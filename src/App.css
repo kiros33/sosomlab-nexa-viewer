@@ -1173,6 +1173,25 @@ body {
   background: var(--bg-elev);
   color: var(--text);
 }
+.pref-row select {
+  flex: 1 1 180px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 12px;
+}
+.pref-fontpreview {
+  margin-top: 6px;
+  padding: 10px 12px;
+  border: 1px dashed var(--border);
+  border-radius: 8px;
+  background: var(--bg-elev);
+  font-size: 14px;
+  color: var(--text);
+}
 .pref-dim {
   color: var(--text-dim);
   font-size: 11px;

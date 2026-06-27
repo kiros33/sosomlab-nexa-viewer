@@ -1,5 +1,7 @@
 /** 환경설정 모달 — 탐색기 표시 파일 + 일반텍스트 글꼴/크기. */
+import { useEffect, useState } from "react";
 import { useViewer } from "../store/viewer";
+import { COMMON_FONTS, listFonts, addFontToStack } from "../lib/fonts";
 
 export function Preferences({ onClose }: { onClose: () => void }) {
   const filters = useViewer((s) => s.filters);
@@ -8,6 +10,11 @@ export function Preferences({ onClose }: { onClose: () => void }) {
   const plainFontSize = useViewer((s) => s.plainFontSize);
   const setPlainFontFamily = useViewer((s) => s.setPlainFontFamily);
   const setPlainFontSize = useViewer((s) => s.setPlainFontSize);
+
+  const [fonts, setFonts] = useState<string[]>(COMMON_FONTS);
+  useEffect(() => {
+    void listFonts().then(setFonts);
+  }, []);
 
   return (
     <div className="modal-backdrop" onClick={onClose}>
@@ -69,9 +76,30 @@ export function Preferences({ onClose }: { onClose: () => void }) {
             <input
               type="text"
               value={plainFontFamily}
+              placeholder='예: "JetBrains Mono", Menlo, monospace'
               onChange={(e) => setPlainFontFamily(e.target.value)}
             />
           </label>
+          <label className="pref-row">
+            <span>목록에서 추가</span>
+            <select
+              value=""
+              onChange={(e) => {
+                if (e.target.value) setPlainFontFamily(addFontToStack(plainFontFamily, e.target.value));
+              }}
+            >
+              <option value="">글꼴 선택…</option>
+              {fonts.map((f) => (
+                <option key={f} value={f} style={{ fontFamily: f }}>
+                  {f}
+                </option>
+              ))}
+            </select>
+            <span className="pref-dim">직접 입력은 쉼표(,)로 여러 개 지정</span>
+          </label>
+          <div className="pref-fontpreview" style={{ fontFamily: plainFontFamily }}>
+            미리보기 — Preview 0123 {"{}"} ABCdef 가나다
+          </div>
           <label className="pref-row">
             <span>기본 크기</span>
             <input
