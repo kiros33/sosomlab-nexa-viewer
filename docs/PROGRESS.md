@@ -302,3 +302,30 @@
 - **검증**: `cargo check` 통과, `pnpm build`(tsc) 통과, dev 재시작 부팅 확인. (실제 로그인은
   사용자 PAT로 테스트 필요 — fine-grained PAT, Contents: Read)
 - **다음**: OAuth 디바이스 로그인, 다중 계정, 자동 폴링 옵션.
+
+---
+
+## 2026-06-27 — 탐색기/GitHub/설정 UX 대폭 보강 + 버그 수정
+
+- **요청(다수)**: 다중 저장소 탐색기, 우클릭 컨텍스트 메뉴, 환경설정 모달(표시 파일/글꼴),
+  일반텍스트 뷰어, 내보내기 모달, Material 아이콘, 스크롤 복원, 패널 docking 등.
+- **변경내역(기능 단위 커밋)**
+  - 다중 루트 탐색기(`Explorer`/`FileTree`): 로컬+GitHub를 접이식 루트로, 기본 접힘 + 펼침
+    상태 영속화, 폴더/파일 아이콘 구분, 루트 배경색 구분.
+  - 루트 갱신 버튼 + 우클릭 컨텍스트 메뉴(`SourceContextMenu`): 갱신/온라인·폴더 열기/제거/
+    파일 보기(저장소별 override).
+  - 환경설정 모달(`Preferences`): 표시 파일(전역 일괄 적용) + 일반텍스트 글꼴/크기.
+    저장소별 override는 컨텍스트 메뉴에서.
+  - 비-마크다운 `PlainTextView`(고정 글꼴, Ctrl/⌘ +/-).
+  - 내보내기 모달(`ExportModal`): 큰 PDF/HTML 선택.
+  - GitHub 패널 3구역(등록/직접등록/내 저장소 +/−·실시간 검색), 목록 docking.
+  - 아이콘: 공통 `Icon`(Material) + `GithubMark`(octocat) + `FormatBadge`(내보내기).
+  - 이동 기록 스크롤 위치 저장/복원(뒤로·앞으로).
+- **버그 수정**
+  - 동일 이름 파일 stale, **camelCase 직렬화로 폴더 미인식**, 깜빡임/재요청, 펼침 상태 초기화.
+- **소스 위치**: `src/components/*`(Explorer/FileTree/Preferences/ExportModal/SourceContextMenu/
+  Icon/GithubMark/FormatBadge/RightBar/ActivityBar/HistoryBar/Toolbar/GithubPanel),
+  `src/renderer/PlainTextView.tsx`, `src/store/viewer.ts`, `src/lib/filetypes.ts`,
+  `src-tauri/src/providers/mod.rs`, `src/App.tsx`, `src/App.css`.
+- **검증**: 각 커밋마다 `pnpm build`(tsc) 통과 후 커밋·푸시, 필요한 경우 `cargo check`.
+- **릴리스 노트**: `CHANGELOG.md` [Unreleased]에 Added/Changed/Fixed/Security로 정리.
