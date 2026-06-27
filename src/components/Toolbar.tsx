@@ -79,10 +79,10 @@ export function Toolbar({ bodyRef }: Props) {
           </select>
         </label>
         <button className="tb-icon" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
-          <FormatBadge label="HTML" color="#e44d26" size={22} />
+          <FormatBadge label="HTML" size={22} />
         </button>
         <button className="tb-icon" onClick={exportPdfViaPrint} disabled={!docPath} title="PDF로 내보내기(인쇄)">
-          <FormatBadge label="PDF" color="#d93831" size={22} />
+          <FormatBadge label="PDF" size={22} />
         </button>
         <button
           className="tb-icon"
