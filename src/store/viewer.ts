@@ -29,18 +29,41 @@ interface PersistedPrefs {
   theme: Theme;
   profileId: string;
   recent: RecentItem[];
+  sidebarVisible: boolean;
+  tocVisible: boolean;
+  sidebarWidth: number;
+  tocWidth: number;
 }
 
 const PREFS_KEY = "viewer.prefs.v1";
 
+const LAYOUT_DEFAULTS = {
+  sidebarVisible: true,
+  tocVisible: true,
+  sidebarWidth: 260,
+  tocWidth: 220,
+};
+export const SIDEBAR_MIN = 180;
+export const SIDEBAR_MAX = 560;
+export const TOC_MIN = 160;
+export const TOC_MAX = 480;
+
+const clamp = (v: number, min: number, max: number) => Math.min(max, Math.max(min, v));
+
 function loadPrefs(): PersistedPrefs {
+  const defaults: PersistedPrefs = {
+    theme: "light",
+    profileId: defaultProfileId,
+    recent: [],
+    ...LAYOUT_DEFAULTS,
+  };
   try {
     const raw = localStorage.getItem(PREFS_KEY);
-    if (raw) return { theme: "light", profileId: defaultProfileId, recent: [], ...JSON.parse(raw) };
+    if (raw) return { ...defaults, ...JSON.parse(raw) };
   } catch {
     /* ignore */
   }
-  return { theme: "light", profileId: defaultProfileId, recent: [] };
+  return defaults;
 }
 
 function savePrefs(prefs: PersistedPrefs) {
@@ -66,6 +89,19 @@ interface ViewerState {
   navSeq: number;
   loading: boolean;
   error: string | null;
+
+  // 레이아웃(패널 표시/너비)
+  sidebarVisible: boolean;
+  tocVisible: boolean;
+  sidebarWidth: number;
+  tocWidth: number;
+  toggleSidebar: () => void;
+  toggleToc: () => void;
+  /** 드래그 중 증분(dx)으로 너비 조절 */
+  resizeSidebar: (dx: number) => void;
+  resizeToc: (dx: number) => void;
+  /** 드래그 종료 시 너비 영속화 */
+  commitLayout: () => void;
 
   openSource: (source: ContentSource) => void;
   /** 현재 소스에서 문서 열기(이동 기록 push). hash 지정 시 해당 앵커로 */
@@ -153,6 +189,25 @@ export const useViewer = create<ViewerState>((set, get) => {
     loading: false,
     error: null,
 
+    sidebarVisible: prefs.sidebarVisible,
+    tocVisible: prefs.tocVisible,
+    sidebarWidth: prefs.sidebarWidth,
+    tocWidth: prefs.tocWidth,
+
+    toggleSidebar: () => {
+      set((s) => ({ sidebarVisible: !s.sidebarVisible }));
+      persist(get);
+    },
+    toggleToc: () => {
+      set((s) => ({ tocVisible: !s.tocVisible }));
+      persist(get);
+    },
+    resizeSidebar: (dx) =>
+      set((s) => ({ sidebarWidth: clamp(s.sidebarWidth + dx, SIDEBAR_MIN, SIDEBAR_MAX) })),
+    resizeToc: (dx) =>
+      set((s) => ({ tocWidth: clamp(s.tocWidth - dx, TOC_MIN, TOC_MAX) })),
+    commitLayout: () => persist(get),
+
     openSource: (source) => {
       set({
         source,
@@ -236,6 +291,6 @@ function pushRecent(
 }
 
 function persist(get: () => ViewerState) {
-  const { theme, profileId, recent } = get();
-  savePrefs({ theme, profileId, recent });
+  const { theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth } = get();
+  savePrefs({ theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth });
 }

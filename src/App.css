@@ -412,9 +412,62 @@ body {
   border-color: var(--accent);
 }
 
+/* ===== Activity bar (VSCode 스타일 토글) ===== */
+.activity-bar {
+  flex: 0 0 48px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  padding: 8px 0;
+  background: var(--bg-elev);
+  border-right: 1px solid var(--border);
+}
+.activity-btn {
+  width: 36px;
+  height: 36px;
+  border-radius: 8px;
+  border: 1px solid transparent;
+  background: none;
+  color: var(--text-dim);
+  font-size: 18px;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.activity-btn:hover {
+  background: var(--selected);
+  color: var(--text);
+}
+.activity-btn.active {
+  color: var(--accent);
+  background: var(--selected);
+}
+
+/* ===== Resizer (드래그 너비 조절) ===== */
+.resizer {
+  flex: 0 0 5px;
+  cursor: col-resize;
+  background: transparent;
+  transition: background 0.12s;
+}
+.resizer:hover {
+  background: var(--accent);
+}
+
+.welcome-org {
+  margin-top: -8px;
+  color: var(--text-dim);
+  font-size: 14px;
+}
+
 /* ===== Print / PDF ===== */
 @media print {
   .toolbar,
+  .activity-bar,
+  .resizer,
+  .history-bar,
   .sidebar,
   .toc-panel {
     display: none !important;

@@ -9,6 +9,8 @@ import { Toolbar } from "./components/Toolbar";
 import { FileTree } from "./components/FileTree";
 import { Toc } from "./components/Toc";
 import { HistoryBar } from "./components/HistoryBar";
+import { ActivityBar } from "./components/ActivityBar";
+import { Resizer } from "./components/Resizer";
 import { MarkdownView } from "./renderer/MarkdownView";
 import { useViewer } from "./store/viewer";
 import type { RecentItem, Theme } from "./store/viewer";
@@ -32,6 +34,12 @@ export default function App() {
   const navigateAnchor = useViewer((s) => s.navigateAnchor);
   const navSeq = useViewer((s) => s.navSeq);
   const pendingHash = useViewer((s) => s.pendingHash);
+  const sidebarVisible = useViewer((s) => s.sidebarVisible);
+  const tocVisible = useViewer((s) => s.tocVisible);
+  const sidebarWidth = useViewer((s) => s.sidebarWidth);
+  const tocWidth = useViewer((s) => s.tocWidth);
+  const resizeSidebar = useViewer((s) => s.resizeSidebar);
+  const resizeToc = useViewer((s) => s.resizeToc);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
@@ -65,18 +73,23 @@ export default function App() {
       <Toolbar bodyRef={bodyRef} />
 
       <div className="layout">
-        <aside className="sidebar">
-          {source ? (
-            <>
-              <div className="panel-title" title={source.ref.root}>
-                {source.label}
-              </div>
-              <FileTree source={source} />
-            </>
-          ) : (
-            <div className="sidebar-empty">폴더를 열어 시작하세요</div>
-          )}
-        </aside>
+        <ActivityBar />
+
+        {sidebarVisible && (
+          <aside className="sidebar" style={{ flex: `0 0 ${sidebarWidth}px`, width: sidebarWidth }}>
+            {source ? (
+              <>
+                <div className="panel-title" title={source.ref.root}>
+                  {source.label}
+                </div>
+                <FileTree source={source} />
+              </>
+            ) : (
+              <div className="sidebar-empty">폴더를 열어 시작하세요</div>
+            )}
+          </aside>
+        )}
+        {sidebarVisible && <Resizer onResize={resizeSidebar} />}
 
         {/* 메인 + ToC 를 묶고, 그 위에 이동 기록 탐색 바를 둔다 */}
         <section className="main-area">
@@ -102,9 +115,12 @@ export default function App() {
               )}
             </main>
 
-            <aside className="toc-panel">
-              <Toc bodyRef={bodyRef} dep={docPath} />
-            </aside>
+            {tocVisible && <Resizer onResize={resizeToc} />}
+            {tocVisible && (
+              <aside className="toc-panel" style={{ flex: `0 0 ${tocWidth}px`, width: tocWidth }}>
+                <Toc bodyRef={bodyRef} dep={docPath} />
+              </aside>
+            )}
           </div>
         </section>
       </div>
@@ -122,6 +138,7 @@ function Welcome({
   return (
     <div className="welcome">
       <h1>Nexa Markdown Viewer</h1>
+      <p className="welcome-org">GitHub 스타일 Markdown 뷰어 · by SosomLab</p>
       <p>
         좌측 상단의 <b>폴더 열기</b> 또는 <b>파일 열기</b>로 시작하세요.
       </p>
