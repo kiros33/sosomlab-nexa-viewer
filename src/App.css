@@ -577,12 +577,11 @@ body {
   font-size: 13px;
   display: flex;
   flex-direction: column;
-  overflow: hidden;
-}
-/* 등록된 저장소 목록은 과도하게 길어지지 않도록 일부만 */
-.gh-registered {
-  max-height: 30vh;
   overflow: auto;
+}
+/* 등록된 저장소 목록은 전부 표시(잘리지 않음). 그 아래로 "내 저장소" 영역이 온다 */
+.gh-registered {
+  flex: 0 0 auto;
 }
 .gh-account {
   display: flex;
@@ -700,7 +699,7 @@ body {
   padding: 8px;
   background: var(--bg-elev);
   flex: 1 1 auto;
-  min-height: 0;
+  min-height: 220px; /* 등록 목록이 길면 패널 전체가 스크롤되고, 짧으면 남은 공간을 채움 */
   display: flex;
   flex-direction: column;
 }
