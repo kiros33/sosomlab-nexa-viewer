@@ -1,8 +1,8 @@
 [package]
 name = "tauri-scaffold"
 version = "0.1.0"
-description = "A Tauri App"
-authors = ["you"]
+description = "Nexa Markdown Viewer — GitHub 스타일 Markdown 뷰어"
+authors = ["SosomLab"]
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html
@@ -22,4 +22,8 @@ tauri = { version = "2", features = [] }
 tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
+tauri-plugin-dialog = "2.7.1"
+tauri-plugin-fs = "2.5.1"
+async-trait = "0.1.89"
+base64 = "0.22.1"
 
