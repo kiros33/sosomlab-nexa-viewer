@@ -27,14 +27,6 @@ export interface FileFilters {
 }
 
 export const DEFAULT_FILTERS: FileFilters = {
-  all: true,
-  markdown: true,
-  text: true,
-  web: true,
-};
-
-/** 과거 기본값(마크다운만) — 저장된 설정 마이그레이션 판별용. */
-export const LEGACY_MD_ONLY_FILTERS: FileFilters = {
   all: false,
   markdown: true,
   text: false,

@@ -5,7 +5,7 @@ import type { ContentSource, SourceRef } from "../sources/types";
 import { sourceFromRef, sourceKey } from "../sources/registry";
 import { defaultProfileId } from "../renderer/profiles";
 import type { FileFilters } from "../lib/filetypes";
-import { DEFAULT_FILTERS, LEGACY_MD_ONLY_FILTERS } from "../lib/filetypes";
+import { DEFAULT_FILTERS } from "../lib/filetypes";
 
 const DEFAULT_PLAIN_FONT =
   'ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace';
@@ -76,21 +76,7 @@ function loadPrefs(): PersistedPrefs {
   };
   try {
     const raw = localStorage.getItem(PREFS_KEY);
-    if (raw) {
-      const merged = { ...defaults, ...JSON.parse(raw) } as PersistedPrefs;
-      // 과거 기본값(마크다운만)으로 저장돼 있으면 새 기본값(전체)으로 1회 마이그레이션
-      const f = merged.filters;
-      if (
-        f &&
-        f.all === LEGACY_MD_ONLY_FILTERS.all &&
-        f.markdown === LEGACY_MD_ONLY_FILTERS.markdown &&
-        f.text === LEGACY_MD_ONLY_FILTERS.text &&
-        f.web === LEGACY_MD_ONLY_FILTERS.web
-      ) {
-        merged.filters = DEFAULT_FILTERS;
-      }
-      return merged;
-    }
+    if (raw) return { ...defaults, ...JSON.parse(raw) };
   } catch {
     /* ignore */
   }
