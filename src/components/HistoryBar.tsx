@@ -36,6 +36,9 @@ export function HistoryBar() {
   const goTo = useViewer((s) => s.goTo);
   const goBack = useViewer((s) => s.goBack);
   const goForward = useViewer((s) => s.goForward);
+  const docPath = useViewer((s) => s.docPath);
+  const updateAvailable = useViewer((s) => s.updateAvailable);
+  const reload = useViewer((s) => s.reload);
   const [open, setOpen] = useState(false);
 
   // 전체 기록을 "파일별 그룹"으로 (최초 등장 순서 유지)
@@ -96,6 +99,16 @@ export function HistoryBar() {
           );
         })}
       </nav>
+
+      {docPath && (
+        <button
+          className={`hist-refresh${updateAvailable ? " update" : ""}`}
+          onClick={() => void reload()}
+          title={updateAvailable ? "온라인에 갱신됨 — 새로고침" : "새로고침"}
+        >
+          {updateAvailable ? "🔄 갱신 가능" : "🔄"}
+        </button>
+      )}
 
       <div className="hist-all">
         <button className="hist-nav" onClick={() => setOpen((o) => !o)} title="전체 이동 기록">

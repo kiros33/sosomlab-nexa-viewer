@@ -12,6 +12,7 @@ import { HistoryBar } from "./components/HistoryBar";
 import { ActivityBar } from "./components/ActivityBar";
 import { RightBar } from "./components/RightBar";
 import { Resizer } from "./components/Resizer";
+import { GithubPanel } from "./components/GithubPanel";
 import { MarkdownView } from "./renderer/MarkdownView";
 import { useViewer } from "./store/viewer";
 import type { RecentItem, Theme } from "./store/viewer";
@@ -39,8 +40,10 @@ export default function App() {
   const tocVisible = useViewer((s) => s.tocVisible);
   const sidebarWidth = useViewer((s) => s.sidebarWidth);
   const tocWidth = useViewer((s) => s.tocWidth);
+  const sidebarView = useViewer((s) => s.sidebarView);
   const resizeSidebar = useViewer((s) => s.resizeSidebar);
   const resizeToc = useViewer((s) => s.resizeToc);
+  const checkForUpdate = useViewer((s) => s.checkForUpdate);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
@@ -66,6 +69,13 @@ export default function App() {
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navSeq]);
 
+  // 창 포커스 시 원격 갱신 여부 확인
+  useEffect(() => {
+    const onFocus = () => void checkForUpdate();
+    window.addEventListener("focus", onFocus);
+    return () => window.removeEventListener("focus", onFocus);
+  }, [checkForUpdate]);
+
   return (
     <div className={`app theme-${theme}`}>
       {/* 활성 테마 CSS만 주입 */}
@@ -78,7 +88,9 @@ export default function App() {
 
         {sidebarVisible && (
           <aside className="sidebar" style={{ flex: `0 0 ${sidebarWidth}px`, width: sidebarWidth }}>
-            {source ? (
+            {sidebarView === "github" ? (
+              <GithubPanel />
+            ) : source ? (
               <>
                 <div className="panel-title" title={source.ref.root}>
                   {source.label}
@@ -86,7 +98,7 @@ export default function App() {
                 <FileTree source={source} />
               </>
             ) : (
-              <div className="sidebar-empty">폴더를 열어 시작하세요</div>
+              <div className="sidebar-empty">폴더 또는 GitHub 저장소를 여세요</div>
             )}
           </aside>
         )}

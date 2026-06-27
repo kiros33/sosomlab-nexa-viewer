@@ -30,6 +30,8 @@ export interface TreeEntry {
 export interface FileContent {
   path: string;
   text: string;
+  /** 버전 식별자(원격 blob sha 등). 갱신 감지용. 로컬은 null. */
+  version?: string | null;
 }
 
 /**
@@ -49,4 +51,6 @@ export interface ContentSource {
   resolveAsset(path: string): Promise<string>;
   /** 원격 전용. 로컬은 빈 배열 */
   listBranches(): Promise<string[]>;
+  /** 현재 파일의 버전 식별자(갱신 감지용). 로컬은 null */
+  latestVersion(path: string): Promise<string | null>;
 }

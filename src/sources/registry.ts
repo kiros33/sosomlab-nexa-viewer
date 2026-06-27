@@ -6,13 +6,15 @@
  */
 import type { ContentSource, SourceKind, SourceRef } from "./types";
 import { LocalSource } from "./localSource";
+import { GithubSource } from "./githubSource";
 
 /** SourceRef → ContentSource 복원(영속화된 소스 재구성에 사용). */
 export function sourceFromRef(ref: SourceRef): ContentSource {
   switch (ref.kind) {
     case "local":
       return new LocalSource(ref.root);
-    // case "github": return new GithubSource(ref);  // M3
+    case "github":
+      return new GithubSource(ref.root, ref.gitRef);
     default:
       throw new Error(`지원하지 않는 소스 종류입니다: ${ref.kind as SourceKind}`);
   }

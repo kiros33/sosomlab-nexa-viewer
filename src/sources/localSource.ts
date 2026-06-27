@@ -29,6 +29,10 @@ export class LocalSource implements ContentSource {
   async listBranches(): Promise<string[]> {
     return [];
   }
+
+  async latestVersion(): Promise<string | null> {
+    return null;
+  }
 }
 
 /** 폴더 선택 다이얼로그 → LocalSource. 취소 시 null. */

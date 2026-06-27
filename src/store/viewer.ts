@@ -90,13 +90,27 @@ interface ViewerState {
   loading: boolean;
   error: string | null;
 
+  // 갱신 감지(원격)
+  /** 현재 열린 문서의 버전(sha 등) */
+  currentVersion: string | null;
+  /** 온라인에 더 새 버전이 있는지 */
+  updateAvailable: boolean;
+  /** 원격 최신 버전과 비교해 갱신 여부 갱신 */
+  checkForUpdate: () => Promise<void>;
+  /** 현재 문서를 강제로 다시 불러옴(기록 변경 없음) */
+  reload: () => Promise<void>;
+
   // 레이아웃(패널 표시/너비)
   sidebarVisible: boolean;
   tocVisible: boolean;
   sidebarWidth: number;
   tocWidth: number;
+  /** 사이드바에 표시할 뷰 */
+  sidebarView: "files" | "github";
   toggleSidebar: () => void;
   toggleToc: () => void;
+  /** 뷰 선택(+사이드바 표시). 활성 뷰 재클릭 시 숨김. */
+  showSidebarView: (view: "files" | "github") => void;
   /** 드래그 중 증분(dx)으로 너비 조절 */
   resizeSidebar: (dx: number) => void;
   resizeToc: (dx: number) => void;
@@ -123,22 +137,30 @@ export const useViewer = create<ViewerState>((set, get) => {
   async function load(
     source: ContentSource,
     path: string,
-    opts: { pushHistory: boolean; indexOverride?: number; hash?: string | null },
+    opts: {
+      pushHistory: boolean;
+      indexOverride?: number;
+      hash?: string | null;
+      force?: boolean;
+    },
   ) {
     const hash = opts.hash ?? null;
     set({ loading: true, error: null });
     try {
-      // 같은 파일이면 재로딩 없이 앵커만 이동
+      // 같은 파일이면 재로딩 없이 앵커만 이동(force면 항상 재로딩)
       const cur = get();
       const sameFile =
+        !opts.force &&
         cur.docPath === path &&
         cur.source != null &&
         sourceKey(cur.source.ref) === sourceKey(source.ref);
 
       let markdown = cur.markdown;
+      let version = cur.currentVersion;
       if (!sameFile) {
         const file = await source.readFile(path);
         markdown = file.text;
+        version = file.version ?? null;
       }
       const title = path.split("/").pop() ?? path;
 
@@ -168,6 +190,8 @@ export const useViewer = create<ViewerState>((set, get) => {
         recent,
         pendingHash: hash,
         navSeq: get().navSeq + 1,
+        currentVersion: version,
+        updateAvailable: sameFile ? get().updateAvailable : false,
       });
       persist(get);
     } catch (e) {
@@ -188,11 +212,35 @@ export const useViewer = create<ViewerState>((set, get) => {
     navSeq: 0,
     loading: false,
     error: null,
+    currentVersion: null,
+    updateAvailable: false,
+
+    checkForUpdate: async () => {
+      const { source, docPath, currentVersion } = get();
+      if (!source || !docPath || !currentVersion) return;
+      try {
+        const latest = await source.latestVersion(docPath);
+        if (latest && latest !== currentVersion) set({ updateAvailable: true });
+      } catch {
+        /* 네트워크 오류 무시 */
+      }
+    },
+
+    reload: async () => {
+      const { source, docPath, historyIndex } = get();
+      if (!source || !docPath) return;
+      await load(source, docPath, {
+        pushHistory: false,
+        indexOverride: historyIndex,
+        force: true,
+      });
+    },
 
     sidebarVisible: prefs.sidebarVisible,
     tocVisible: prefs.tocVisible,
     sidebarWidth: prefs.sidebarWidth,
     tocWidth: prefs.tocWidth,
+    sidebarView: "files",
 
     toggleSidebar: () => {
       set((s) => ({ sidebarVisible: !s.sidebarVisible }));
@@ -200,6 +248,15 @@ export const useViewer = create<ViewerState>((set, get) => {
     },
     toggleToc: () => {
       set((s) => ({ tocVisible: !s.tocVisible }));
+      persist(get);
+    },
+    showSidebarView: (view) => {
+      const s = get();
+      if (s.sidebarVisible && s.sidebarView === view) {
+        set({ sidebarVisible: false });
+      } else {
+        set({ sidebarVisible: true, sidebarView: view });
+      }
       persist(get);
     },
     resizeSidebar: (dx) =>
