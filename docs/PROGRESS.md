@@ -329,3 +329,23 @@
   `src-tauri/src/providers/mod.rs`, `src/App.tsx`, `src/App.css`.
 - **검증**: 각 커밋마다 `pnpm build`(tsc) 통과 후 커밋·푸시, 필요한 경우 `cargo check`.
 - **릴리스 노트**: `CHANGELOG.md` [Unreleased]에 Added/Changed/Fixed/Security로 정리.
+
+---
+
+## 2026-06-27 — v0.2.0 배포 + Wiki 메뉴얼(실제 캡처) + 아이콘/글꼴 보완
+
+- **요청**: 글꼴 선택 보완, v0.2.0 배포, GitHub Wiki에 기능별 이미지 포함 메뉴얼, 앱 아이콘 크기(macOS 표준).
+- **변경내역**
+  1. **글꼴 선택**(`src/lib/fonts.ts`, `Preferences`): 직접 입력(쉼표 다중) + 목록에서 추가
+     (설치 글꼴 조회/폴백) + 미리보기.
+  2. **v0.2.0 정식 배포**: 버전 상향(tauri.conf/package/Cargo), CHANGELOG [0.2.0] 확정,
+     `v0.2.0` 태그 → 3-OS(CI) 빌드 → Release 공개(dmg/exe/deb/rpm/AppImage).
+  3. **GitHub Wiki 메뉴얼**: 기능별 페이지(설치/빠른시작/탐색기/GitHub/문서보기/내보내기/설정/빌드/FAQ)
+     + 사용자 제공 실제 캡처 15장을 의미있는 이름으로 정리하고 패널/메뉴/모달/기록은 ImageMagick으로
+     해당 영역 크롭. 위키 push + 저장소 `docs/wiki/`(이미지 포함) 동기화.
+  4. **앱 아이콘**: 타일을 꽉 채워 크게 보이던 문제 → macOS 표준 여백(본체 824/1024 + 투명 여백)으로
+     `icon-source.svg` 재구성 후 `tauri icon` 재생성(다음 빌드부터 적용).
+  5. 원본 캡처는 `docs/images/`(소스), 크롭/사용본은 `docs/wiki/images/`.
+- **도구**: gh(릴리스), cliclick/screencapture(자동 캡처 시도 — 합성 클릭 차단으로 수동 캡처로 전환),
+  rsvg-convert/ImageMagick(아이콘·크롭). 모두 brew 설치.
+- **검증**: 각 기능 커밋마다 `pnpm build` 통과, v0.2.0 CI 성공.
