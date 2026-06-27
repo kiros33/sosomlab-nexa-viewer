@@ -13,6 +13,7 @@ pub mod local;
 /// - local: `root`는 열린 폴더의 절대 경로.
 /// - remote(github 등): `root`는 "owner/repo", `git_ref`는 브랜치/태그/커밋.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct SourceRef {
     pub kind: String,
     pub root: String,
@@ -22,6 +23,7 @@ pub struct SourceRef {
 
 /// 디렉터리(트리) 한 항목.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct TreeEntry {
     pub name: String,
     /// root 기준 상대 경로(슬래시 구분).
@@ -31,6 +33,7 @@ pub struct TreeEntry {
 
 /// 파일 텍스트 내용.
 #[derive(Debug, Clone, Serialize, Deserialize)]
+#[serde(rename_all = "camelCase")]
 pub struct FileContent {
     pub path: String,
     pub text: String,
