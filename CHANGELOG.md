@@ -5,6 +5,10 @@
 
 ## [Unreleased]
 
+## [0.2.0] - 2026-06-27
+
+GitHub 원격 연동(M3) + 탐색기/설정/내보내기 UX 대폭 보강.
+
 ### Added
 - **GitHub 원격 저장소 연동(M3)** — PAT 로그인(공개 repo는 로그인 불필요, 토큰은 AES-256-GCM
   암호화 로컬 저장), **계정 접근 저장소 목록에서 선택 추가**, 트리 탐색·md 열람,
@@ -66,4 +70,5 @@
 - `NexaMarkdownViewer_0.1.0_universal.dmg` (macOS)
 - `NexaMarkdownViewer_0.1.0_x64-setup.exe` (Windows)
 
+[0.2.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.1.0
