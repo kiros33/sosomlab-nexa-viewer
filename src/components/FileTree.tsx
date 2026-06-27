@@ -4,9 +4,7 @@ import { useEffect, useState } from "react";
 import type { ContentSource, TreeEntry } from "../sources/types";
 import { useViewer } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
-
-const MD_RE = /\.(md|markdown|mdx|txt)$/i;
-const isMarkdown = (name: string) => MD_RE.test(name);
+import { isFileVisible, isMarkdownName } from "../lib/filetypes";
 
 function TreeNode({
   entry,
@@ -23,7 +21,7 @@ function TreeNode({
   const openInSource = useViewer((s) => s.openInSource);
   const activeSource = useViewer((s) => s.source);
   const currentPath = useViewer((s) => s.docPath);
-  const showAllFiles = useViewer((s) => s.showAllFiles);
+  const filters = useViewer((s) => s.filters);
 
   const onClick = async () => {
     if (entry.isDir) {
@@ -38,26 +36,26 @@ function TreeNode({
         }
       }
       setOpen(!open);
-    } else if (isMarkdown(entry.name)) {
-      void openInSource(source, entry.path);
+    } else {
+      void openInSource(source, entry.path); // 마크다운/일반텍스트 모두 열기
     }
   };
 
   const isActiveSource =
     activeSource != null && sourceKey(activeSource.ref) === sourceKey(source.ref);
   const selected = !entry.isDir && isActiveSource && currentPath === entry.path;
-  const dimmed = !entry.isDir && !isMarkdown(entry.name);
+  const md = isMarkdownName(entry.name);
 
   return (
     <div className="tree-node">
       <button
-        className={`tree-row${selected ? " selected" : ""}${dimmed ? " dimmed" : ""}`}
+        className={`tree-row${selected ? " selected" : ""}${!entry.isDir && !md ? " dimmed" : ""}`}
         style={{ paddingLeft: `${8 + depth * 14}px` }}
         onClick={onClick}
         title={entry.name}
       >
         <span className="tree-icon">
-          {entry.isDir ? (open ? "▾" : "▸") : isMarkdown(entry.name) ? "📄" : "·"}
+          {entry.isDir ? (open ? "▾" : "▸") : md ? "📄" : "📃"}
         </span>
         <span className="tree-name">{entry.name}</span>
       </button>
@@ -69,7 +67,7 @@ function TreeNode({
             </div>
           )}
           {children
-            ?.filter((c) => c.isDir || showAllFiles || isMarkdown(c.name))
+            ?.filter((c) => c.isDir || isFileVisible(c.name, filters))
             .map((c) => (
               <TreeNode key={c.path} entry={c} source={source} depth={depth + 1} />
             ))}
@@ -83,7 +81,7 @@ function TreeNode({
 export function FileTree({ source }: { source: ContentSource }) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const showAllFiles = useViewer((s) => s.showAllFiles);
+  const filters = useViewer((s) => s.filters);
 
   useEffect(() => {
     let active = true;
@@ -104,7 +102,7 @@ export function FileTree({ source }: { source: ContentSource }) {
   return (
     <div className="file-tree">
       {roots
-        .filter((entry) => entry.isDir || showAllFiles || isMarkdown(entry.name))
+        .filter((entry) => entry.isDir || isFileVisible(entry.name, filters))
         .map((entry) => (
           <TreeNode key={entry.path} entry={entry} source={source} depth={0} />
         ))}

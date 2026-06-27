@@ -14,8 +14,10 @@ import { RightBar } from "./components/RightBar";
 import { Resizer } from "./components/Resizer";
 import { GithubPanel } from "./components/GithubPanel";
 import { MarkdownView } from "./renderer/MarkdownView";
+import { PlainTextView } from "./renderer/PlainTextView";
 import { useViewer } from "./store/viewer";
 import type { RecentItem, Theme } from "./store/viewer";
+import { isMarkdownName } from "./lib/filetypes";
 import "./App.css";
 
 function themeCss(theme: Theme): string {
@@ -36,6 +38,8 @@ export default function App() {
   const navigateAnchor = useViewer((s) => s.navigateAnchor);
   const navSeq = useViewer((s) => s.navSeq);
   const pendingHash = useViewer((s) => s.pendingHash);
+  const adjustPlainFontSize = useViewer((s) => s.adjustPlainFontSize);
+  const setPlainFontSize = useViewer((s) => s.setPlainFontSize);
   const sidebarVisible = useViewer((s) => s.sidebarVisible);
   const tocVisible = useViewer((s) => s.tocVisible);
   const sidebarWidth = useViewer((s) => s.sidebarWidth);
@@ -76,6 +80,27 @@ export default function App() {
     return () => window.removeEventListener("focus", onFocus);
   }, [checkForUpdate]);
 
+  // 비-마크다운(plain) 문서에서 Ctrl/⌘ +/- 로 글꼴 크기 조절
+  useEffect(() => {
+    const isPlain = !!docPath && !isMarkdownName(docPath);
+    if (!isPlain) return;
+    const onKey = (e: KeyboardEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if (e.key === "=" || e.key === "+") {
+        e.preventDefault();
+        adjustPlainFontSize(1);
+      } else if (e.key === "-") {
+        e.preventDefault();
+        adjustPlainFontSize(-1);
+      } else if (e.key === "0") {
+        e.preventDefault();
+        setPlainFontSize(14);
+      }
+    };
+    window.addEventListener("keydown", onKey);
+    return () => window.removeEventListener("keydown", onKey);
+  }, [docPath, adjustPlainFontSize, setPlainFontSize]);
+
   return (
     <div className={`app theme-${theme}`}>
       {/* 활성 테마 CSS만 주입 */}
@@ -109,15 +134,19 @@ export default function App() {
               ) : error ? (
                 <div className="placeholder error">{error}</div>
               ) : docPath && source ? (
-                <MarkdownView
-                  markdown={markdown}
-                  source={source}
-                  docPath={docPath}
-                  profileId={profileId}
-                  onNavigateDoc={(p, hash) => void openDoc(p, hash)}
-                  onNavigateAnchor={(h) => void navigateAnchor(h)}
-                  bodyRef={bodyRef}
-                />
+                isMarkdownName(docPath) ? (
+                  <MarkdownView
+                    markdown={markdown}
+                    source={source}
+                    docPath={docPath}
+                    profileId={profileId}
+                    onNavigateDoc={(p, hash) => void openDoc(p, hash)}
+                    onNavigateAnchor={(h) => void navigateAnchor(h)}
+                    bodyRef={bodyRef}
+                  />
+                ) : (
+                  <PlainTextView text={markdown} />
+                )
               ) : (
                 <Welcome recent={recent} onOpenRecent={(item) => void openRecent(item)} />
               )}

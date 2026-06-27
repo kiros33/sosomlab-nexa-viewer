@@ -906,6 +906,105 @@ body {
   font-size: 14px;
 }
 
+/* ===== Plain text viewer ===== */
+.plain-view {
+  margin: 0;
+  padding: 24px 28px 80px;
+  white-space: pre-wrap;
+  word-break: break-word;
+  line-height: 1.55;
+  color: var(--text);
+  tab-size: 4;
+}
+
+/* ===== Modal (Preferences) ===== */
+.modal-backdrop {
+  position: fixed;
+  inset: 0;
+  background: rgba(0, 0, 0, 0.4);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  z-index: 100;
+}
+.modal {
+  width: 460px;
+  max-width: calc(100vw - 40px);
+  max-height: calc(100vh - 80px);
+  overflow: auto;
+  background: var(--bg);
+  color: var(--text);
+  border: 1px solid var(--border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.35);
+  padding: 16px 18px;
+}
+.modal-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  margin-bottom: 8px;
+}
+.modal-close {
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  font-size: 20px;
+  cursor: pointer;
+}
+.modal-close:hover {
+  color: var(--text);
+}
+.pref-section {
+  border-top: 1px solid var(--border);
+  padding: 12px 0 4px;
+}
+.pref-section h4 {
+  margin: 0 0 8px;
+  font-size: 13px;
+}
+.pref-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 0;
+  cursor: pointer;
+}
+.pref-row {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 5px 0;
+  flex-wrap: wrap;
+}
+.pref-row > span:first-child {
+  flex: 0 0 110px;
+}
+.pref-row input[type="text"] {
+  flex: 1 1 200px;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elev);
+  color: var(--text);
+  font-size: 12px;
+}
+.pref-row input[type="number"] {
+  width: 70px;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg-elev);
+  color: var(--text);
+}
+.pref-dim {
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
 /* ===== Print / PDF ===== */
 @media print {
   .toolbar,

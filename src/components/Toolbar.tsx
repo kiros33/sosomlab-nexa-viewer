@@ -1,8 +1,10 @@
 /** 상단 툴바 — 열기/렌더 프로파일/테마/내보내기. */
+import { useState } from "react";
 import { pickLocalFolder, pickLocalMarkdownFile } from "../sources/localSource";
 import { listProfiles } from "../renderer/profiles";
 import { exportHtml, exportPdfViaPrint } from "../lib/exporters";
 import { useViewer } from "../store/viewer";
+import { Preferences } from "./Preferences";
 
 interface Props {
   bodyRef: React.RefObject<HTMLDivElement | null>;
@@ -20,6 +22,7 @@ export function Toolbar({ bodyRef }: Props) {
 
   const profiles = listProfiles();
   const title = docPath ? (docPath.split("/").pop() ?? docPath) : "Markdown Viewer";
+  const [prefsOpen, setPrefsOpen] = useState(false);
 
   const onOpenFolder = async () => {
     const src = await pickLocalFolder();
@@ -78,7 +81,12 @@ export function Toolbar({ bodyRef }: Props) {
         <button onClick={toggleTheme} title="테마 전환">
           {theme === "light" ? "🌙" : "☀️"}
         </button>
+        <button onClick={() => setPrefsOpen(true)} title="환경설정">
+          ⚙️
+        </button>
       </div>
+
+      {prefsOpen && <Preferences onClose={() => setPrefsOpen(false)} />}
     </header>
   );
 }

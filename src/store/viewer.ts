@@ -4,6 +4,11 @@ import { create } from "zustand";
 import type { ContentSource, SourceRef } from "../sources/types";
 import { sourceFromRef, sourceKey } from "../sources/registry";
 import { defaultProfileId } from "../renderer/profiles";
+import type { FileFilters } from "../lib/filetypes";
+import { DEFAULT_FILTERS } from "../lib/filetypes";
+
+const DEFAULT_PLAIN_FONT =
+  'ui-monospace, SFMono-Regular, Menlo, Consolas, "Noto Sans Mono", monospace';
 
 export type Theme = "light" | "dark";
 
@@ -33,8 +38,12 @@ interface PersistedPrefs {
   tocVisible: boolean;
   sidebarWidth: number;
   tocWidth: number;
-  /** 탐색기에서 마크다운 외 전체 파일도 표시할지 */
-  showAllFiles: boolean;
+  /** 탐색기 파일 표시 필터(카테고리별) */
+  filters: FileFilters;
+  /** 일반텍스트/코드 파일 글꼴 */
+  plainFontFamily: string;
+  /** 일반텍스트/코드 파일 기본 글꼴 크기(px) */
+  plainFontSize: number;
 }
 
 const PREFS_KEY = "viewer.prefs.v1";
@@ -57,7 +66,9 @@ function loadPrefs(): PersistedPrefs {
     theme: "light",
     profileId: defaultProfileId,
     recent: [],
-    showAllFiles: false, // 기본: 마크다운만
+    filters: DEFAULT_FILTERS, // 기본: 마크다운만
+    plainFontFamily: DEFAULT_PLAIN_FONT,
+    plainFontSize: 14,
     ...LAYOUT_DEFAULTS,
   };
   try {
@@ -177,9 +188,15 @@ interface ViewerState {
   toggleToc: () => void;
   /** 뷰 선택(+사이드바 표시). 활성 뷰 재클릭 시 숨김. */
   showSidebarView: (view: "files" | "github") => void;
-  /** 탐색기 전체 파일 표시 여부 */
-  showAllFiles: boolean;
-  toggleShowAllFiles: () => void;
+  /** 탐색기 파일 표시 필터 */
+  filters: FileFilters;
+  setFilters: (patch: Partial<FileFilters>) => void;
+  /** 일반텍스트 글꼴/크기 */
+  plainFontFamily: string;
+  plainFontSize: number;
+  setPlainFontFamily: (family: string) => void;
+  setPlainFontSize: (size: number) => void;
+  adjustPlainFontSize: (delta: number) => void;
   /** 드래그 중 증분(dx)으로 너비 조절 */
   resizeSidebar: (dx: number) => void;
   resizeToc: (dx: number) => void;
@@ -341,9 +358,23 @@ export const useViewer = create<ViewerState>((set, get) => {
       }
       persist(get);
     },
-    showAllFiles: prefs.showAllFiles,
-    toggleShowAllFiles: () => {
-      set((s) => ({ showAllFiles: !s.showAllFiles }));
+    filters: prefs.filters,
+    setFilters: (patch) => {
+      set((s) => ({ filters: { ...s.filters, ...patch } }));
+      persist(get);
+    },
+    plainFontFamily: prefs.plainFontFamily,
+    plainFontSize: prefs.plainFontSize,
+    setPlainFontFamily: (family) => {
+      set({ plainFontFamily: family });
+      persist(get);
+    },
+    setPlainFontSize: (size) => {
+      set({ plainFontSize: clamp(size, 8, 48) });
+      persist(get);
+    },
+    adjustPlainFontSize: (delta) => {
+      set((s) => ({ plainFontSize: clamp(s.plainFontSize + delta, 8, 48) }));
       persist(get);
     },
     resizeSidebar: (dx) =>
@@ -482,8 +513,18 @@ function pushRecent(
 }
 
 function persist(get: () => ViewerState) {
-  const { theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth, showAllFiles } =
-    get();
+  const {
+    theme,
+    profileId,
+    recent,
+    sidebarVisible,
+    tocVisible,
+    sidebarWidth,
+    tocWidth,
+    filters,
+    plainFontFamily,
+    plainFontSize,
+  } = get();
   savePrefs({
     theme,
     profileId,
@@ -492,6 +533,8 @@ function persist(get: () => ViewerState) {
     tocVisible,
     sidebarWidth,
     tocWidth,
-    showAllFiles,
+    filters,
+    plainFontFamily,
+    plainFontSize,
   });
 }

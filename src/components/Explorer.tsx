@@ -46,22 +46,11 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
 export function Explorer() {
   const workspaces = useViewer((s) => s.workspaces);
   const hiddenKeys = useViewer((s) => s.hiddenKeys);
-  const showAllFiles = useViewer((s) => s.showAllFiles);
-  const toggleShowAllFiles = useViewer((s) => s.toggleShowAllFiles);
   const visible = workspaces.filter((w) => !hiddenKeys.includes(sourceKey(w)));
 
   return (
     <div className="explorer">
-      <div className="explorer-head">
-        <span className="panel-title">탐색기</span>
-        <button
-          className={`explorer-filter${showAllFiles ? " on" : ""}`}
-          onClick={toggleShowAllFiles}
-          title={showAllFiles ? "마크다운만 보기로 전환" : "전체 파일 보기로 전환"}
-        >
-          {showAllFiles ? "전체 파일" : "MD만"}
-        </button>
-      </div>
+      <div className="panel-title">탐색기</div>
 
       {visible.length === 0 ? (
         <div className="sidebar-empty">
