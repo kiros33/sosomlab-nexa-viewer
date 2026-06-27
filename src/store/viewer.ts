@@ -74,6 +74,27 @@ function savePrefs(prefs: PersistedPrefs) {
   }
 }
 
+// 탐색기에 표시할 등록 소스(워크스페이스) 목록 — 로컬 폴더 + GitHub 저장소
+const WORKSPACES_KEY = "workspaces.v1";
+
+function loadWorkspaces(): SourceRef[] {
+  try {
+    const raw = localStorage.getItem(WORKSPACES_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveWorkspaces(ws: SourceRef[]) {
+  try {
+    localStorage.setItem(WORKSPACES_KEY, JSON.stringify(ws));
+  } catch {
+    /* ignore */
+  }
+}
+
 interface ViewerState {
   source: ContentSource | null;
   docPath: string | null;
@@ -117,7 +138,14 @@ interface ViewerState {
   /** 드래그 종료 시 너비 영속화 */
   commitLayout: () => void;
 
+  // 탐색기 다중 루트(등록된 소스)
+  workspaces: SourceRef[];
+  addWorkspace: (ref: SourceRef) => void;
+  removeWorkspace: (key: string) => void;
+
   openSource: (source: ContentSource) => void;
+  /** 특정 소스의 문서를 연다(필요 시 활성 소스 전환). */
+  openInSource: (source: ContentSource, path: string) => Promise<void>;
   /** 현재 소스에서 문서 열기(이동 기록 push). hash 지정 시 해당 앵커로 */
   openDoc: (path: string, hash?: string | null) => Promise<void>;
   /** 같은 문서 내 앵커 이동(기록 push, 재로딩 없음) */
@@ -265,6 +293,22 @@ export const useViewer = create<ViewerState>((set, get) => {
       set((s) => ({ tocWidth: clamp(s.tocWidth - dx, TOC_MIN, TOC_MAX) })),
     commitLayout: () => persist(get),
 
+    workspaces: loadWorkspaces(),
+
+    addWorkspace: (ref) => {
+      const key = sourceKey(ref);
+      const ws = get().workspaces.filter((w) => sourceKey(w) !== key);
+      ws.unshift(ref);
+      saveWorkspaces(ws);
+      set({ workspaces: ws });
+    },
+
+    removeWorkspace: (key) => {
+      const ws = get().workspaces.filter((w) => sourceKey(w) !== key);
+      saveWorkspaces(ws);
+      set({ workspaces: ws });
+    },
+
     openSource: (source) => {
       set({
         source,
@@ -275,6 +319,14 @@ export const useViewer = create<ViewerState>((set, get) => {
         historyIndex: -1,
         pendingHash: null,
       });
+    },
+
+    openInSource: async (source, path) => {
+      const cur = get().source;
+      if (!cur || sourceKey(cur.ref) !== sourceKey(source.ref)) {
+        set({ source, history: [], historyIndex: -1 });
+      }
+      await get().openDoc(path);
     },
 
     openDoc: async (path, hash) => {

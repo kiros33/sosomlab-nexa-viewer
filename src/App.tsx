@@ -6,7 +6,7 @@ import hlLight from "highlight.js/styles/github.css?raw";
 import hlDark from "highlight.js/styles/github-dark.css?raw";
 
 import { Toolbar } from "./components/Toolbar";
-import { FileTree } from "./components/FileTree";
+import { Explorer } from "./components/Explorer";
 import { Toc } from "./components/Toc";
 import { HistoryBar } from "./components/HistoryBar";
 import { ActivityBar } from "./components/ActivityBar";
@@ -88,18 +88,7 @@ export default function App() {
 
         {sidebarVisible && (
           <aside className="sidebar" style={{ flex: `0 0 ${sidebarWidth}px`, width: sidebarWidth }}>
-            {sidebarView === "github" ? (
-              <GithubPanel />
-            ) : source ? (
-              <>
-                <div className="panel-title" title={source.ref.root}>
-                  {source.label}
-                </div>
-                <FileTree source={source} />
-              </>
-            ) : (
-              <div className="sidebar-empty">폴더 또는 GitHub 저장소를 여세요</div>
-            )}
+            {sidebarView === "github" ? <GithubPanel /> : <Explorer />}
           </aside>
         )}
         {sidebarVisible && <Resizer onResize={resizeSidebar} />}

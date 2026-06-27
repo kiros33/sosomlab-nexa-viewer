@@ -14,22 +14,26 @@ export function Toolbar({ bodyRef }: Props) {
   const docPath = useViewer((s) => s.docPath);
   const toggleTheme = useViewer((s) => s.toggleTheme);
   const setProfile = useViewer((s) => s.setProfile);
-  const openSource = useViewer((s) => s.openSource);
-  const openDoc = useViewer((s) => s.openDoc);
+  const addWorkspace = useViewer((s) => s.addWorkspace);
+  const openInSource = useViewer((s) => s.openInSource);
+  const showSidebarView = useViewer((s) => s.showSidebarView);
 
   const profiles = listProfiles();
   const title = docPath ? (docPath.split("/").pop() ?? docPath) : "Markdown Viewer";
 
   const onOpenFolder = async () => {
     const src = await pickLocalFolder();
-    if (src) openSource(src);
+    if (src) {
+      addWorkspace(src.ref); // 탐색기에 루트로 추가(접힘 상태)
+      showSidebarView("files");
+    }
   };
 
   const onOpenFile = async () => {
     const picked = await pickLocalMarkdownFile();
     if (picked) {
-      openSource(picked.source);
-      await openDoc(picked.filePath);
+      addWorkspace(picked.source.ref); // 부모 폴더를 탐색기에 등록
+      await openInSource(picked.source, picked.filePath); // 파일은 바로 열기
     }
   };
 

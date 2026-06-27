@@ -1,8 +1,9 @@
-/** 좌측 파일 트리 — 폴더는 지연 확장, 마크다운 파일 클릭 시 열람. */
+/** 파일 트리 — 폴더는 지연 확장, 마크다운 파일 클릭 시 열람. 다중 루트 지원. */
 import { useEffect, useState } from "react";
 
 import type { ContentSource, TreeEntry } from "../sources/types";
 import { useViewer } from "../store/viewer";
+import { sourceKey } from "../sources/registry";
 
 const MD_RE = /\.(md|markdown|mdx|txt)$/i;
 const isMarkdown = (name: string) => MD_RE.test(name);
@@ -19,7 +20,8 @@ function TreeNode({
   const [open, setOpen] = useState(false);
   const [children, setChildren] = useState<TreeEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
-  const openDoc = useViewer((s) => s.openDoc);
+  const openInSource = useViewer((s) => s.openInSource);
+  const activeSource = useViewer((s) => s.source);
   const currentPath = useViewer((s) => s.docPath);
 
   const onClick = async () => {
@@ -36,11 +38,13 @@ function TreeNode({
       }
       setOpen(!open);
     } else if (isMarkdown(entry.name)) {
-      void openDoc(entry.path);
+      void openInSource(source, entry.path);
     }
   };
 
-  const selected = !entry.isDir && currentPath === entry.path;
+  const isActiveSource =
+    activeSource != null && sourceKey(activeSource.ref) === sourceKey(source.ref);
+  const selected = !entry.isDir && isActiveSource && currentPath === entry.path;
   const dimmed = !entry.isDir && !isMarkdown(entry.name);
 
   return (
@@ -58,7 +62,11 @@ function TreeNode({
       </button>
       {open && (
         <div>
-          {loading && <div className="tree-loading" style={{ paddingLeft: `${22 + depth * 14}px` }}>…</div>}
+          {loading && (
+            <div className="tree-loading" style={{ paddingLeft: `${22 + depth * 14}px` }}>
+              …
+            </div>
+          )}
           {children?.map((c) => (
             <TreeNode key={c.path} entry={c} source={source} depth={depth + 1} />
           ))}
@@ -68,6 +76,7 @@ function TreeNode({
   );
 }
 
+/** 단일 소스의 트리(루트 항목들). */
 export function FileTree({ source }: { source: ContentSource }) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
