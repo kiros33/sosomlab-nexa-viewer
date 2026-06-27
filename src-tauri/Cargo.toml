@@ -14,6 +14,11 @@ edition = "2021"
 name = "tauri_scaffold_lib"
 crate-type = ["staticlib", "cdylib", "rlib"]
 
+# 실행 파일 이름 = 앱 이름. (dev 실행 시 macOS 메뉴의 About/Quit 등에 표시됨)
+[[bin]]
+name = "NexaMarkdownViewer"
+path = "src/main.rs"
+
 [build-dependencies]
 tauri-build = { version = "2", features = [] }
 
