@@ -229,3 +229,29 @@
      일괄 반영해 v0.1.0 재태그로 단일 재실행.
 - **산출물(예상 파일명)**: `NexaMarkdownViewer_0.1.0_universal.dmg`,
   `NexaMarkdownViewer_0.1.0_x64-setup.exe`
+- **CI 결과**: 성공. 자산명 정상(`NexaMarkdownViewer_0.1.0_universal.dmg`,
+  `..._x64-setup.exe`). 초안 Release 유지.
+
+---
+
+## 2026-06-27 — 앱 이름/조직 보완 + 패널 크기조절/토글(VSCode 스타일)
+
+- **요청**: ① 앱 내부(About/Quit 메뉴) 이름이 `tauri-scaffold`로 나옴 + 기본값 보완
+  ② 조직(SosomLab)을 앱·GitHub 문서 설명에 표시 ③ 좌측 파일목록·우측 ToC 크기 조절
+  ④ VSCode처럼 아이콘 토글로 패널 숨김/표시.
+- **변경내역**
+  1. **메뉴 이름**: `src-tauri/Cargo.toml`에 `[[bin]] name = "NexaMarkdownViewer"` 추가
+     → dev 실행 바이너리명이 앱 이름과 일치(About/Quit에 반영). 번들은 productName으로
+     이미 정상. (lib 이름은 유지해 모바일 gen 영향 없음)
+  2. **조직 표시**: 앱 환영화면에 "by SosomLab", GitHub 저장소 description/홈페이지 설정
+     (gh repo edit). README/CHANGELOG에는 기존 반영. macOS About 패널은 copyright
+     "© 2026 SosomLab" 표시.
+  3. **패널 크기 조절**: `store/viewer.ts`에 sidebarWidth/tocWidth + `resizeSidebar/resizeToc`
+     (clamp), `components/Resizer.tsx`(포인터 드래그). 너비 localStorage 영속화.
+  4. **패널 토글**: sidebarVisible/tocVisible + `toggleSidebar/toggleToc`,
+     `components/ActivityBar.tsx`(좌측 아이콘 바: 🗂 탐색기, ☰ 목차). 클릭 시 숨김/표시.
+  5. App 레이아웃 재구성: `액티비티바 | [사이드바|리사이저] | (히스토리바 → 본문|리사이저|ToC)`.
+- **소스 위치**: `src-tauri/Cargo.toml`, `src/store/viewer.ts`, `src/components/ActivityBar.tsx`,
+  `src/components/Resizer.tsx`, `src/App.tsx`, `src/App.css`
+- **남은 기본값**: 앱 아이콘이 아직 Tauri 기본 로고 → 추후 커스텀 아이콘 세트 생성 예정.
+- **검증**: `pnpm build`(tsc) 통과, `cargo check` 통과(대문자 bin명 허용), dev 실행 확인.
