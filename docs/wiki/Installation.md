@@ -23,8 +23,6 @@
   chmod +x NexaMarkdownViewer_*.AppImage && ./NexaMarkdownViewer_*.AppImage
   ```
 
-> 📷 _스크린샷: macOS 우클릭 → 열기 / Windows SmartScreen 우회_ — `images/install-gatekeeper.png`
-
 ## 시스템 요구사항
 - macOS 12+ / Windows 10+ / 주요 Linux 배포판(glibc 2.35+ 권장)
 - 별도 런타임 설치 불필요(네이티브 웹뷰 사용)
