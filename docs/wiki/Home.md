@@ -7,10 +7,16 @@
 **로컬과 GitHub 등 저장소의 Markdown을 GitHub 스타일로 읽는 크로스 플랫폼 데스크톱 뷰어** (Tauri 2 + React). 제작: **SosomLab**.
 
 <p align="center">
-  <img src="https://raw.githubusercontent.com/kiros33/sosomlab-nexa-viewer/main/docs/assets/screenshot.svg" alt="UI 개요" width="100%" />
+  <img src="images/render-document.png" alt="실행 화면 — 탐색기 + 본문 + 목차" width="100%" />
 </p>
 
-> 위 이미지는 UI 개요입니다. 각 기능의 실제 화면은 아래 문서에서 다룹니다.
+> 좌측 탐색기(로컬·GitHub 다중 루트), 가운데 GitHub 스타일 본문, 우측 목차(ToC).
+
+앱 정보는 메뉴 → **About**에서 확인할 수 있습니다(버전·제작).
+
+<p align="center">
+  <img src="images/about.png" alt="About — 버전/제작" width="320" />
+</p>
 
 ## 핵심 기능 한눈에
 
@@ -28,8 +34,3 @@
 - 다운로드: [GitHub Releases](https://github.com/kiros33/sosomlab-nexa-viewer/releases)
 - 변경 이력: [CHANGELOG](https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/CHANGELOG.md)
 
----
-
-### 📷 스크린샷 안내
-이 위키의 각 페이지에는 기능별 스크린샷 자리(`images/…`)가 표시되어 있습니다. 실제 캡처 이미지를
-위키의 `images/` 폴더에 추가하면 해당 위치에 표시됩니다. (자세한 방법은 [FAQ](FAQ) 참고)

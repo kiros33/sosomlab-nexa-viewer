@@ -9,8 +9,6 @@
 | **Windows** | `NexaMarkdownViewer_<버전>_x64-setup.exe` | 실행 → 설치 마법사 진행 |
 | **Linux** | `*.AppImage` / `*.deb` / `*.rpm` | AppImage: 실행권한 후 실행 / deb·rpm: 패키지 설치 |
 
-> 📷 _스크린샷: Releases 페이지의 자산 목록_ — `images/install-releases.png`
-
 ## ⚠️ 코드 서명 안내 (중요)
 현재 빌드는 **코드 서명이 적용되지 않았습니다.** 첫 실행 시 OS 보안 경고가 나올 수 있습니다.
 
