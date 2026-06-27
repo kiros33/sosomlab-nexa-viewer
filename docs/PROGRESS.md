@@ -209,3 +209,23 @@
   - CI 1차 실패: pnpm 9 ↔ pnpm-workspace.yaml(allowBuilds, pnpm10+ 문법) 충돌
     → "packages field missing". **수정**: package.json에 `packageManager: pnpm@11.8.0`,
     release.yml에서 pnpm 버전 고정 제거(자동 감지) + Node 22. v0.1.0 태그 재푸시로 재실행.
+  - CI 2차: **성공**(6m21s). 초안 Release에 dmg/exe/msi/app.tar.gz 업로드 확인.
+
+---
+
+## 2026-06-27 — 릴리스 산출물 이름 정리 + 서명 안내 + 릴리스 노트
+
+- **요청**: 파일명을 `NexaMarkdownViewer_0.1.0.…` 형태로. 코드 서명 미적용 사실을 README에
+  명시. 진행사항·Release Notes 보완 후 전체 정리/푸시.
+- **변경내역**
+  1. `src-tauri/tauri.conf.json`: productName/mainBinaryName "NexaMarkdownViewer"(공백 제거)
+     → 업로드 시 점(.) 구분 제거. 타이틀바 표시명은 "Nexa Markdown Viewer" 유지.
+     bundle.targets ["dmg","nsis"]로 정리(OS당 설치 파일 1개).
+  2. `README.md`: "다운로드 & 설치" 섹션 추가 — **코드 서명 미적용 경고** + macOS/Windows
+     우회 방법, Releases 링크.
+  3. `CHANGELOG.md` 신규: v0.1.0 Release Notes(Added/Known issues/산출물).
+  4. `.github/workflows/release.yml`: releaseBody에 서명 미적용 경고·설치 안내·CHANGELOG 링크.
+  5. CI: `gh` 설치/인증 확인(kiros33). 이전 초안 릴리스 삭제, 진행 중 실행 취소 후 변경
+     일괄 반영해 v0.1.0 재태그로 단일 재실행.
+- **산출물(예상 파일명)**: `NexaMarkdownViewer_0.1.0_universal.dmg`,
+  `NexaMarkdownViewer_0.1.0_x64-setup.exe`

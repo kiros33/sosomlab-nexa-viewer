@@ -67,7 +67,28 @@ pnpm tauri build    # 배포용 설치 파일 생성
 | **Windows** | `.msi`(WiX), `*-setup.exe`(NSIS) |
 
 > Windows/macOS는 각 OS에서 빌드해야 합니다. `v*` 태그 push로 **GitHub Actions → Releases**
-> 자동 배포를 구성할 수 있습니다(`tauri-apps/tauri-action`).
+> 자동 배포됩니다(`tauri-apps/tauri-action`). 산출물 예: `NexaMarkdownViewer_0.1.0_universal.dmg`,
+> `NexaMarkdownViewer_0.1.0_x64-setup.exe`.
+
+---
+
+## ⬇️ 다운로드 & 설치
+
+[**Releases**](https://github.com/kiros33/sosomlab-nexa-viewer/releases) 에서 OS에 맞는 파일을 받으세요.
+
+| OS | 파일 | 설치 |
+|----|------|------|
+| **macOS** | `…_universal.dmg` | 열어서 앱을 Applications로 드래그 |
+| **Windows** | `…_x64-setup.exe` | 실행 후 마법사 진행 |
+
+> ⚠️ **현재 코드 서명(code signing)이 적용되어 있지 않습니다.** 따라서 첫 실행 시
+> 운영체제의 보안 경고가 표시될 수 있습니다. (신뢰할 수 있는 출처에서 받은 경우에만 진행하세요.)
+>
+> - **macOS** — "확인되지 않은 개발자" 경고 시: 앱을 **우클릭 → 열기**(한 번만), 또는 터미널에서
+>   `xattr -dr com.apple.quarantine "/Applications/NexaMarkdownViewer.app"`
+> - **Windows** — SmartScreen 경고 시: **추가 정보 → 실행**
+>
+> 정식 배포 단계에서는 Apple Developer 인증서(notarization)·Windows 코드 서명 인증서를 적용할 예정입니다(로드맵).
 
 ---
 
