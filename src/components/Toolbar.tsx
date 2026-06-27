@@ -6,7 +6,7 @@ import { exportHtml, exportPdfViaPrint } from "../lib/exporters";
 import { useViewer } from "../store/viewer";
 import { Preferences } from "./Preferences";
 import { Icon } from "./Icon";
-import { FormatBadge } from "./FormatBadge";
+import { ExportModal } from "./ExportModal";
 
 interface Props {
   bodyRef: React.RefObject<HTMLDivElement | null>;
@@ -25,6 +25,7 @@ export function Toolbar({ bodyRef }: Props) {
   const profiles = listProfiles();
   const title = docPath ? (docPath.split("/").pop() ?? docPath) : "Markdown Viewer";
   const [prefsOpen, setPrefsOpen] = useState(false);
+  const [exportOpen, setExportOpen] = useState(false);
 
   const onOpenFolder = async () => {
     const src = await pickLocalFolder();
@@ -78,11 +79,13 @@ export function Toolbar({ bodyRef }: Props) {
             ))}
           </select>
         </label>
-        <button className="tb-icon" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
-          <FormatBadge label="HTML" size={22} />
-        </button>
-        <button className="tb-icon" onClick={exportPdfViaPrint} disabled={!docPath} title="PDF로 내보내기(인쇄)">
-          <FormatBadge label="PDF" size={22} />
+        <button
+          className="tb-icon"
+          onClick={() => setExportOpen(true)}
+          disabled={!docPath}
+          title="내보내기 (HTML / PDF)"
+        >
+          <Icon name="download" size={18} />
         </button>
         <button
           className="tb-icon"
@@ -98,6 +101,13 @@ export function Toolbar({ bodyRef }: Props) {
       </div>
 
       {prefsOpen && <Preferences onClose={() => setPrefsOpen(false)} />}
+      {exportOpen && (
+        <ExportModal
+          onClose={() => setExportOpen(false)}
+          onHtml={() => void onExportHtml()}
+          onPdf={exportPdfViaPrint}
+        />
+      )}
     </header>
   );
 }
