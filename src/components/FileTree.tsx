@@ -23,6 +23,7 @@ function TreeNode({
   const openInSource = useViewer((s) => s.openInSource);
   const activeSource = useViewer((s) => s.source);
   const currentPath = useViewer((s) => s.docPath);
+  const showAllFiles = useViewer((s) => s.showAllFiles);
 
   const onClick = async () => {
     if (entry.isDir) {
@@ -67,9 +68,11 @@ function TreeNode({
               …
             </div>
           )}
-          {children?.map((c) => (
-            <TreeNode key={c.path} entry={c} source={source} depth={depth + 1} />
-          ))}
+          {children
+            ?.filter((c) => c.isDir || showAllFiles || isMarkdown(c.name))
+            .map((c) => (
+              <TreeNode key={c.path} entry={c} source={source} depth={depth + 1} />
+            ))}
         </div>
       )}
     </div>
@@ -80,6 +83,7 @@ function TreeNode({
 export function FileTree({ source }: { source: ContentSource }) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const showAllFiles = useViewer((s) => s.showAllFiles);
 
   useEffect(() => {
     let active = true;
@@ -99,9 +103,11 @@ export function FileTree({ source }: { source: ContentSource }) {
 
   return (
     <div className="file-tree">
-      {roots.map((entry) => (
-        <TreeNode key={entry.path} entry={entry} source={source} depth={0} />
-      ))}
+      {roots
+        .filter((entry) => entry.isDir || showAllFiles || isMarkdown(entry.name))
+        .map((entry) => (
+          <TreeNode key={entry.path} entry={entry} source={source} depth={0} />
+        ))}
     </div>
   );
 }

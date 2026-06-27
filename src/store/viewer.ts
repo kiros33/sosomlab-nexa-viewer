@@ -33,6 +33,8 @@ interface PersistedPrefs {
   tocVisible: boolean;
   sidebarWidth: number;
   tocWidth: number;
+  /** 탐색기에서 마크다운 외 전체 파일도 표시할지 */
+  showAllFiles: boolean;
 }
 
 const PREFS_KEY = "viewer.prefs.v1";
@@ -55,6 +57,7 @@ function loadPrefs(): PersistedPrefs {
     theme: "light",
     profileId: defaultProfileId,
     recent: [],
+    showAllFiles: false, // 기본: 마크다운만
     ...LAYOUT_DEFAULTS,
   };
   try {
@@ -174,6 +177,9 @@ interface ViewerState {
   toggleToc: () => void;
   /** 뷰 선택(+사이드바 표시). 활성 뷰 재클릭 시 숨김. */
   showSidebarView: (view: "files" | "github") => void;
+  /** 탐색기 전체 파일 표시 여부 */
+  showAllFiles: boolean;
+  toggleShowAllFiles: () => void;
   /** 드래그 중 증분(dx)으로 너비 조절 */
   resizeSidebar: (dx: number) => void;
   resizeToc: (dx: number) => void;
@@ -335,6 +341,11 @@ export const useViewer = create<ViewerState>((set, get) => {
       }
       persist(get);
     },
+    showAllFiles: prefs.showAllFiles,
+    toggleShowAllFiles: () => {
+      set((s) => ({ showAllFiles: !s.showAllFiles }));
+      persist(get);
+    },
     resizeSidebar: (dx) =>
       set((s) => ({ sidebarWidth: clamp(s.sidebarWidth + dx, SIDEBAR_MIN, SIDEBAR_MAX) })),
     resizeToc: (dx) =>
@@ -471,6 +482,16 @@ function pushRecent(
 }
 
 function persist(get: () => ViewerState) {
-  const { theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth } = get();
-  savePrefs({ theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth });
+  const { theme, profileId, recent, sidebarVisible, tocVisible, sidebarWidth, tocWidth, showAllFiles } =
+    get();
+  savePrefs({
+    theme,
+    profileId,
+    recent,
+    sidebarVisible,
+    tocVisible,
+    sidebarWidth,
+    tocWidth,
+    showAllFiles,
+  });
 }

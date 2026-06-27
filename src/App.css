@@ -140,6 +140,29 @@ body {
 }
 
 /* ===== Explorer (다중 루트) ===== */
+.explorer-head {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding-right: 6px;
+}
+.explorer-filter {
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 1px 8px;
+  font-size: 11px;
+  cursor: pointer;
+}
+.explorer-filter:hover {
+  border-color: var(--accent);
+  color: var(--text);
+}
+.explorer-filter.on {
+  color: var(--accent);
+  border-color: var(--accent);
+}
 .ws-root {
   border-bottom: 1px solid var(--border);
 }
