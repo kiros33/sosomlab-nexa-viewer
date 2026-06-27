@@ -6,6 +6,7 @@
   --text-dim: #656d76;
   --accent: #0969da;
   --selected: #ddf4ff;
+  --ws-root-bg: #e9edf2;
 }
 .theme-dark {
   --bg: #0d1117;
@@ -15,6 +16,7 @@
   --text-dim: #8b949e;
   --accent: #2f81f7;
   --selected: #163056;
+  --ws-root-bg: #1c2333;
 }
 
 * {
@@ -179,6 +181,8 @@ body {
 .ws-head {
   display: flex;
   align-items: center;
+  background: var(--ws-root-bg);
+  border-bottom: 1px solid var(--border);
 }
 .ws-toggle {
   flex: 1 1 auto;
