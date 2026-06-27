@@ -1,5 +1,6 @@
 mod commands;
 mod providers;
+mod secrets;
 
 /// 앱 목적 요약 — macOS About 패널(comments)과 메뉴 등에 노출.
 const APP_NAME: &str = "Nexa Markdown Viewer";
@@ -71,7 +72,13 @@ pub fn run() {
             commands::source_list_dir,
             commands::source_read_file,
             commands::source_read_asset,
+            commands::source_latest_version,
+            commands::source_list_branches,
             commands::write_text_file,
+            commands::github_login,
+            commands::github_status,
+            commands::github_logout,
+            commands::github_default_branch,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

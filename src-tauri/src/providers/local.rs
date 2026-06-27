@@ -67,6 +67,7 @@ impl ContentProvider for LocalProvider {
         Ok(FileContent {
             path: path.to_string(),
             text,
+            version: None,
         })
     }
 

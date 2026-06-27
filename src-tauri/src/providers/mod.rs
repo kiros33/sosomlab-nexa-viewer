@@ -6,6 +6,7 @@
 
 use serde::{Deserialize, Serialize};
 
+pub mod github;
 pub mod local;
 
 /// 어떤 소스의 어느 위치를 가리키는지 식별하는 컨텍스트.
@@ -33,6 +34,9 @@ pub struct TreeEntry {
 pub struct FileContent {
     pub path: String,
     pub text: String,
+    /// 버전 식별자(원격: blob sha 등). 갱신 감지에 사용. 로컬은 None.
+    #[serde(default)]
+    pub version: Option<String>,
 }
 
 pub type ProviderResult<T> = Result<T, String>;
@@ -54,6 +58,11 @@ pub trait ContentProvider: Send + Sync {
     /// 원격 소스 전용. 로컬은 빈 목록(기본 구현).
     async fn list_branches(&self, _ctx: &SourceRef) -> ProviderResult<Vec<String>> {
         Ok(vec![])
+    }
+
+    /// 현재 파일의 버전 식별자(갱신 감지용). 로컬은 None(기본 구현).
+    async fn latest_version(&self, _ctx: &SourceRef, _path: &str) -> ProviderResult<Option<String>> {
+        Ok(None)
     }
 }
 
