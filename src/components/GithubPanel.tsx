@@ -1,7 +1,11 @@
 /**
  * GitHub 패널
- *  - 상단: 계정 + 등록된 저장소 목록(관리: ⋯ 표시/숨김·삭제)
- *  - 하단: 독립된 "저장소 검색 & 추가" 영역(검색창은 새로고침 제외 전체 폭)
+ *  1) 등록된 저장소 (목록)
+ *  2) 직접 등록 (owner/repo)
+ *  3) 내 저장소
+ *     - 미등록: PAT 입력 + 로그인(아이콘) 버튼
+ *     - 등록: 계정 정보 + 로그아웃(아이콘) 버튼
+ *     - 등록 가능한 저장소 목록 + / − 버튼 (실시간 검색)
  */
 import { useEffect, useState } from "react";
 import { useGithub } from "../store/github";
@@ -61,24 +65,32 @@ function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
   );
 }
 
-/** 검색 결과(계정 저장소) 한 줄 — 추가 버튼. */
+/** 계정 저장소 한 줄 — 등록 여부에 따라 + / − 버튼. */
 function AvailRow({
   repo,
-  added,
+  registered,
   onAdd,
+  onRemove,
 }: {
   repo: RepoInfo;
-  added: boolean;
+  registered: boolean;
   onAdd: () => void;
+  onRemove: () => void;
 }) {
   return (
     <li className="gh-avail-row">
       <span className="gh-avail-name" title={repo.fullName}>
         {repo.isPrivate ? "🔒" : "📂"} {repo.fullName}
       </span>
-      <button className="gh-add-btn" disabled={added} onClick={onAdd}>
-        {added ? "추가됨" : "추가"}
-      </button>
+      {registered ? (
+        <button className="gh-pm-btn minus" onClick={onRemove} title="등록 해제(삭제)">
+          −
+        </button>
+      ) : (
+        <button className="gh-pm-btn plus" onClick={onAdd} title="추가">
+          +
+        </button>
+      )}
     </li>
   );
 }
@@ -97,6 +109,7 @@ export function GithubPanel() {
     setError,
   } = useGithub();
   const addWorkspace = useViewer((s) => s.addWorkspace);
+  const removeWorkspace = useViewer((s) => s.removeWorkspace);
   const showSidebarView = useViewer((s) => s.showSidebarView);
   const workspaces = useViewer((s) => s.workspaces);
 
@@ -141,46 +154,7 @@ export function GithubPanel() {
     <div className="gh-panel">
       <div className="panel-title">GitHub</div>
 
-      {/* 계정 */}
-      {login ? (
-        <div className="gh-account">
-          <span>👤 {login}</span>
-          <button className="gh-link" onClick={() => void signOut()}>
-            로그아웃
-          </button>
-        </div>
-      ) : (
-        <details className="gh-login-wrap">
-          <summary>🔒 비공개 저장소 로그인 (PAT, 선택)</summary>
-          <form
-            className="gh-login"
-            onSubmit={(e) => {
-              e.preventDefault();
-              if (token.trim()) void signIn(token).then((ok) => ok && setToken(""));
-            }}
-          >
-            <input
-              type="password"
-              placeholder="Personal Access Token"
-              value={token}
-              onChange={(e) => setToken(e.target.value)}
-            />
-            <button type="submit" disabled={busy || !token.trim()}>
-              {busy ? "확인 중…" : "로그인"}
-            </button>
-            <a
-              className="gh-hint"
-              href="https://github.com/settings/tokens?type=beta"
-              target="_blank"
-              rel="noreferrer"
-            >
-              토큰 발급 (fine-grained, Contents: Read) · 공개 저장소엔 불필요
-            </a>
-          </form>
-        </details>
-      )}
-
-      {/* 등록된 저장소 */}
+      {/* 1) 등록된 저장소 */}
       <div className="gh-section-title">등록된 저장소 ({githubWorkspaces.length})</div>
       <ul className="gh-registered">
         {githubWorkspaces.map((w) => (
@@ -191,9 +165,69 @@ export function GithubPanel() {
         )}
       </ul>
 
-      {/* 저장소 검색 & 추가 (독립 영역) */}
+      {/* 2) 직접 등록 */}
+      <div className="gh-section-title">직접 등록</div>
+      <form
+        className="gh-addrepo"
+        onSubmit={(e) => {
+          e.preventDefault();
+          if (repoInput.trim()) void onManualAdd();
+        }}
+      >
+        <input
+          placeholder="owner/repo (공개는 로그인 불필요)"
+          value={repoInput}
+          onChange={(e) => setRepoInput(e.target.value)}
+        />
+        <button type="submit" disabled={adding || !repoInput.trim()} title="추가">
+          {adding ? "…" : "+"}
+        </button>
+      </form>
+
+      {/* 3) 내 저장소 */}
+      <div className="gh-section-title">내 저장소</div>
       <div className="gh-addbox">
-        <div className="gh-section-title">🔎 저장소 검색 &amp; 추가</div>
+        {login ? (
+          <div className="gh-account">
+            <span className="gh-account-name" title={login}>
+              <GithubMark size={13} /> {login}
+            </span>
+            <button className="gh-icon-btn" onClick={() => void signOut()} title="로그아웃">
+              🚪
+            </button>
+          </div>
+        ) : (
+          <form
+            className="gh-login"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (token.trim()) void signIn(token).then((ok) => ok && setToken(""));
+            }}
+          >
+            <input
+              type="password"
+              placeholder="Personal Access Token (비공개용)"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+            <button
+              type="submit"
+              className="gh-icon-btn"
+              disabled={busy || !token.trim()}
+              title="로그인"
+            >
+              {busy ? "…" : "🔑"}
+            </button>
+            <a
+              className="gh-hint"
+              href="https://github.com/settings/tokens?type=beta"
+              target="_blank"
+              rel="noreferrer"
+            >
+              토큰 발급 (fine-grained, Contents: Read) · 공개 저장소엔 불필요
+            </a>
+          </form>
+        )}
 
         {login && (
           <>
@@ -227,8 +261,9 @@ export function GithubPanel() {
                       <AvailRow
                         key={r.fullName}
                         repo={r}
-                        added={registered.has(key)}
+                        registered={registered.has(key)}
                         onAdd={() => addRepo(r.fullName, r.defaultBranch)}
+                        onRemove={() => removeWorkspace(key)}
                       />
                     );
                   })}
@@ -239,23 +274,6 @@ export function GithubPanel() {
             )}
           </>
         )}
-
-        <form
-          className="gh-addrepo"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (repoInput.trim()) void onManualAdd();
-          }}
-        >
-          <input
-            placeholder="owner/repo 직접 추가 (공개는 로그인 불필요)"
-            value={repoInput}
-            onChange={(e) => setRepoInput(e.target.value)}
-          />
-          <button type="submit" disabled={adding || !repoInput.trim()}>
-            {adding ? "…" : "+"}
-          </button>
-        </form>
       </div>
 
       {error && <div className="gh-error">{error}</div>}

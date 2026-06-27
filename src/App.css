@@ -693,6 +693,58 @@ body {
   border-color: var(--accent);
   color: var(--text);
 }
+.gh-account-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  font-size: 13px;
+}
+.gh-icon-btn {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text);
+  border-radius: 6px;
+  padding: 5px 9px;
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+}
+.gh-icon-btn:hover:not(:disabled) {
+  border-color: var(--accent);
+}
+.gh-icon-btn:disabled {
+  opacity: 0.5;
+  cursor: default;
+}
+.gh-pm-btn {
+  flex: 0 0 auto;
+  width: 24px;
+  height: 24px;
+  border-radius: 6px;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  cursor: pointer;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  font-size: 16px;
+  line-height: 1;
+}
+.gh-pm-btn.plus {
+  color: var(--accent);
+}
+.gh-pm-btn.minus {
+  color: #cf222e;
+}
+.gh-pm-btn:hover {
+  border-color: currentColor;
+}
 .gh-available {
   list-style: none;
   margin: 6px 0 0;
