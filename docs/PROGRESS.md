@@ -203,3 +203,9 @@
 - **빌드 테스트 방법**
   - 로컬: `pnpm tauri build` → `src-tauri/target/release/bundle/`
   - CI: `git tag v0.1.0 && git push origin v0.1.0` → Actions가 빌드 후 **초안 Release** 생성.
+- **빌드 테스트 결과**
+  - 로컬: 앱 컴파일 + `.app` 번들 성공. 전체 `tauri build`는 DMG 단계(`bundle_dmg.sh`,
+    Finder/AppleScript)가 비-GUI 셸에서 실패 → `--bundles app`으로 정상 통과 확인(환경 제약).
+  - CI 1차 실패: pnpm 9 ↔ pnpm-workspace.yaml(allowBuilds, pnpm10+ 문법) 충돌
+    → "packages field missing". **수정**: package.json에 `packageManager: pnpm@11.8.0`,
+    release.yml에서 pnpm 버전 고정 제거(자동 감지) + Node 22. v0.1.0 태그 재푸시로 재실행.
