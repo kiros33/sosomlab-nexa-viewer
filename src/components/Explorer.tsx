@@ -50,7 +50,7 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
       {expanded && (
         <div className="ws-body">
           {/* tick 변경 시 remount → 트리 새로고침 */}
-          <FileTree key={`${key}:${tick}`} source={source} onContext={openMenu} />
+          <FileTree key={`${key}:${tick}`} source={source} filters={filters} onContext={openMenu} />
         </div>
       )}
       {menu && (
