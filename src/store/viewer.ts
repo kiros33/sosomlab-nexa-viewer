@@ -95,6 +95,48 @@ function saveWorkspaces(ws: SourceRef[]) {
   }
 }
 
+// 탐색기에서 숨긴 워크스페이스 key 목록
+const HIDDEN_KEY = "hidden.v1";
+
+function loadHidden(): string[] {
+  try {
+    const raw = localStorage.getItem(HIDDEN_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveHidden(keys: string[]) {
+  try {
+    localStorage.setItem(HIDDEN_KEY, JSON.stringify(keys));
+  } catch {
+    /* ignore */
+  }
+}
+
+// 탐색기에서 펼쳐진 워크스페이스 key 목록(접힘이 기본)
+const EXPANDED_KEY = "expanded.v1";
+
+function loadExpanded(): string[] {
+  try {
+    const raw = localStorage.getItem(EXPANDED_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return [];
+}
+
+function saveExpanded(keys: string[]) {
+  try {
+    localStorage.setItem(EXPANDED_KEY, JSON.stringify(keys));
+  } catch {
+    /* ignore */
+  }
+}
+
 interface ViewerState {
   source: ContentSource | null;
   docPath: string | null;
@@ -142,6 +184,12 @@ interface ViewerState {
   workspaces: SourceRef[];
   addWorkspace: (ref: SourceRef) => void;
   removeWorkspace: (key: string) => void;
+  /** 탐색기에서 숨긴 워크스페이스 key */
+  hiddenKeys: string[];
+  toggleHidden: (key: string) => void;
+  /** 탐색기에서 펼쳐진 워크스페이스 key (접힘이 기본) */
+  expandedKeys: string[];
+  toggleExpanded: (key: string) => void;
 
   openSource: (source: ContentSource) => void;
   /** 특정 소스의 문서를 연다(필요 시 활성 소스 전환). */
@@ -306,7 +354,29 @@ export const useViewer = create<ViewerState>((set, get) => {
     removeWorkspace: (key) => {
       const ws = get().workspaces.filter((w) => sourceKey(w) !== key);
       saveWorkspaces(ws);
-      set({ workspaces: ws });
+      const expandedKeys = get().expandedKeys.filter((k) => k !== key);
+      const hiddenKeys = get().hiddenKeys.filter((k) => k !== key);
+      saveExpanded(expandedKeys);
+      saveHidden(hiddenKeys);
+      set({ workspaces: ws, expandedKeys, hiddenKeys });
+    },
+
+    hiddenKeys: loadHidden(),
+
+    toggleHidden: (key) => {
+      const cur = get().hiddenKeys;
+      const next = cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key];
+      saveHidden(next);
+      set({ hiddenKeys: next });
+    },
+
+    expandedKeys: loadExpanded(),
+
+    toggleExpanded: (key) => {
+      const cur = get().expandedKeys;
+      const next = cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key];
+      saveExpanded(next);
+      set({ expandedKeys: next });
     },
 
     openSource: (source) => {
@@ -324,7 +394,8 @@ export const useViewer = create<ViewerState>((set, get) => {
     openInSource: async (source, path) => {
       const cur = get().source;
       if (!cur || sourceKey(cur.ref) !== sourceKey(source.ref)) {
-        set({ source, history: [], historyIndex: -1 });
+        // 소스 전환: docPath/markdown을 비워 같은 이름 파일이라도 강제로 다시 로드
+        set({ source, docPath: null, markdown: "", history: [], historyIndex: -1 });
       }
       await get().openDoc(path);
     },

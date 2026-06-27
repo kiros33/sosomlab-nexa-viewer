@@ -88,7 +88,13 @@ export default function App() {
 
         {sidebarVisible && (
           <aside className="sidebar" style={{ flex: `0 0 ${sidebarWidth}px`, width: sidebarWidth }}>
-            {sidebarView === "github" ? <GithubPanel /> : <Explorer />}
+            {/* 두 뷰를 항상 마운트하고 표시만 토글 → 펼침/입력 상태 유지 */}
+            <div style={{ display: sidebarView === "files" ? "contents" : "none" }}>
+              <Explorer />
+            </div>
+            <div style={{ display: sidebarView === "github" ? "contents" : "none" }}>
+              <GithubPanel />
+            </div>
           </aside>
         )}
         {sidebarVisible && <Resizer onResize={resizeSidebar} />}
