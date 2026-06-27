@@ -65,6 +65,16 @@
 - [ ] 내보내기 고도화(서버사이드 PDF, 다크 테마 내보내기 옵션)
 - [ ] 번들 크기 최적화(highlight.js 언어 선별/코드 스플리팅)
 
+### 배포 채널 — 패키지 매니저 등록 — *요청 반영(설계)*
+- [ ] **Windows — WinGet**: `winget` manifest(YAML) 작성 → microsoft/winget-pkgs PR (또는
+      `vedantmgoyal/winget-releaser` 액션으로 릴리스 시 자동 제출). 설치 파일 SHA256 필요.
+- [ ] **Windows — Chocolatey**: `.nuspec` + install 스크립트 패키지 → `choco push`(API 키),
+      커뮤니티 저장소 심사.
+- [ ] **macOS — Homebrew**: Cask(`Casks/nexa-markdown-viewer.rb`, dmg URL+sha256) →
+      탭(tap) 저장소(`homebrew-tap`) 운영 또는 homebrew-cask PR.
+- 선행 조건: **코드 서명/공증**(미서명 시 다수 매니저 심사·사용자 신뢰 문제), 안정 버전 태깅,
+  릴리스 자산 체크섬 자동화.
+
 ### M6 — Git diff 비교 — *요청 반영(설계)*
 - [ ] 원격 git 소스: 커밋/브랜치 간 md diff 비교 보기
 - [ ] 로컬이 git 저장소면 워킹트리/커밋 간 diff 제공
@@ -88,3 +98,8 @@
 | 문서 간 링크 연결 정보(백링크/그래프) | M5 | 설계 |
 | 문서별 태그 | M5 | 설계 |
 | Git diff 비교(원격/로컬 git) | M6 | 설계 |
+| 이동 기록(파일#앵커)·브레드크럼 | M1 | ✅ 완료 |
+| 패널 크기조절 + VSCode/Eclipse 토글 | M1 | ✅ 완료 |
+| 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
+| Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
+| WinGet / Chocolatey / Homebrew 등록 | 배포 채널 | 설계 |

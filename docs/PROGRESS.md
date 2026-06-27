@@ -255,3 +255,22 @@
   `src/components/Resizer.tsx`, `src/App.tsx`, `src/App.css`
 - **남은 기본값**: 앱 아이콘이 아직 Tauri 기본 로고 → 추후 커스텀 아이콘 세트 생성 예정.
 - **검증**: `pnpm build`(tsc) 통과, `cargo check` 통과(대문자 bin명 허용), dev 실행 확인.
+
+---
+
+## 2026-06-27 — ToC 우측 이동 + 앱 아이콘 + Linux 빌드 + 패키지매니저 로드맵
+
+- **요청**: ① ToC 토글을 우측으로(파일목록처럼 숨김/표시), 우측은 Eclipse 느낌의 작은 아이콘
+  ② 앱 아이콘/파비콘 — 큰 "S"(SosomLab) 배경 + 우상단 1/4 정사각 "M↓" ③ Linux 빌드 추가
+  ④ WinGet/Chocolatey/Homebrew 등록을 할 일에 추가.
+- **변경내역**
+  1. ToC 토글을 좌측 ActivityBar에서 제거 → 우측 `components/RightBar.tsx`(Eclipse 스타일,
+     작은 세로 라벨 아이콘)로 이동. App 레이아웃 우측에 배치. CSS `.right-bar/.right-btn`.
+  2. 앱 아이콘: `public/app-icon.svg`(큰 S 배경 + 우상단 M↓ 배지) → rsvg로 1024 PNG 렌더 →
+     `pnpm tauri icon`으로 데스크톱/iOS/Android 아이콘 세트 생성. favicon을 app-icon.svg로 교체.
+  3. Linux 빌드: `tauri.conf.json` bundle.targets에 deb/rpm/appimage 추가, `release.yml`
+     매트릭스에 `ubuntu-22.04` 잡 + apt 의존성 설치 스텝. releaseBody에 Linux 안내.
+  4. 로드맵: "배포 채널 — WinGet/Chocolatey/Homebrew 등록" 항목 추가(선행: 코드 서명/체크섬).
+- **소스 위치**: `src/components/RightBar.tsx`, `src/components/ActivityBar.tsx`, `src/App.tsx`,
+  `src/App.css`, `public/app-icon.svg`, `src-tauri/icons/*`, `index.html`,
+  `src-tauri/tauri.conf.json`, `.github/workflows/release.yml`, `docs/ROADMAP.md`
