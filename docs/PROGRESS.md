@@ -186,3 +186,20 @@
 
 ### 검증
 - `pnpm build`(tsc+vite) 통과. dev 앱 HMR 정상, 패닉/에러 없음.
+
+---
+
+## 2026-06-27 — 문서화: README 제품 소개 + 이미지, 릴리스 워크플로
+
+- **요청**: README에 제품 특징이 잘 드러나게 설명 추가 + 적당한 이미지. 진행사항 기록/푸시.
+  GitHub Release 배포용 워크플로 추가 및 빌드 테스트.
+- **변경내역**
+  1. `README.md` 전면 개편: 소개·주요 특징·빠른 시작·빌드/배포·기술 스택/구조·로드맵·배지.
+  2. 이미지 제작(`docs/assets/banner.svg`, `docs/assets/screenshot.svg`) — 직접 작성한 SVG
+     배너 및 UI 미리보기(목업). GitHub README에서 상대경로로 렌더링.
+  3. 릴리스 워크플로 `.github/workflows/release.yml`(사용자 커밋 efd731d): `v*` 태그 push 시
+     macOS(유니버설)+Windows 빌드 → `tauri-apps/tauri-action`으로 Release(초안) 업로드.
+- **소스 위치**: `README.md`, `docs/assets/`, `.github/workflows/release.yml`
+- **빌드 테스트 방법**
+  - 로컬: `pnpm tauri build` → `src-tauri/target/release/bundle/`
+  - CI: `git tag v0.1.0 && git push origin v0.1.0` → Actions가 빌드 후 **초안 Release** 생성.
