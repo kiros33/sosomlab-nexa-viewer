@@ -84,3 +84,105 @@
 - iOS 개발: `pnpm tauri ios dev`
 - Android 개발: `NDK_HOME=$ANDROID_HOME/ndk/27.1.12297006 pnpm tauri android dev`
 - 참고: 새 셸에서는 `source "$HOME/.cargo/env"` 로 Rust 경로 활성화 필요.
+
+---
+
+## 2026-06-27 — M1: GitHub 스타일 Markdown 뷰어 (로컬 + 파일트리)
+
+- **요청**: GitHub 스타일 md 뷰어 개발. 로컬 파일 접근, 소스/렌더러 추상화(추후
+  GitHub·Bitbucket·수식·그래프 확장), 데스크톱(Win/macOS) 우선. 진행 중 추가 요청:
+  렌더링 선택 전환, ToC 보기, HTML/PDF 내보내기, 언어별 코드 하이라이팅·Mermaid,
+  문서 간 링크 연결정보·태그(설계만), Git diff 비교(설계만).
+- **목적**: M1(로컬 뷰어 + 파일트리)을 추상화 구조 위에 구현하고 확장 지점을 마련.
+
+### 변경내역
+1. **의존성 추가**
+   - 프론트: react-markdown, remark-gfm, remark-frontmatter, rehype-raw,
+     rehype-slug, rehype-autolink-headings, rehype-highlight, highlight.js,
+     github-markdown-css, zustand
+   - Tauri 플러그인: @tauri-apps/plugin-dialog, @tauri-apps/plugin-fs (JS+Rust)
+   - Rust: tauri-plugin-dialog, tauri-plugin-fs, async-trait, base64
+2. **소스 추상화 (Rust)**: `ContentProvider` 트레잇 + `LocalProvider`(경로 탈출 방지,
+   디렉터리 나열/파일·에셋 읽기) + 디스패치 커맨드.
+3. **소스 추상화 (TS)**: `ContentSource` 인터페이스 + `LocalSource` + 레지스트리.
+4. **렌더 프로파일 추상화**: 교체 가능한 렌더링 프로파일(현재 GitHub 1종) + 툴바 선택.
+5. **렌더러**: react-markdown 파이프라인, 상대 이미지(data URL)·문서 간 링크·외부 링크 처리.
+6. **UI/상태**: zustand 스토어(소스/문서/테마/프로파일/최근문서 영속화), 파일트리,
+   ToC 패널, 툴바(열기·프로파일·테마·내보내기), 라이트/다크 CSS 토글, 환영/최근 화면.
+7. **내보내기**: HTML(스타일 인라인 단독 파일) + PDF(웹뷰 인쇄, @media print).
+8. **권한/정리**: capabilities에 dialog 권한 추가, 기본 `greet` 예제 제거.
+
+### 기능 및 반영 소스 위치
+- Rust provider: `src-tauri/src/providers/mod.rs`, `src-tauri/src/providers/local.rs`
+- Rust 커맨드: `src-tauri/src/commands.rs` (pick_folder/pick_markdown_file/
+  source_list_dir/source_read_file/source_read_asset/write_text_file), 등록 `src-tauri/src/lib.rs`
+- 소스 추상화(TS): `src/sources/types.ts`, `src/sources/localSource.ts`, `src/sources/registry.ts`
+- 렌더러: `src/renderer/profiles.ts`(확장 지점), `src/renderer/MarkdownView.tsx`, `src/renderer/AsyncImage.tsx`
+- 상태: `src/store/viewer.ts`  / 유틸: `src/lib/paths.ts`, `src/lib/exporters.ts`
+- UI: `src/components/Toolbar.tsx`, `src/components/FileTree.tsx`, `src/components/Toc.tsx`,
+  `src/App.tsx`, `src/App.css`
+- 권한: `src-tauri/capabilities/default.json`
+- 로드맵/설계 누적: `docs/ROADMAP.md`
+
+### 검증
+- `pnpm build` (tsc + vite) 통과, `cargo check` 통과(미사용 trait 메서드 경고는 M3 예정분).
+- `pnpm tauri dev` 실행 확인.
+
+### 알려진 한계 / 다음
+- JS 번들 ~808KB(highlight.js 전체 언어 포함) → M5에서 최적화.
+- 다음 단계는 M2(수식 KaTeX, Mermaid) 또는 M3(GitHub 원격) 중 택일.
+
+---
+
+## 2026-06-27 — M1 보강: 이동 기록(History) + 레이아웃 + 브랜딩
+
+- **요청**: ① 링크로 이동 시 이전 파일로 돌아가기 — 상단에 최근 경로 최대 3개(긴
+  이름 … 처리) + 전체 이동 기록 탐색. ② 메인+ToC를 묶고 그 위에 히스토리 탐색 배치.
+  ③ 앱 이름 "Nexa Markdown Viewer", 소속 "SosomLab".
+- **목적**: 위키 스타일 문서 이동 UX 강화 및 제품 브랜딩 적용.
+
+### 변경내역
+1. **이동 기록 스택**: `src/store/viewer.ts` 에 `history`/`historyIndex` + `goTo`/`goBack`/
+   `goForward` 추가. 링크·트리 클릭은 push(앞쪽 기록은 분기 시 잘림), 기록 점프는 push 안 함.
+   새 소스/최근문서 열기 시 기록 초기화.
+2. **HistoryBar**: `src/components/HistoryBar.tsx` — ←/→, 최근 경로 최대 3개(… 처리),
+   "전체 기록" 펼침 드롭다운(번호+파일명+경로, 클릭 점프).
+3. **레이아웃 재구성**: `src/App.tsx` — `사이드바 | (HistoryBar → doc-area(content+toc))`.
+   CSS `.main-area`/`.doc-area`/`.history-*` 추가(`src/App.css`).
+4. **브랜딩**:
+   - `src-tauri/tauri.conf.json`: productName "Nexa Markdown Viewer",
+     identifier `com.sosomlab.nexa-markdown-viewer`, window title 동일, 창 1200×800,
+     bundle publisher "SosomLab" / copyright / category / shortDescription.
+   - `index.html` title, `src-tauri/Cargo.toml` authors=SosomLab/description.
+   - 환영 화면 제목 "Nexa Markdown Viewer".
+5. FileTree `isMarkdown` 비컴포넌트 export 제거(Fast Refresh 경고 해소).
+
+### 검증
+- `pnpm build`(tsc+vite) 통과. dev 앱 HMR/재컴파일 정상, 패닉 없음.
+
+### 주의
+- **identifier 변경**으로 기존 모바일 gen(`gen/apple`·`gen/android`,
+  old id `com.sosomlab.tauritest1`)과 불일치. 모바일(M7) 진행 시 `tauri ios/android init`
+  재생성 또는 식별자 수동 정정 필요.
+
+---
+
+## 2026-06-27 — M1 보강: 앵커 기반 이동 기록(파일#앵커) + 그룹형 기록 UX
+
+- **요청**: 기록을 "파일#링크(앵커)" 단위로 관리. 같은 파일 내 이동은 `#앵커`,
+  파일이 다르면 `파일명#앵커`로 표시. 파일이 다를 때 1-클릭 이동 UX 제안/구현.
+- **목적**: 위키 스타일 정밀 이동(문서 내 위치까지) + 빠른 파일 점프.
+
+### 변경내역
+1. **스토어**(`src/store/viewer.ts`): `HistoryEntry`에 `hash` 추가. `pendingHash`/`navSeq`로
+   이동 시 스크롤 트리거. `navigateAnchor(hash)`(같은 파일, 재로딩 없음), `openDoc(path, hash)`
+   (앵커 지원), `goTo`가 앵커까지 복원.
+2. **MarkdownView**(`src/renderer/MarkdownView.tsx`): `#앵커`는 `navigateAnchor`로,
+   `path#frag` 상대 링크는 분리해 `onNavigateDoc(path, frag)`로 처리.
+3. **스크롤**(`src/App.tsx`): `navSeq` 변화 시 `pendingHash` 헤딩으로 스크롤(없으면 본문 상단).
+4. **HistoryBar UX**(`src/components/HistoryBar.tsx`): 브레드크럼 라벨 규칙(같은 파일 `#앵커`,
+   다른 파일 `파일명#앵커`). 전체 기록 드롭다운을 **파일별 그룹**으로 — 파일 헤더 클릭 시
+   해당 파일로 1-클릭 점프, 하위에 방문 앵커 나열(정확 위치 이동).
+
+### 검증
+- `pnpm build`(tsc+vite) 통과. dev 앱 HMR 정상, 패닉/에러 없음.

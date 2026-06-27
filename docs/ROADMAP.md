@@ -1,0 +1,90 @@
+# 로드맵 & 기능 설계 (Markdown 뷰어)
+
+프로젝트: **sosomlab-tauri-test1** — GitHub 스타일 Markdown 뷰어 (Tauri 2 + React 19 + TS)
+플랫폼: 데스크톱(Windows/macOS) 우선 → 추후 Linux, 모바일(iOS/Android)
+
+이 문서는 누적되는 요구사항/설계 항목과 단계별 구현 대상을 관리한다.
+(상세 아키텍처는 코드의 `src/sources`, `src/renderer`, `src-tauri/src/providers` 참고)
+
+---
+
+## 핵심 설계 원칙
+- **소스 추상화**: 로컬/GitHub/Bitbucket/GitLab을 동일 인터페이스로.
+  - TS: `src/sources/types.ts` `ContentSource`
+  - Rust: `src-tauri/src/providers/mod.rs` `ContentProvider` 트레잇
+  - 신규 소스 = 인터페이스 구현 + 레지스트리 등록만으로 추가.
+- **렌더 프로파일 추상화(교체 가능한 렌더링)**: `src/renderer/profiles.ts`
+  - "어떤 방식으로 렌더링할지"를 프로파일로 정의, 툴바에서 선택 전환.
+  - 신규 프로파일(수식/그래프 강화, GitLab, 순수 텍스트 등) 추가만으로 확장.
+- **토큰/HTTP/FS는 Rust에 격리**(보안). 토큰은 **암호화된 로컬 저장**.
+
+---
+
+## 단계별 구현 대상 (Milestones)
+
+### ✅ M1 — 로컬 뷰어 + 파일트리 (데스크톱) — *구현 완료*
+- [x] 로컬 폴더/파일 열기 (네이티브 다이얼로그)
+- [x] 좌측 파일 트리(지연 확장)
+- [x] GitHub 스타일 렌더링: GFM(표/체크박스/취소선/자동링크)
+- [x] **언어별 코드 구문 강조** (highlight.js, 라이트/다크 테마 동기화)
+- [x] 라이트/다크 테마 토글 (github-markdown-css 라이트/다크)
+- [x] **목차(ToC) 보기** 패널 (헤딩 추출 → 클릭 이동)
+- [x] 헤딩 앵커/슬러그(rehype-slug + autolink)
+- [x] 상대 경로 이미지 표시(data URL), 문서 간 .md 링크 이동, 외부 링크 기본 브라우저
+- [x] 최근 문서(localStorage 영속화)
+- [x] **렌더 프로파일 선택 UI**(현재 GitHub 1종, 확장 구조)
+- [x] **내보내기**: HTML(스타일 인라인), PDF(웹뷰 인쇄)
+- [x] YAML frontmatter 숨김 처리
+
+### M2 — 렌더러 확장
+- [ ] **수식 렌더링** (KaTeX): `remark-math` + `rehype-katex` (새 프로파일 또는 기본 통합)
+- [ ] **Mermaid 다이어그램/그래프** 렌더링 (코드펜스 `mermaid`)
+- [ ] GitHub Alerts/콜아웃 (`> [!NOTE]`, `[!WARNING]` 등)
+- [ ] 각주, 이모지 shortcode
+- [ ] 추가 렌더 프로파일 예시(예: "수식·다이어그램 강화", "순수 텍스트")
+- [ ] 라이트/다크 정교화, 본문 폭/글꼴 크기 설정
+
+### M3 — GitHub 원격 소스
+- [ ] PAT 인증 + **암호화된 로컬 토큰 저장** (tauri-plugin-stronghold/store)
+- [ ] **다중 repository/계정 등록** 및 관리 UI
+- [ ] 저장소·브랜치·트리 탐색, 원격 .md 열람 (`ContentProvider` github 구현, `list_branches` 활용)
+- [ ] 원격 상대 이미지/링크 해석
+
+### M4 — 추상화 강화 + 타 저장소
+- [ ] Provider 인터페이스 일반화/안정화
+- [ ] **Bitbucket** (및 GitLab) provider 추가
+- [ ] 소스 종류별 인증 방식 정리
+
+### M5 — UX 폴리시 & 지식관리
+- [ ] 문서 내/저장소 전체 검색
+- [ ] 탭(다중 문서)
+- [ ] 즐겨찾기(북마크)
+- [ ] **문서 간 링크 연결 정보 보기**(백링크/링크 그래프) — *요청 반영(설계)*
+- [ ] **문서별 태그 추가/관리 + 태그 기반 탐색** — *요청 반영(설계)*
+- [ ] 로컬 파일 변경 감지(라이브 리로드)
+- [ ] 내보내기 고도화(서버사이드 PDF, 다크 테마 내보내기 옵션)
+- [ ] 번들 크기 최적화(highlight.js 언어 선별/코드 스플리팅)
+
+### M6 — Git diff 비교 — *요청 반영(설계)*
+- [ ] 원격 git 소스: 커밋/브랜치 간 md diff 비교 보기
+- [ ] 로컬이 git 저장소면 워킹트리/커밋 간 diff 제공
+- [ ] diff 전용 렌더(좌우/인라인), 변경 강조
+
+### M7 — 모바일
+- [ ] iOS/Android 빌드·배포
+- [ ] 반응형 레이아웃(사이드바/ToC 토글), 터치 UX
+- [ ] 모바일 보안 저장(Keychain/Keystore)
+
+---
+
+## 요청 반영 추적 (사용자 추가 요구사항)
+| 항목 | 단계 | 상태 |
+|---|---|---|
+| 다른 포맷 지원 위해 렌더링 선택 전환 가능하게 | M1(구조) + M2(프로파일 추가) | M1 구조 완료 |
+| ToC 보기 | M1 | ✅ 완료 |
+| HTML/PDF 내보내기 | M1(기본) + M5(고도화) | M1 완료 |
+| 언어별 코드 하이라이팅 | M1 | ✅ 완료 |
+| Mermaid 등 다이어그램 | M2 | 설계 |
+| 문서 간 링크 연결 정보(백링크/그래프) | M5 | 설계 |
+| 문서별 태그 | M5 | 설계 |
+| Git diff 비교(원격/로컬 git) | M6 | 설계 |
