@@ -84,7 +84,12 @@ export function Toolbar({ bodyRef }: Props) {
         <button className="tb-icon" onClick={exportPdfViaPrint} disabled={!docPath} title="PDF로 내보내기(인쇄)">
           <FormatBadge label="PDF" color="#d93831" size={22} />
         </button>
-        <button className="tb-icon" onClick={toggleTheme} title="테마 전환">
+        <button
+          className="tb-icon"
+          onClick={toggleTheme}
+          title="테마 전환"
+          style={theme === "dark" ? { color: "#ffc400" } : undefined}
+        >
           <Icon name={theme === "light" ? "dark_mode" : "light_mode"} size={18} />
         </button>
         <button className="tb-icon" onClick={() => setPrefsOpen(true)} title="환경설정">
