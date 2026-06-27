@@ -64,10 +64,6 @@ impl GithubProvider {
 
 #[async_trait::async_trait]
 impl ContentProvider for GithubProvider {
-    fn kind(&self) -> &'static str {
-        "github"
-    }
-
     async fn list_dir(&self, ctx: &SourceRef, path: &str) -> ProviderResult<Vec<TreeEntry>> {
         let v = self.get_json(&Self::contents_url(ctx, path)).await?;
         let arr = v.as_array().ok_or("디렉터리가 아닙니다")?;

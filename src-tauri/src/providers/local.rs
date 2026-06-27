@@ -25,10 +25,6 @@ impl LocalProvider {
 
 #[async_trait::async_trait]
 impl ContentProvider for LocalProvider {
-    fn kind(&self) -> &'static str {
-        "local"
-    }
-
     async fn list_dir(&self, ctx: &SourceRef, path: &str) -> ProviderResult<Vec<TreeEntry>> {
         let dir = Self::resolve(ctx, path)?;
         let root = PathBuf::from(&ctx.root);
