@@ -2,6 +2,8 @@
  * 탐색기 — 등록된 다수 소스(로컬 폴더 + GitHub 저장소)를 접이식 루트로 표시.
  * 펼침 상태는 스토어에 영속화(최초 등록/최초 실행만 접힘). 숨김 처리된 항목은 제외.
  */
+import { useMemo } from "react";
+
 import type { SourceRef } from "../sources/types";
 import { sourceFromRef, sourceKey } from "../sources/registry";
 import { useViewer } from "../store/viewer";
@@ -12,7 +14,8 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const expanded = useViewer((s) => s.expandedKeys.includes(key));
   const toggleExpanded = useViewer((s) => s.toggleExpanded);
   const removeWorkspace = useViewer((s) => s.removeWorkspace);
-  const source = sourceFromRef(wsRef);
+  // 소스 객체를 key 기준으로 memo → 재렌더 시 재요청/깜빡임 방지
+  const source = useMemo(() => sourceFromRef(wsRef), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   const icon = wsRef.kind === "github" ? "🐙" : "📁";
 
   return (
