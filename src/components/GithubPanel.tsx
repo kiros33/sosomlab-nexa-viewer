@@ -3,7 +3,70 @@ import { useEffect, useState } from "react";
 import { useGithub } from "../store/github";
 import { useViewer } from "../store/viewer";
 import { GithubSource, githubDefaultBranch } from "../sources/githubSource";
+import type { RepoInfo } from "../sources/githubSource";
 import { sourceKey } from "../sources/registry";
+
+/** 계정 저장소 한 줄 — 이름은 넓게, 설정(삭제/표시토글)은 ⋯ 뒤로 숨김. */
+function AvailableItem({
+  repo,
+  added,
+  hidden,
+  onAdd,
+  onRemove,
+  onToggleHidden,
+}: {
+  repo: RepoInfo;
+  added: boolean;
+  hidden: boolean;
+  onAdd: () => void;
+  onRemove: () => void;
+  onToggleHidden: () => void;
+}) {
+  const [menu, setMenu] = useState(false);
+  return (
+    <li className="gh-avail-row">
+      <span className="gh-avail-name" title={repo.fullName}>
+        {repo.isPrivate ? "🔒" : "📂"} {repo.fullName}
+      </span>
+      {added ? (
+        <div className="gh-kebab-wrap">
+          {hidden && <span className="gh-hidden-dot" title="탐색기에서 숨김">🚫</span>}
+          <button className="gh-kebab" onClick={() => setMenu((m) => !m)} title="설정">
+            ⋯
+          </button>
+          {menu && (
+            <>
+              <div className="gh-menu-backdrop" onClick={() => setMenu(false)} />
+              <div className="gh-menu">
+                <button
+                  onClick={() => {
+                    onToggleHidden();
+                    setMenu(false);
+                  }}
+                >
+                  {hidden ? "👁 탐색기에 표시" : "🚫 탐색기에서 숨김"}
+                </button>
+                <button
+                  className="gh-menu-danger"
+                  onClick={() => {
+                    onRemove();
+                    setMenu(false);
+                  }}
+                >
+                  🗑 삭제
+                </button>
+              </div>
+            </>
+          )}
+        </div>
+      ) : (
+        <button className="gh-add-btn" onClick={onAdd} title="추가">
+          추가
+        </button>
+      )}
+    </li>
+  );
+}
 
 export function GithubPanel() {
   const {
@@ -19,8 +82,11 @@ export function GithubPanel() {
     setError,
   } = useGithub();
   const addWorkspace = useViewer((s) => s.addWorkspace);
+  const removeWorkspace = useViewer((s) => s.removeWorkspace);
+  const toggleHidden = useViewer((s) => s.toggleHidden);
   const showSidebarView = useViewer((s) => s.showSidebarView);
   const workspaces = useViewer((s) => s.workspaces);
+  const hiddenKeys = useViewer((s) => s.hiddenKeys);
 
   const [token, setToken] = useState("");
   const [repoInput, setRepoInput] = useState("");
@@ -117,19 +183,16 @@ export function GithubPanel() {
                       root: r.fullName,
                       gitRef: r.defaultBranch,
                     });
-                    const added = registered.has(key);
                     return (
-                      <li key={r.fullName}>
-                        <button
-                          className="gh-avail-item"
-                          disabled={added}
-                          onClick={() => addRepo(r.fullName, r.defaultBranch)}
-                          title={added ? "이미 추가됨" : `${r.fullName} 추가`}
-                        >
-                          {r.isPrivate ? "🔒" : "📂"} {r.fullName}
-                          {added && <span className="gh-added">추가됨</span>}
-                        </button>
-                      </li>
+                      <AvailableItem
+                        key={r.fullName}
+                        repo={r}
+                        added={registered.has(key)}
+                        hidden={hiddenKeys.includes(key)}
+                        onAdd={() => addRepo(r.fullName, r.defaultBranch)}
+                        onRemove={() => removeWorkspace(key)}
+                        onToggleHidden={() => toggleHidden(key)}
+                      />
                     );
                   })}
                 {available.length === 0 && (
