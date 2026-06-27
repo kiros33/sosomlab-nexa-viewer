@@ -45,10 +45,12 @@
 - [ ] 라이트/다크 정교화, 본문 폭/글꼴 크기 설정
 
 ### M3 — GitHub 원격 소스
-- [ ] PAT 인증 + **암호화된 로컬 토큰 저장** (tauri-plugin-stronghold/store)
-- [ ] **다중 repository/계정 등록** 및 관리 UI
-- [ ] 저장소·브랜치·트리 탐색, 원격 .md 열람 (`ContentProvider` github 구현, `list_branches` 활용)
-- [ ] 원격 상대 이미지/링크 해석
+- [x] PAT 인증 + **암호화된 로컬 토큰 저장** (AES-256-GCM)
+- [x] **다중 repository 등록** 및 관리 UI (GitHub 패널)
+- [x] 저장소·트리 탐색, 원격 .md 열람 (`ContentProvider` github 구현)
+- [x] 원격 상대 이미지/링크 해석
+- [x] **온라인 갱신 감지(blob sha) + 갱신 버튼**(포커스 시 확인)
+- [ ] OAuth 디바이스 로그인(추후), 다중 계정, 자동 폴링 옵션, 브랜치 선택 UI
 
 ### M4 — 추상화 강화 + 타 저장소
 - [ ] Provider 인터페이스 일반화/안정화

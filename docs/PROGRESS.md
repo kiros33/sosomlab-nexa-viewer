@@ -274,3 +274,31 @@
 - **소스 위치**: `src/components/RightBar.tsx`, `src/components/ActivityBar.tsx`, `src/App.tsx`,
   `src/App.css`, `public/app-icon.svg`, `src-tauri/icons/*`, `index.html`,
   `src-tauri/tauri.conf.json`, `.github/workflows/release.yml`, `docs/ROADMAP.md`
+
+---
+
+## 2026-06-27 — M3(1차): GitHub 원격 소스(PAT) + 온라인 갱신 감지
+
+- **요청**: GitHub에 직접 로그인해 md 열람, 온라인 갱신 시 갱신(버튼), 갱신 여부 판단.
+  → 인증=PAT 우선(+추후 OAuth), 갱신=감지+갱신버튼, 토큰=암호화 로컬 저장.
+- **변경내역(백엔드)**
+  1. 토큰 암호화 저장 `src-tauri/src/secrets.rs` (AES-256-GCM, 키=pepper+사용자명 파생,
+     nonce=getrandom, 앱 로컬데이터에 저장).
+  2. `src-tauri/src/providers/github.rs`: GithubProvider(contents/branches API, reqwest
+     rustls). read_file가 blob `sha`를 version으로 반환, latest_version로 갱신 감지.
+  3. `providers/mod.rs`: FileContent에 `version`, 트레잇에 `latest_version` 추가.
+  4. `src-tauri/src/commands.rs`: app-aware provider 디스패치(github는 저장 토큰 주입),
+     github_login/status/logout/default_branch, source_latest_version/list_branches.
+  5. deps: reqwest(json,rustls-tls,gzip), aes-gcm, sha2, getrandom.
+- **변경내역(프론트)**
+  1. `src/sources/githubSource.ts`(+types version/latestVersion, registry github).
+  2. `src/store/github.ts`: 계정/등록 저장소(localStorage), 로그인/로그아웃/추가/삭제.
+  3. `src/store/viewer.ts`: currentVersion/updateAvailable + checkForUpdate(포커스 시) + reload.
+  4. UI: `src/components/GithubPanel.tsx`(PAT 로그인·repo 등록/열기), ActivityBar에 GitHub
+     뷰 전환(🐙), HistoryBar에 "🔄 갱신 가능/새로고침" 버튼.
+- **갱신 감지 방식**: 문서 열 때 blob sha 저장 → 창 포커스 시 latest_version과 비교 →
+  다르면 "갱신 가능" 배지, 버튼 클릭 시 강제 재로딩.
+- **보안**: 토큰은 Rust에만 보관(JS로 노출 안 함), 암호화 로컬 저장.
+- **검증**: `cargo check` 통과, `pnpm build`(tsc) 통과, dev 재시작 부팅 확인. (실제 로그인은
+  사용자 PAT로 테스트 필요 — fine-grained PAT, Contents: Read)
+- **다음**: OAuth 디바이스 로그인, 다중 계정, 자동 폴링 옵션.
