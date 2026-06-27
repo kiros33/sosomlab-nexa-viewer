@@ -1,6 +1,7 @@
 ### Nexa Markdown Viewer
 
 - [Home](Home)
+- [소개 (Introduction)](Introduction)
 - [설치 (Installation)](Installation)
 - [빠른 시작 (Getting Started)](Getting-Started)
 - [탐색기 (Explorer)](Explorer)
