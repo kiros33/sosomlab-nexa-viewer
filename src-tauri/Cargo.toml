@@ -1,6 +1,6 @@
 [package]
 name = "tauri-scaffold"
-version = "0.2.0"
+version = "0.2.1"
 description = "Nexa Markdown Viewer — GitHub 스타일 Markdown 뷰어"
 authors = ["SosomLab"]
 edition = "2021"

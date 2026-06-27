@@ -5,6 +5,20 @@
 
 ## [Unreleased]
 
+## [0.2.1] - 2026-06-28
+
+### Added
+- 일반텍스트/코드 **글꼴 선택 보완** — 직접 입력(쉼표로 다중 폴백) + 목록에서 추가(설치 글꼴 조회/폴백) + 미리보기
+
+### Fixed
+- 앱 **아이콘을 macOS 표준 여백**으로 조정 — Dock에서 다른 앱보다 크게 보이던 문제 해결
+
+### Docs
+- **GitHub Wiki 사용 설명서** 추가 — 기능별 실제 화면 캡처(크롭) 포함
+
+### Chore
+- 미사용 코드 정리(dead_code 경고 해소)
+
 ## [0.2.0] - 2026-06-27
 
 GitHub 원격 연동(M3) + 탐색기/설정/내보내기 UX 대폭 보강.
@@ -70,5 +84,6 @@ GitHub 원격 연동(M3) + 탐색기/설정/내보내기 UX 대폭 보강.
 - `NexaMarkdownViewer_0.1.0_universal.dmg` (macOS)
 - `NexaMarkdownViewer_0.1.0_x64-setup.exe` (Windows)
 
+[0.2.1]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.2.1
 [0.2.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.1.0
