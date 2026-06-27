@@ -28,6 +28,8 @@ export interface HistoryEntry {
   path: string;
   hash: string | null;
   title: string; // 파일명
+  /** 이 문서를 떠날 때의 스크롤 위치(뒤로/앞으로 시 복원) */
+  scroll?: number;
 }
 
 interface PersistedPrefs {
@@ -165,6 +167,12 @@ interface ViewerState {
   historyIndex: number;
   /** 이동 후 스크롤할 앵커(null=문서 처음) */
   pendingHash: string | null;
+  /** 이동 후 복원할 스크롤 위치(px). null이면 앵커/처음 규칙 사용 */
+  pendingScroll: number | null;
+  /** 현재 본문 스크롤 위치(네비게이션 시 떠나는 엔트리에 저장) */
+  currentScroll: number;
+  /** 본문 스크롤 시 호출(현재 위치 갱신) */
+  noteScroll: (top: number) => void;
   /** 이동 시퀀스 — 같은 앵커 재이동도 스크롤 트리거되게 하는 카운터 */
   navSeq: number;
   loading: boolean;
@@ -275,7 +283,14 @@ export const useViewer = create<ViewerState>((set, get) => {
       }
       const title = path.split("/").pop() ?? path;
 
-      let { history, historyIndex } = get();
+      let history = cur.history.slice();
+      let historyIndex = cur.historyIndex;
+      // 떠나는 현재 엔트리에 스크롤 위치 저장
+      if (historyIndex >= 0 && history[historyIndex]) {
+        history[historyIndex] = { ...history[historyIndex], scroll: cur.currentScroll };
+      }
+      let pendingScroll: number | null = null;
+
       if (opts.pushHistory) {
         const base = history.slice(0, historyIndex + 1);
         const last = base[base.length - 1];
@@ -287,11 +302,14 @@ export const useViewer = create<ViewerState>((set, get) => {
         if (!isDup) base.push({ ref: source.ref, path, hash, title });
         history = base;
         historyIndex = history.length - 1;
+        pendingScroll = null; // 새 이동: 앵커/처음 규칙
       } else if (opts.indexOverride !== undefined) {
         historyIndex = opts.indexOverride;
+        // 뒤로/앞으로: 저장된 스크롤 복원
+        pendingScroll = history[historyIndex]?.scroll ?? null;
       }
 
-      const recent = pushRecent(get().recent, source, path);
+      const recent = pushRecent(cur.recent, source, path);
       set({
         markdown,
         docPath: path,
@@ -300,9 +318,10 @@ export const useViewer = create<ViewerState>((set, get) => {
         historyIndex,
         recent,
         pendingHash: hash,
-        navSeq: get().navSeq + 1,
+        pendingScroll,
+        navSeq: cur.navSeq + 1,
         currentVersion: version,
-        updateAvailable: sameFile ? get().updateAvailable : false,
+        updateAvailable: sameFile ? cur.updateAvailable : false,
       });
       persist(get);
     } catch (e) {
@@ -320,6 +339,9 @@ export const useViewer = create<ViewerState>((set, get) => {
     history: [],
     historyIndex: -1,
     pendingHash: null,
+    pendingScroll: null,
+    currentScroll: 0,
+    noteScroll: (top) => set({ currentScroll: top }),
     navSeq: 0,
     loading: false,
     error: null,

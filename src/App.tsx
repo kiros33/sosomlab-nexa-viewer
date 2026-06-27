@@ -38,6 +38,8 @@ export default function App() {
   const navigateAnchor = useViewer((s) => s.navigateAnchor);
   const navSeq = useViewer((s) => s.navSeq);
   const pendingHash = useViewer((s) => s.pendingHash);
+  const pendingScroll = useViewer((s) => s.pendingScroll);
+  const noteScroll = useViewer((s) => s.noteScroll);
   const adjustPlainFontSize = useViewer((s) => s.adjustPlainFontSize);
   const setPlainFontSize = useViewer((s) => s.setPlainFontSize);
   const sidebarVisible = useViewer((s) => s.sidebarVisible);
@@ -57,19 +59,23 @@ export default function App() {
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
-  // 이동(navSeq)마다 앵커로 스크롤(없으면 본문 맨 위로)
+  // 이동(navSeq)마다 스크롤 복원: 저장된 위치 > 앵커 > 맨 위
   useEffect(() => {
     if (navSeq === 0) return;
-    requestAnimationFrame(() => {
-      if (pendingHash) {
-        document
-          .getElementById(pendingHash)
-          ?.scrollIntoView({ behavior: "smooth", block: "start" });
-      } else {
-        contentRef.current?.scrollTo({ top: 0 });
-      }
-    });
-    // navSeq만 의존: 같은 앵커 재이동도 트리거
+    requestAnimationFrame(() =>
+      requestAnimationFrame(() => {
+        if (pendingScroll != null) {
+          contentRef.current?.scrollTo({ top: pendingScroll });
+        } else if (pendingHash) {
+          document
+            .getElementById(pendingHash)
+            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+        } else {
+          contentRef.current?.scrollTo({ top: 0 });
+        }
+      }),
+    );
+    // navSeq만 의존: 같은 위치 재이동도 트리거
     // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [navSeq]);
 
@@ -128,7 +134,11 @@ export default function App() {
         <section className="main-area">
           <HistoryBar />
           <div className="doc-area">
-            <main className="content" ref={contentRef}>
+            <main
+              className="content"
+              ref={contentRef}
+              onScroll={(e) => noteScroll(e.currentTarget.scrollTop)}
+            >
               {loading ? (
                 <div className="placeholder">불러오는 중…</div>
               ) : error ? (
