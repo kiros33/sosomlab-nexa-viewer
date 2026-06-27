@@ -10,6 +10,7 @@ import { FileTree } from "./components/FileTree";
 import { Toc } from "./components/Toc";
 import { HistoryBar } from "./components/HistoryBar";
 import { ActivityBar } from "./components/ActivityBar";
+import { RightBar } from "./components/RightBar";
 import { Resizer } from "./components/Resizer";
 import { MarkdownView } from "./renderer/MarkdownView";
 import { useViewer } from "./store/viewer";
@@ -123,6 +124,8 @@ export default function App() {
             )}
           </div>
         </section>
+
+        <RightBar />
       </div>
     </div>
   );

@@ -445,6 +445,49 @@ body {
   background: var(--selected);
 }
 
+/* ===== Right bar (Eclipse 스타일, 작은 아이콘) ===== */
+.right-bar {
+  flex: 0 0 26px;
+  display: flex;
+  flex-direction: column;
+  align-items: stretch;
+  padding-top: 6px;
+  background: var(--bg-elev);
+  border-left: 1px solid var(--border);
+}
+.right-btn {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 4px;
+  border: none;
+  border-left: 2px solid transparent;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 6px 2px;
+  font-size: 11px;
+}
+.right-btn:hover {
+  background: var(--selected);
+  color: var(--text);
+}
+.right-btn.active {
+  color: var(--accent);
+  border-left-color: var(--accent);
+  background: var(--selected);
+}
+.right-btn-icon {
+  font-size: 13px;
+  line-height: 1;
+}
+.right-btn-label {
+  /* 세로 텍스트(Eclipse 탭 느낌) */
+  writing-mode: vertical-rl;
+  text-orientation: mixed;
+  letter-spacing: 1px;
+}
+
 /* ===== Resizer (드래그 너비 조절) ===== */
 .resizer {
   flex: 0 0 5px;
@@ -466,6 +509,7 @@ body {
 @media print {
   .toolbar,
   .activity-bar,
+  .right-bar,
   .resizer,
   .history-bar,
   .sidebar,
