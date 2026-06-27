@@ -78,13 +78,11 @@ export function Toolbar({ bodyRef }: Props) {
             ))}
           </select>
         </label>
-        <button className="tb-btn" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
-          <Icon name="download" size={16} />
-          <FormatBadge label="HTML" color="#e44d26" />
+        <button className="tb-icon" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
+          <FormatBadge label="HTML" color="#e44d26" size={22} />
         </button>
-        <button className="tb-btn" onClick={exportPdfViaPrint} disabled={!docPath} title="인쇄/PDF로 저장">
-          <Icon name="download" size={16} />
-          <FormatBadge label="PDF" color="#d93831" />
+        <button className="tb-icon" onClick={exportPdfViaPrint} disabled={!docPath} title="PDF로 내보내기(인쇄)">
+          <FormatBadge label="PDF" color="#d93831" size={22} />
         </button>
         <button className="tb-icon" onClick={toggleTheme} title="테마 전환">
           <Icon name={theme === "light" ? "dark_mode" : "light_mode"} size={18} />
