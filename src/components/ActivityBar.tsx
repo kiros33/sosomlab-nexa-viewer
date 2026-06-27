@@ -3,6 +3,7 @@
  * 파일 탐색기 / GitHub 뷰를 전환(활성 뷰 재클릭 시 사이드바 숨김).
  */
 import { useViewer } from "../store/viewer";
+import { GithubMark } from "./GithubMark";
 
 export function ActivityBar() {
   const sidebarVisible = useViewer((s) => s.sidebarVisible);
@@ -27,7 +28,7 @@ export function ActivityBar() {
         title="GitHub 저장소"
         aria-pressed={isActive("github")}
       >
-        🐙
+        <GithubMark size={20} />
       </button>
     </div>
   );

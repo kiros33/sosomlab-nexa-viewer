@@ -8,6 +8,7 @@ import type { SourceRef } from "../sources/types";
 import { sourceFromRef, sourceKey } from "../sources/registry";
 import { useViewer } from "../store/viewer";
 import { FileTree } from "./FileTree";
+import { GithubMark } from "./GithubMark";
 
 function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const key = sourceKey(wsRef);
@@ -16,14 +17,14 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const removeWorkspace = useViewer((s) => s.removeWorkspace);
   // 소스 객체를 key 기준으로 memo → 재렌더 시 재요청/깜빡임 방지
   const source = useMemo(() => sourceFromRef(wsRef), [key]); // eslint-disable-line react-hooks/exhaustive-deps
-  const icon = wsRef.kind === "github" ? "🐙" : "📁";
+  const isGithub = wsRef.kind === "github";
 
   return (
     <div className="ws-root">
       <div className="ws-head">
         <button className="ws-toggle" onClick={() => toggleExpanded(key)} title={source.ref.root}>
           <span className="ws-caret">{expanded ? "▾" : "▸"}</span>
-          <span className="ws-icon">{icon}</span>
+          <span className="ws-icon">{isGithub ? <GithubMark size={14} /> : "📁"}</span>
           <span className="ws-label">{source.label}</span>
         </button>
         <button

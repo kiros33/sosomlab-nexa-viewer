@@ -10,6 +10,7 @@ import { GithubSource, githubDefaultBranch } from "../sources/githubSource";
 import type { RepoInfo } from "../sources/githubSource";
 import type { SourceRef } from "../sources/types";
 import { sourceKey } from "../sources/registry";
+import { GithubMark } from "./GithubMark";
 
 /** 등록된 저장소 한 줄 — 이름 넓게, 관리는 ⋯ 뒤로. */
 function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
@@ -23,7 +24,7 @@ function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
   return (
     <li className={`gh-reg-row${hidden ? " dim" : ""}`}>
       <span className="gh-reg-name" title={label}>
-        🐙 {wsRef.root}
+        <GithubMark size={13} /> {wsRef.root}
         {wsRef.gitRef && <span className="gh-branch">@{wsRef.gitRef}</span>}
         {hidden && <span className="gh-hidden-dot" title="탐색기에서 숨김">🚫</span>}
       </span>
