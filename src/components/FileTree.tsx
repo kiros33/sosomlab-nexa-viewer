@@ -1,4 +1,4 @@
-/** 파일 트리 — 폴더는 지연 확장, 마크다운 파일 클릭 시 열람. 다중 루트 지원. */
+/** 파일 트리 — 폴더는 지연 확장(펼침만), 파일 클릭 시 열람. 다중 루트 지원. */
 import { useEffect, useState } from "react";
 
 import type { ContentSource, TreeEntry } from "../sources/types";
@@ -6,14 +6,18 @@ import { useViewer } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
 import { isFileVisible, isMarkdownName } from "../lib/filetypes";
 
+type ContextHandler = (e: React.MouseEvent) => void;
+
 function TreeNode({
   entry,
   source,
   depth,
+  onContext,
 }: {
   entry: TreeEntry;
   source: ContentSource;
   depth: number;
+  onContext?: ContextHandler;
 }) {
   const [open, setOpen] = useState(false);
   const [children, setChildren] = useState<TreeEntry[] | null>(null);
@@ -25,6 +29,7 @@ function TreeNode({
 
   const onClick = async () => {
     if (entry.isDir) {
+      // 폴더: 목록만 펼침/접힘 (우측 열린 문서는 그대로 유지)
       if (!open && children === null) {
         setLoading(true);
         try {
@@ -37,7 +42,7 @@ function TreeNode({
       }
       setOpen(!open);
     } else {
-      void openInSource(source, entry.path); // 마크다운/일반텍스트 모두 열기
+      void openInSource(source, entry.path);
     }
   };
 
@@ -46,17 +51,20 @@ function TreeNode({
   const selected = !entry.isDir && isActiveSource && currentPath === entry.path;
   const md = isMarkdownName(entry.name);
 
+  // 아이콘: 폴더(닫힘/열림) vs 파일(마크다운/일반)
+  const icon = entry.isDir ? (open ? "📂" : "📁") : md ? "📄" : "📃";
+
   return (
     <div className="tree-node">
       <button
         className={`tree-row${selected ? " selected" : ""}${!entry.isDir && !md ? " dimmed" : ""}`}
         style={{ paddingLeft: `${8 + depth * 14}px` }}
         onClick={onClick}
+        onContextMenu={onContext}
         title={entry.name}
       >
-        <span className="tree-icon">
-          {entry.isDir ? (open ? "▾" : "▸") : md ? "📄" : "📃"}
-        </span>
+        {entry.isDir && <span className="tree-caret">{open ? "▾" : "▸"}</span>}
+        <span className="tree-icon">{icon}</span>
         <span className="tree-name">{entry.name}</span>
       </button>
       {open && (
@@ -69,7 +77,13 @@ function TreeNode({
           {children
             ?.filter((c) => c.isDir || isFileVisible(c.name, filters))
             .map((c) => (
-              <TreeNode key={c.path} entry={c} source={source} depth={depth + 1} />
+              <TreeNode
+                key={c.path}
+                entry={c}
+                source={source}
+                depth={depth + 1}
+                onContext={onContext}
+              />
             ))}
         </div>
       )}
@@ -78,7 +92,13 @@ function TreeNode({
 }
 
 /** 단일 소스의 트리(루트 항목들). */
-export function FileTree({ source }: { source: ContentSource }) {
+export function FileTree({
+  source,
+  onContext,
+}: {
+  source: ContentSource;
+  onContext?: ContextHandler;
+}) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
   const filters = useViewer((s) => s.filters);
@@ -104,7 +124,13 @@ export function FileTree({ source }: { source: ContentSource }) {
       {roots
         .filter((entry) => entry.isDir || isFileVisible(entry.name, filters))
         .map((entry) => (
-          <TreeNode key={entry.path} entry={entry} source={source} depth={0} />
+          <TreeNode
+            key={entry.path}
+            entry={entry}
+            source={source}
+            depth={0}
+            onContext={onContext}
+          />
         ))}
     </div>
   );

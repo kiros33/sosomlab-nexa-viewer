@@ -213,6 +213,9 @@ interface ViewerState {
   /** 탐색기에서 펼쳐진 워크스페이스 key (접힘이 기본) */
   expandedKeys: string[];
   toggleExpanded: (key: string) => void;
+  /** 워크스페이스별 트리 갱신 카운터(증가 시 해당 트리 재로딩) */
+  refreshTicks: Record<string, number>;
+  bumpRefresh: (key: string) => void;
 
   openSource: (source: ContentSource) => void;
   /** 특정 소스의 문서를 연다(필요 시 활성 소스 전환). */
@@ -419,6 +422,14 @@ export const useViewer = create<ViewerState>((set, get) => {
       const next = cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key];
       saveExpanded(next);
       set({ expandedKeys: next });
+    },
+
+    refreshTicks: {},
+
+    bumpRefresh: (key) => {
+      set((s) => ({
+        refreshTicks: { ...s.refreshTicks, [key]: (s.refreshTicks[key] ?? 0) + 1 },
+      }));
     },
 
     openSource: (source) => {

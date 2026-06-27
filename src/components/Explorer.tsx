@@ -1,44 +1,56 @@
 /**
  * 탐색기 — 등록된 다수 소스(로컬 폴더 + GitHub 저장소)를 접이식 루트로 표시.
- * 펼침 상태는 스토어에 영속화(최초 등록/최초 실행만 접힘). 숨김 처리된 항목은 제외.
+ * 펼침 상태는 스토어 영속화. 루트 갱신 버튼 + 우클릭 컨텍스트 메뉴 제공.
  */
-import { useMemo } from "react";
+import { useMemo, useState } from "react";
 
 import type { SourceRef } from "../sources/types";
 import { sourceFromRef, sourceKey } from "../sources/registry";
 import { useViewer } from "../store/viewer";
 import { FileTree } from "./FileTree";
 import { GithubMark } from "./GithubMark";
+import { SourceContextMenu } from "./SourceContextMenu";
 
 function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const key = sourceKey(wsRef);
   const expanded = useViewer((s) => s.expandedKeys.includes(key));
   const toggleExpanded = useViewer((s) => s.toggleExpanded);
-  const removeWorkspace = useViewer((s) => s.removeWorkspace);
-  // 소스 객체를 key 기준으로 memo → 재렌더 시 재요청/깜빡임 방지
+  const bumpRefresh = useViewer((s) => s.bumpRefresh);
+  const tick = useViewer((s) => s.refreshTicks[key] ?? 0);
+  // 소스 객체를 key 기준 memo → 재렌더 시 재요청/깜빡임 방지
   const source = useMemo(() => sourceFromRef(wsRef), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   const isGithub = wsRef.kind === "github";
+
+  const [menu, setMenu] = useState<{ x: number; y: number } | null>(null);
+  const openMenu = (e: React.MouseEvent) => {
+    e.preventDefault();
+    setMenu({ x: e.clientX, y: e.clientY });
+  };
 
   return (
     <div className="ws-root">
       <div className="ws-head">
-        <button className="ws-toggle" onClick={() => toggleExpanded(key)} title={source.ref.root}>
+        <button className="ws-toggle" onClick={() => toggleExpanded(key)} onContextMenu={openMenu} title={source.ref.root}>
           <span className="ws-caret">{expanded ? "▾" : "▸"}</span>
           <span className="ws-icon">{isGithub ? <GithubMark size={14} /> : "📁"}</span>
           <span className="ws-label">{source.label}</span>
         </button>
         <button
-          className="ws-remove"
-          onClick={() => removeWorkspace(key)}
-          title="탐색기에서 제거"
+          className="ws-refresh"
+          onClick={() => bumpRefresh(key)}
+          title="저장소 갱신"
         >
-          ×
+          🔄
         </button>
       </div>
       {expanded && (
         <div className="ws-body">
-          <FileTree source={source} />
+          {/* tick 변경 시 remount → 트리 새로고침 */}
+          <FileTree key={`${key}:${tick}`} source={source} onContext={openMenu} />
         </div>
+      )}
+      {menu && (
+        <SourceContextMenu wsRef={wsRef} x={menu.x} y={menu.y} onClose={() => setMenu(null)} />
       )}
     </div>
   );

@@ -203,16 +203,88 @@ body {
   text-overflow: ellipsis;
   text-transform: none;
 }
-.ws-remove {
+.ws-refresh {
   border: none;
   background: none;
   color: var(--text-dim);
   cursor: pointer;
-  font-size: 15px;
+  font-size: 13px;
   padding: 0 8px;
+  flex: 0 0 auto;
 }
-.ws-remove:hover {
+.ws-refresh:hover {
+  color: var(--accent);
+}
+
+/* tree caret + icon */
+.tree-caret {
+  width: 12px;
+  flex: 0 0 auto;
+  color: var(--text-dim);
+  font-size: 11px;
+}
+
+/* ===== Context menu ===== */
+.ctx-backdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+}
+.ctx-menu {
+  position: fixed;
+  z-index: 61;
+  min-width: 200px;
+  background: var(--bg);
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  box-shadow: 0 8px 28px rgba(0, 0, 0, 0.3);
+  padding: 4px;
+}
+.ctx-title {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 4px 8px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  max-width: 240px;
+}
+.ctx-item {
+  display: block;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 6px 8px;
+  border-radius: 6px;
+  font-size: 13px;
+}
+.ctx-item:hover {
+  background: var(--selected);
+}
+.ctx-danger {
   color: #cf222e;
+}
+.ctx-sep {
+  height: 1px;
+  background: var(--border);
+  margin: 4px 0;
+}
+.ctx-subtitle {
+  font-size: 11px;
+  color: var(--text-dim);
+  padding: 2px 8px;
+  font-weight: 700;
+}
+.ctx-check {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-size: 13px;
+  padding: 4px 8px;
+  cursor: pointer;
 }
 .ws-body {
   padding-bottom: 4px;
