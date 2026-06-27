@@ -6,6 +6,7 @@ import { exportHtml, exportPdfViaPrint } from "../lib/exporters";
 import { useViewer } from "../store/viewer";
 import { Preferences } from "./Preferences";
 import { Icon } from "./Icon";
+import { FormatBadge } from "./FormatBadge";
 
 interface Props {
   bodyRef: React.RefObject<HTMLDivElement | null>;
@@ -78,10 +79,12 @@ export function Toolbar({ bodyRef }: Props) {
           </select>
         </label>
         <button className="tb-btn" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
-          <Icon name="download" /> HTML
+          <Icon name="download" size={16} />
+          <FormatBadge label="HTML" color="#e44d26" />
         </button>
         <button className="tb-btn" onClick={exportPdfViaPrint} disabled={!docPath} title="인쇄/PDF로 저장">
-          <Icon name="download" /> PDF
+          <Icon name="download" size={16} />
+          <FormatBadge label="PDF" color="#d93831" />
         </button>
         <button className="tb-icon" onClick={toggleTheme} title="테마 전환">
           <Icon name={theme === "light" ? "dark_mode" : "light_mode"} size={18} />
