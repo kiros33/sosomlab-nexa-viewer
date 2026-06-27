@@ -24,41 +24,7 @@ export function GithubPanel() {
     <div className="gh-panel">
       <div className="panel-title">GitHub</div>
 
-      {login ? (
-        <div className="gh-account">
-          <span>👤 {login}</span>
-          <button className="gh-link" onClick={() => void signOut()}>
-            로그아웃
-          </button>
-        </div>
-      ) : (
-        <form
-          className="gh-login"
-          onSubmit={(e) => {
-            e.preventDefault();
-            if (token.trim()) void signIn(token).then((ok) => ok && setToken(""));
-          }}
-        >
-          <input
-            type="password"
-            placeholder="Personal Access Token"
-            value={token}
-            onChange={(e) => setToken(e.target.value)}
-          />
-          <button type="submit" disabled={busy || !token.trim()}>
-            {busy ? "확인 중…" : "로그인"}
-          </button>
-          <a
-            className="gh-hint"
-            href="https://github.com/settings/tokens?type=beta"
-            target="_blank"
-            rel="noreferrer"
-          >
-            토큰 발급 (fine-grained, Contents: Read)
-          </a>
-        </form>
-      )}
-
+      {/* 공개 저장소는 로그인 없이 바로 추가/열람. 비공개/요청한도는 PAT 로그인. */}
       <form
         className="gh-addrepo"
         onSubmit={(e) => {
@@ -68,7 +34,7 @@ export function GithubPanel() {
         }}
       >
         <input
-          placeholder="owner/repo 추가"
+          placeholder="owner/repo 추가 (공개는 로그인 불필요)"
           value={repoInput}
           onChange={(e) => setRepoInput(e.target.value)}
         />
@@ -76,6 +42,44 @@ export function GithubPanel() {
           +
         </button>
       </form>
+
+      {login ? (
+        <div className="gh-account">
+          <span>👤 {login}</span>
+          <button className="gh-link" onClick={() => void signOut()}>
+            로그아웃
+          </button>
+        </div>
+      ) : (
+        <details className="gh-login-wrap">
+          <summary>🔒 비공개 저장소 로그인 (PAT, 선택)</summary>
+          <form
+            className="gh-login"
+            onSubmit={(e) => {
+              e.preventDefault();
+              if (token.trim()) void signIn(token).then((ok) => ok && setToken(""));
+            }}
+          >
+            <input
+              type="password"
+              placeholder="Personal Access Token"
+              value={token}
+              onChange={(e) => setToken(e.target.value)}
+            />
+            <button type="submit" disabled={busy || !token.trim()}>
+              {busy ? "확인 중…" : "로그인"}
+            </button>
+            <a
+              className="gh-hint"
+              href="https://github.com/settings/tokens?type=beta"
+              target="_blank"
+              rel="noreferrer"
+            >
+              토큰 발급 (fine-grained, Contents: Read) · 공개 저장소엔 불필요
+            </a>
+          </form>
+        </details>
+      )}
 
       {error && <div className="gh-error">{error}</div>}
 
