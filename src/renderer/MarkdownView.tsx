@@ -4,7 +4,7 @@
  * 활성 렌더 프로파일(remark/rehype 플러그인 + 본문 클래스)을 적용하고,
  * 상대 경로 이미지/문서 간 링크를 소스 추상화로 해석한다.
  */
-import { useMemo } from "react";
+import { memo, useMemo } from "react";
 import type { ComponentPropsWithoutRef } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
@@ -35,7 +35,7 @@ function splitHash(href: string): [string, string | null] {
   return [href.slice(0, i), href.slice(i + 1) || null];
 }
 
-export function MarkdownView({
+function MarkdownViewImpl({
   markdown,
   source,
   docPath,
@@ -95,3 +95,6 @@ export function MarkdownView({
     </div>
   );
 }
+
+/** 무관한 리렌더(탭 전환 등)로 인한 재파싱/깜빡임 방지 */
+export const MarkdownView = memo(MarkdownViewImpl);

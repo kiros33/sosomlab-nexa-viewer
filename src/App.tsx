@@ -1,4 +1,4 @@
-import { useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef } from "react";
 // 테마별 GitHub 마크다운 CSS + highlight.js 테마를 raw로 가져와 토글한다.
 import githubLight from "github-markdown-css/github-markdown-light.css?raw";
 import githubDark from "github-markdown-css/github-markdown-dark.css?raw";
@@ -53,6 +53,16 @@ export default function App() {
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
+
+  // 콜백 안정화 → memo된 MarkdownView가 탭 전환 등으로 재렌더되지 않게
+  const handleNavigateDoc = useCallback(
+    (p: string, hash: string | null) => void openDoc(p, hash),
+    [openDoc],
+  );
+  const handleNavigateAnchor = useCallback(
+    (h: string) => void navigateAnchor(h),
+    [navigateAnchor],
+  );
 
   useEffect(() => {
     document.documentElement.setAttribute("data-theme", theme);
@@ -150,8 +160,8 @@ export default function App() {
                     source={source}
                     docPath={docPath}
                     profileId={profileId}
-                    onNavigateDoc={(p, hash) => void openDoc(p, hash)}
-                    onNavigateAnchor={(h) => void navigateAnchor(h)}
+                    onNavigateDoc={handleNavigateDoc}
+                    onNavigateAnchor={handleNavigateAnchor}
                     bodyRef={bodyRef}
                   />
                 ) : (
