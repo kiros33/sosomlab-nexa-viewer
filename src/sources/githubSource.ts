@@ -52,3 +52,14 @@ export function githubLogout(): Promise<void> {
 export function githubDefaultBranch(ownerRepo: string): Promise<string> {
   return invoke<string>("github_default_branch", { ownerRepo });
 }
+
+/** 로그인 계정이 접근 가능한 저장소 목록. */
+export interface RepoInfo {
+  fullName: string;
+  isPrivate: boolean;
+  defaultBranch: string;
+}
+
+export function githubListRepos(): Promise<RepoInfo[]> {
+  return invoke<RepoInfo[]>("github_list_repos");
+}

@@ -79,6 +79,7 @@ pub fn run() {
             commands::github_status,
             commands::github_logout,
             commands::github_default_branch,
+            commands::github_list_repos,
         ])
         .run(tauri::generate_context!())
         .expect("error while running tauri application");

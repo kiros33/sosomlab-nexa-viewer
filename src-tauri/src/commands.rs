@@ -138,6 +138,16 @@ pub async fn github_logout(app: tauri::AppHandle) -> Result<(), String> {
     secrets::clear_github(&dir)
 }
 
+/// 로그인 계정이 접근 가능한 저장소 목록.
+#[tauri::command]
+pub async fn github_list_repos(
+    app: tauri::AppHandle,
+) -> Result<Vec<github::RepoInfo>, String> {
+    let dir = data_dir(&app)?;
+    let token = secrets::load_github_token(&dir).ok_or("로그인이 필요합니다")?;
+    github::list_user_repos(&token).await
+}
+
 /// 저장소 기본 브랜치 조회.
 #[tauri::command]
 pub async fn github_default_branch(

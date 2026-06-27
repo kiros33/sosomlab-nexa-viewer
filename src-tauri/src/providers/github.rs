@@ -171,6 +171,48 @@ pub async fn fetch_login(token: &str) -> ProviderResult<String> {
         .ok_or_else(|| "로그인 정보를 확인할 수 없습니다".to_string())
 }
 
+/// 인증 계정이 접근 가능한 저장소 목록(최근 갱신순).
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct RepoInfo {
+    pub full_name: String,
+    pub is_private: bool,
+    pub default_branch: String,
+}
+
+pub async fn list_user_repos(token: &str) -> ProviderResult<Vec<RepoInfo>> {
+    let p = GithubProvider::new(Some(token.to_string()));
+    let mut out = Vec::new();
+    // 최대 3페이지(300개)까지
+    for page in 1..=3 {
+        let url = format!(
+            "{API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner,collaborator,organization_member"
+        );
+        let v = p.get_json(&url).await?;
+        let arr = match v.as_array() {
+            Some(a) if !a.is_empty() => a.clone(),
+            _ => break,
+        };
+        for r in &arr {
+            if let Some(full_name) = r.get("full_name").and_then(|s| s.as_str()) {
+                out.push(RepoInfo {
+                    full_name: full_name.to_string(),
+                    is_private: r.get("private").and_then(|b| b.as_bool()).unwrap_or(false),
+                    default_branch: r
+                        .get("default_branch")
+                        .and_then(|b| b.as_str())
+                        .unwrap_or("main")
+                        .to_string(),
+                });
+            }
+        }
+        if arr.len() < 100 {
+            break;
+        }
+    }
+    Ok(out)
+}
+
 pub async fn default_branch(token: Option<&str>, owner_repo: &str) -> ProviderResult<String> {
     let p = GithubProvider::new(token.map(String::from));
     let v = p.get_json(&format!("{API}/repos/{owner_repo}")).await?;

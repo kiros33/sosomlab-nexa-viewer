@@ -5,16 +5,31 @@ import { useViewer } from "../store/viewer";
 import { GithubSource } from "../sources/githubSource";
 
 export function GithubPanel() {
-  const { login, repos, busy, error, init, signIn, signOut, addRepo, removeRepo } =
-    useGithub();
+  const {
+    login,
+    repos,
+    busy,
+    error,
+    available,
+    loadingAvailable,
+    init,
+    signIn,
+    signOut,
+    addRepo,
+    removeRepo,
+    fetchAvailable,
+  } = useGithub();
   const openSource = useViewer((s) => s.openSource);
 
   const [token, setToken] = useState("");
   const [repoInput, setRepoInput] = useState("");
+  const [filter, setFilter] = useState("");
 
   useEffect(() => {
     void init();
   }, [init]);
+
+  const registered = new Set(repos.map((r) => r.ownerRepo));
 
   const openRepo = (ownerRepo: string, branch: string | null) => {
     openSource(new GithubSource(ownerRepo, branch));
@@ -44,12 +59,62 @@ export function GithubPanel() {
       </form>
 
       {login ? (
-        <div className="gh-account">
-          <span>👤 {login}</span>
-          <button className="gh-link" onClick={() => void signOut()}>
-            로그아웃
-          </button>
-        </div>
+        <>
+          <div className="gh-account">
+            <span>👤 {login}</span>
+            <button className="gh-link" onClick={() => void signOut()}>
+              로그아웃
+            </button>
+          </div>
+
+          {/* 계정 접근 가능 저장소에서 선택 추가 */}
+          <div className="gh-pick">
+            <div className="gh-pick-head">
+              <input
+                placeholder="내 저장소 검색…"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+              <button
+                className="gh-link"
+                onClick={() => void fetchAvailable()}
+                title="목록 새로고침"
+              >
+                ↻
+              </button>
+            </div>
+            {loadingAvailable ? (
+              <div className="gh-empty">불러오는 중…</div>
+            ) : (
+              <ul className="gh-available">
+                {available
+                  .filter((r) =>
+                    r.fullName.toLowerCase().includes(filter.trim().toLowerCase()),
+                  )
+                  .slice(0, 50)
+                  .map((r) => {
+                    const added = registered.has(r.fullName);
+                    return (
+                      <li key={r.fullName}>
+                        <button
+                          className="gh-avail-item"
+                          disabled={added}
+                          onClick={() => void addRepo(r.fullName, r.defaultBranch)}
+                          title={added ? "이미 추가됨" : `${r.fullName} 추가`}
+                        >
+                          {r.isPrivate ? "🔒" : "📂"} {r.fullName}
+                          {added && <span className="gh-added">추가됨</span>}
+                        </button>
+                      </li>
+                    );
+                  })}
+                {available.length === 0 && (
+                  <li className="gh-empty">접근 가능한 저장소가 없습니다</li>
+                )}
+              </ul>
+            )}
+          </div>
+        </>
       ) : (
         <details className="gh-login-wrap">
           <summary>🔒 비공개 저장소 로그인 (PAT, 선택)</summary>

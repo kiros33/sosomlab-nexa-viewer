@@ -469,6 +469,64 @@ body {
   margin: 4px 0;
   word-break: break-word;
 }
+/* 계정 저장소 선택 */
+.gh-pick {
+  margin: 4px 0 10px;
+  border-top: 1px solid var(--border);
+  padding-top: 8px;
+}
+.gh-pick-head {
+  display: flex;
+  gap: 6px;
+  align-items: center;
+}
+.gh-pick-head input {
+  flex: 1 1 auto;
+  min-width: 0;
+  padding: 5px 8px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  font-size: 12px;
+}
+.gh-available {
+  list-style: none;
+  margin: 6px 0 0;
+  padding: 0;
+  max-height: 240px;
+  overflow: auto;
+}
+.gh-avail-item {
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  width: 100%;
+  text-align: left;
+  border: none;
+  background: none;
+  color: var(--text);
+  cursor: pointer;
+  padding: 4px 6px;
+  border-radius: 6px;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+.gh-avail-item:hover:not(:disabled) {
+  background: var(--selected);
+}
+.gh-avail-item:disabled {
+  color: var(--text-dim);
+  cursor: default;
+}
+.gh-added {
+  margin-left: auto;
+  font-size: 10px;
+  color: var(--text-dim);
+}
+
 .gh-repos {
   list-style: none;
   margin: 6px 0 0;

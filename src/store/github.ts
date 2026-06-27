@@ -5,7 +5,9 @@ import {
   githubLogout,
   githubStatus,
   githubDefaultBranch,
+  githubListRepos,
 } from "../sources/githubSource";
+import type { RepoInfo } from "../sources/githubSource";
 
 export interface RegisteredRepo {
   ownerRepo: string; // "owner/repo"
@@ -37,12 +39,16 @@ interface GithubState {
   repos: RegisteredRepo[];
   busy: boolean;
   error: string | null;
+  /** 로그인 계정이 접근 가능한 저장소 목록(선택 추가용) */
+  available: RepoInfo[];
+  loadingAvailable: boolean;
 
   init: () => Promise<void>;
   signIn: (token: string) => Promise<boolean>;
   signOut: () => Promise<void>;
   addRepo: (ownerRepo: string, branch?: string | null) => Promise<boolean>;
   removeRepo: (ownerRepo: string) => void;
+  fetchAvailable: () => Promise<void>;
 }
 
 export const useGithub = create<GithubState>((set, get) => ({
@@ -50,12 +56,26 @@ export const useGithub = create<GithubState>((set, get) => ({
   repos: loadRepos(),
   busy: false,
   error: null,
+  available: [],
+  loadingAvailable: false,
 
   init: async () => {
     try {
-      set({ login: await githubStatus() });
+      const login = await githubStatus();
+      set({ login });
+      if (login) void get().fetchAvailable();
     } catch {
       /* ignore */
+    }
+  },
+
+  fetchAvailable: async () => {
+    if (!get().login) return;
+    set({ loadingAvailable: true });
+    try {
+      set({ available: await githubListRepos(), loadingAvailable: false });
+    } catch (e) {
+      set({ loadingAvailable: false, error: String(e) });
     }
   },
 
@@ -64,6 +84,7 @@ export const useGithub = create<GithubState>((set, get) => ({
     try {
       const login = await githubLogin(token.trim());
       set({ login, busy: false });
+      void get().fetchAvailable();
       return true;
     } catch (e) {
       set({ busy: false, error: String(e) });
@@ -73,7 +94,7 @@ export const useGithub = create<GithubState>((set, get) => ({
 
   signOut: async () => {
     await githubLogout().catch(() => {});
-    set({ login: null });
+    set({ login: null, available: [] });
   },
 
   addRepo: async (ownerRepo, branch) => {
