@@ -1,69 +1,83 @@
-/** GitHub 패널 — PAT 로그인, 계정 저장소 선택/추가. 추가된 저장소는 탐색기에 표시. */
+/**
+ * GitHub 패널
+ *  - 상단: 계정 + 등록된 저장소 목록(관리: ⋯ 표시/숨김·삭제)
+ *  - 하단: 독립된 "저장소 검색 & 추가" 영역(검색창은 새로고침 제외 전체 폭)
+ */
 import { useEffect, useState } from "react";
 import { useGithub } from "../store/github";
 import { useViewer } from "../store/viewer";
 import { GithubSource, githubDefaultBranch } from "../sources/githubSource";
 import type { RepoInfo } from "../sources/githubSource";
+import type { SourceRef } from "../sources/types";
 import { sourceKey } from "../sources/registry";
 
-/** 계정 저장소 한 줄 — 이름은 넓게, 설정(삭제/표시토글)은 ⋯ 뒤로 숨김. */
-function AvailableItem({
+/** 등록된 저장소 한 줄 — 이름 넓게, 관리는 ⋯ 뒤로. */
+function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
+  const key = sourceKey(wsRef);
+  const hidden = useViewer((s) => s.hiddenKeys.includes(key));
+  const toggleHidden = useViewer((s) => s.toggleHidden);
+  const removeWorkspace = useViewer((s) => s.removeWorkspace);
+  const [menu, setMenu] = useState(false);
+  const label = wsRef.gitRef ? `${wsRef.root}@${wsRef.gitRef}` : wsRef.root;
+
+  return (
+    <li className={`gh-reg-row${hidden ? " dim" : ""}`}>
+      <span className="gh-reg-name" title={label}>
+        🐙 {wsRef.root}
+        {wsRef.gitRef && <span className="gh-branch">@{wsRef.gitRef}</span>}
+        {hidden && <span className="gh-hidden-dot" title="탐색기에서 숨김">🚫</span>}
+      </span>
+      <div className="gh-kebab-wrap">
+        <button className="gh-kebab" onClick={() => setMenu((m) => !m)} title="설정">
+          ⋯
+        </button>
+        {menu && (
+          <>
+            <div className="gh-menu-backdrop" onClick={() => setMenu(false)} />
+            <div className="gh-menu">
+              <button
+                onClick={() => {
+                  toggleHidden(key);
+                  setMenu(false);
+                }}
+              >
+                {hidden ? "👁 탐색기에 표시" : "🚫 탐색기에서 숨김"}
+              </button>
+              <button
+                className="gh-menu-danger"
+                onClick={() => {
+                  removeWorkspace(key);
+                  setMenu(false);
+                }}
+              >
+                🗑 삭제
+              </button>
+            </div>
+          </>
+        )}
+      </div>
+    </li>
+  );
+}
+
+/** 검색 결과(계정 저장소) 한 줄 — 추가 버튼. */
+function AvailRow({
   repo,
   added,
-  hidden,
   onAdd,
-  onRemove,
-  onToggleHidden,
 }: {
   repo: RepoInfo;
   added: boolean;
-  hidden: boolean;
   onAdd: () => void;
-  onRemove: () => void;
-  onToggleHidden: () => void;
 }) {
-  const [menu, setMenu] = useState(false);
   return (
     <li className="gh-avail-row">
       <span className="gh-avail-name" title={repo.fullName}>
         {repo.isPrivate ? "🔒" : "📂"} {repo.fullName}
       </span>
-      {added ? (
-        <div className="gh-kebab-wrap">
-          {hidden && <span className="gh-hidden-dot" title="탐색기에서 숨김">🚫</span>}
-          <button className="gh-kebab" onClick={() => setMenu((m) => !m)} title="설정">
-            ⋯
-          </button>
-          {menu && (
-            <>
-              <div className="gh-menu-backdrop" onClick={() => setMenu(false)} />
-              <div className="gh-menu">
-                <button
-                  onClick={() => {
-                    onToggleHidden();
-                    setMenu(false);
-                  }}
-                >
-                  {hidden ? "👁 탐색기에 표시" : "🚫 탐색기에서 숨김"}
-                </button>
-                <button
-                  className="gh-menu-danger"
-                  onClick={() => {
-                    onRemove();
-                    setMenu(false);
-                  }}
-                >
-                  🗑 삭제
-                </button>
-              </div>
-            </>
-          )}
-        </div>
-      ) : (
-        <button className="gh-add-btn" onClick={onAdd} title="추가">
-          추가
-        </button>
-      )}
+      <button className="gh-add-btn" disabled={added} onClick={onAdd}>
+        {added ? "추가됨" : "추가"}
+      </button>
     </li>
   );
 }
@@ -82,11 +96,8 @@ export function GithubPanel() {
     setError,
   } = useGithub();
   const addWorkspace = useViewer((s) => s.addWorkspace);
-  const removeWorkspace = useViewer((s) => s.removeWorkspace);
-  const toggleHidden = useViewer((s) => s.toggleHidden);
   const showSidebarView = useViewer((s) => s.showSidebarView);
   const workspaces = useViewer((s) => s.workspaces);
-  const hiddenKeys = useViewer((s) => s.hiddenKeys);
 
   const [token, setToken] = useState("");
   const [repoInput, setRepoInput] = useState("");
@@ -97,14 +108,12 @@ export function GithubPanel() {
     void init();
   }, [init]);
 
-  const registered = new Set(
-    workspaces.filter((w) => w.kind === "github").map((w) => sourceKey(w)),
-  );
+  const githubWorkspaces = workspaces.filter((w) => w.kind === "github");
+  const registered = new Set(githubWorkspaces.map((w) => sourceKey(w)));
 
   const addRepo = (ownerRepo: string, branch: string | null) => {
-    const src = new GithubSource(ownerRepo, branch);
-    addWorkspace(src.ref);
-    showSidebarView("files"); // 탐색기로 전환해 바로 보이게
+    addWorkspace(new GithubSource(ownerRepo, branch).ref);
+    showSidebarView("files");
   };
 
   const onManualAdd = async () => {
@@ -131,77 +140,14 @@ export function GithubPanel() {
     <div className="gh-panel">
       <div className="panel-title">GitHub</div>
 
-      <form
-        className="gh-addrepo"
-        onSubmit={(e) => {
-          e.preventDefault();
-          if (repoInput.trim()) void onManualAdd();
-        }}
-      >
-        <input
-          placeholder="owner/repo 추가 (공개는 로그인 불필요)"
-          value={repoInput}
-          onChange={(e) => setRepoInput(e.target.value)}
-        />
-        <button type="submit" disabled={adding || !repoInput.trim()}>
-          {adding ? "…" : "+"}
-        </button>
-      </form>
-
+      {/* 계정 */}
       {login ? (
-        <>
-          <div className="gh-account">
-            <span>👤 {login}</span>
-            <button className="gh-link" onClick={() => void signOut()}>
-              로그아웃
-            </button>
-          </div>
-
-          <div className="gh-pick">
-            <div className="gh-pick-head">
-              <input
-                placeholder="내 저장소 검색…"
-                value={filter}
-                onChange={(e) => setFilter(e.target.value)}
-              />
-              <button className="gh-link" onClick={() => void fetchAvailable()} title="목록 새로고침">
-                ↻
-              </button>
-            </div>
-            {loadingAvailable ? (
-              <div className="gh-empty">불러오는 중…</div>
-            ) : (
-              <ul className="gh-available">
-                {available
-                  .filter((r) =>
-                    r.fullName.toLowerCase().includes(filter.trim().toLowerCase()),
-                  )
-                  .slice(0, 50)
-                  .map((r) => {
-                    const key = sourceKey({
-                      kind: "github",
-                      root: r.fullName,
-                      gitRef: r.defaultBranch,
-                    });
-                    return (
-                      <AvailableItem
-                        key={r.fullName}
-                        repo={r}
-                        added={registered.has(key)}
-                        hidden={hiddenKeys.includes(key)}
-                        onAdd={() => addRepo(r.fullName, r.defaultBranch)}
-                        onRemove={() => removeWorkspace(key)}
-                        onToggleHidden={() => toggleHidden(key)}
-                      />
-                    );
-                  })}
-                {available.length === 0 && (
-                  <li className="gh-empty">접근 가능한 저장소가 없습니다</li>
-                )}
-              </ul>
-            )}
-          </div>
-        </>
+        <div className="gh-account">
+          <span>👤 {login}</span>
+          <button className="gh-link" onClick={() => void signOut()}>
+            로그아웃
+          </button>
+        </div>
       ) : (
         <details className="gh-login-wrap">
           <summary>🔒 비공개 저장소 로그인 (PAT, 선택)</summary>
@@ -232,6 +178,84 @@ export function GithubPanel() {
           </form>
         </details>
       )}
+
+      {/* 등록된 저장소 */}
+      <div className="gh-section-title">등록된 저장소 ({githubWorkspaces.length})</div>
+      <ul className="gh-registered">
+        {githubWorkspaces.map((w) => (
+          <RegisteredRow key={sourceKey(w)} wsRef={w} />
+        ))}
+        {githubWorkspaces.length === 0 && (
+          <li className="gh-empty">아래에서 저장소를 추가하세요</li>
+        )}
+      </ul>
+
+      {/* 저장소 검색 & 추가 (독립 영역) */}
+      <div className="gh-addbox">
+        <div className="gh-section-title">🔎 저장소 검색 &amp; 추가</div>
+
+        {login && (
+          <>
+            <div className="gh-pick-head">
+              <input
+                className="gh-search"
+                placeholder="내 저장소 검색…"
+                value={filter}
+                onChange={(e) => setFilter(e.target.value)}
+              />
+              <button className="gh-refresh-sm" onClick={() => void fetchAvailable()} title="목록 새로고침">
+                ↻
+              </button>
+            </div>
+            {loadingAvailable ? (
+              <div className="gh-empty">불러오는 중…</div>
+            ) : (
+              <ul className="gh-available">
+                {available
+                  .filter((r) =>
+                    r.fullName.toLowerCase().includes(filter.trim().toLowerCase()),
+                  )
+                  .slice(0, 50)
+                  .map((r) => {
+                    const key = sourceKey({
+                      kind: "github",
+                      root: r.fullName,
+                      gitRef: r.defaultBranch,
+                    });
+                    return (
+                      <AvailRow
+                        key={r.fullName}
+                        repo={r}
+                        added={registered.has(key)}
+                        onAdd={() => addRepo(r.fullName, r.defaultBranch)}
+                      />
+                    );
+                  })}
+                {available.length === 0 && (
+                  <li className="gh-empty">접근 가능한 저장소가 없습니다</li>
+                )}
+              </ul>
+            )}
+          </>
+        )}
+
+        <form
+          className="gh-addrepo"
+          onSubmit={(e) => {
+            e.preventDefault();
+            if (repoInput.trim()) void onManualAdd();
+          }}
+        >
+          <input
+            placeholder="owner/repo 직접 추가 (공개는 로그인 불필요)"
+            value={repoInput}
+            onChange={(e) => setRepoInput(e.target.value)}
+          />
+          <button type="submit" disabled={adding || !repoInput.trim()}>
+            {adding ? "…" : "+"}
+          </button>
+        </form>
+      </div>
 
       {error && <div className="gh-error">{error}</div>}
     </div>

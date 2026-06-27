@@ -549,25 +549,77 @@ body {
   word-break: break-word;
 }
 /* 계정 저장소 선택 */
-.gh-pick {
-  margin: 4px 0 10px;
-  border-top: 1px solid var(--border);
-  padding-top: 8px;
+.gh-section-title {
+  font-size: 11px;
+  text-transform: uppercase;
+  letter-spacing: 0.03em;
+  color: var(--text-dim);
+  font-weight: 700;
+  margin: 10px 0 4px;
+}
+.gh-registered {
+  list-style: none;
+  margin: 0 0 6px;
+  padding: 0;
+}
+.gh-reg-row {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  padding: 3px 4px;
+  border-radius: 6px;
+}
+.gh-reg-row:hover {
+  background: var(--selected);
+}
+.gh-reg-row.dim {
+  opacity: 0.55;
+}
+.gh-reg-name {
+  flex: 1 1 auto;
+  min-width: 0;
+  font-size: 12px;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+}
+
+/* 검색 & 추가 독립 영역 */
+.gh-addbox {
+  margin-top: 8px;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  padding: 8px;
+  background: var(--bg-elev);
 }
 .gh-pick-head {
   display: flex;
   gap: 6px;
   align-items: center;
 }
-.gh-pick-head input {
-  flex: 1 1 auto;
+.gh-search {
+  flex: 1 1 auto; /* 새로고침 제외 전체 폭 */
   min-width: 0;
-  padding: 5px 8px;
+  width: 100%;
+  padding: 6px 8px;
   border: 1px solid var(--border);
   border-radius: 6px;
   background: var(--bg);
   color: var(--text);
   font-size: 12px;
+}
+.gh-refresh-sm {
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  background: var(--bg);
+  color: var(--text-dim);
+  border-radius: 6px;
+  padding: 5px 8px;
+  cursor: pointer;
+}
+.gh-refresh-sm:hover {
+  border-color: var(--accent);
+  color: var(--text);
 }
 .gh-available {
   list-style: none;
