@@ -38,8 +38,10 @@ interface PersistedPrefs {
   tocVisible: boolean;
   sidebarWidth: number;
   tocWidth: number;
-  /** 탐색기 파일 표시 필터(카테고리별) */
+  /** 탐색기 파일 표시 필터(카테고리별) — 전역 기본값 */
   filters: FileFilters;
+  /** 저장소(워크스페이스)별 필터 override(없으면 전역 filters 사용) */
+  filterOverrides: Record<string, FileFilters>;
   /** 일반텍스트/코드 파일 글꼴 */
   plainFontFamily: string;
   /** 일반텍스트/코드 파일 기본 글꼴 크기(px) */
@@ -67,6 +69,7 @@ function loadPrefs(): PersistedPrefs {
     profileId: defaultProfileId,
     recent: [],
     filters: DEFAULT_FILTERS, // 기본: 마크다운만
+    filterOverrides: {},
     plainFontFamily: DEFAULT_PLAIN_FONT,
     plainFontSize: 14,
     ...LAYOUT_DEFAULTS,
@@ -188,9 +191,15 @@ interface ViewerState {
   toggleToc: () => void;
   /** 뷰 선택(+사이드바 표시). 활성 뷰 재클릭 시 숨김. */
   showSidebarView: (view: "files" | "github") => void;
-  /** 탐색기 파일 표시 필터 */
+  /** 탐색기 파일 표시 필터(전역). 변경 시 모든 저장소에 일괄 적용(개별 override 초기화) */
   filters: FileFilters;
   setFilters: (patch: Partial<FileFilters>) => void;
+  /** 저장소별 필터 override */
+  filterOverrides: Record<string, FileFilters>;
+  /** 특정 저장소의 필터를 개별 설정(override) */
+  setSourceFilter: (key: string, patch: Partial<FileFilters>) => void;
+  /** 저장소의 유효 필터(override 우선, 없으면 전역) */
+  effectiveFilters: (key: string) => FileFilters;
   /** 일반텍스트 글꼴/크기 */
   plainFontFamily: string;
   plainFontSize: number;
@@ -362,9 +371,22 @@ export const useViewer = create<ViewerState>((set, get) => {
       persist(get);
     },
     filters: prefs.filters,
+    filterOverrides: prefs.filterOverrides,
     setFilters: (patch) => {
-      set((s) => ({ filters: { ...s.filters, ...patch } }));
+      // 전역 변경 → 모든 저장소에 일괄 적용(개별 override 초기화)
+      set((s) => ({ filters: { ...s.filters, ...patch }, filterOverrides: {} }));
       persist(get);
+    },
+    setSourceFilter: (key, patch) => {
+      set((s) => {
+        const base = s.filterOverrides[key] ?? s.filters;
+        return { filterOverrides: { ...s.filterOverrides, [key]: { ...base, ...patch } } };
+      });
+      persist(get);
+    },
+    effectiveFilters: (key) => {
+      const s = get();
+      return s.filterOverrides[key] ?? s.filters;
     },
     plainFontFamily: prefs.plainFontFamily,
     plainFontSize: prefs.plainFontSize,
@@ -533,6 +555,7 @@ function persist(get: () => ViewerState) {
     sidebarWidth,
     tocWidth,
     filters,
+    filterOverrides,
     plainFontFamily,
     plainFontSize,
   } = get();
@@ -545,6 +568,7 @@ function persist(get: () => ViewerState) {
     sidebarWidth,
     tocWidth,
     filters,
+    filterOverrides,
     plainFontFamily,
     plainFontSize,
   });

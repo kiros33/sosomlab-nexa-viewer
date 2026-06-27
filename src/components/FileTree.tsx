@@ -5,6 +5,7 @@ import type { ContentSource, TreeEntry } from "../sources/types";
 import { useViewer } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
 import { isFileVisible, isMarkdownName } from "../lib/filetypes";
+import type { FileFilters } from "../lib/filetypes";
 import { Icon } from "./Icon";
 
 type ContextHandler = (e: React.MouseEvent) => void;
@@ -13,11 +14,13 @@ function TreeNode({
   entry,
   source,
   depth,
+  filters,
   onContext,
 }: {
   entry: TreeEntry;
   source: ContentSource;
   depth: number;
+  filters: FileFilters;
   onContext?: ContextHandler;
 }) {
   const [open, setOpen] = useState(false);
@@ -26,7 +29,6 @@ function TreeNode({
   const openInSource = useViewer((s) => s.openInSource);
   const activeSource = useViewer((s) => s.source);
   const currentPath = useViewer((s) => s.docPath);
-  const filters = useViewer((s) => s.filters);
 
   const onClick = async () => {
     if (entry.isDir) {
@@ -84,6 +86,7 @@ function TreeNode({
                 entry={c}
                 source={source}
                 depth={depth + 1}
+                filters={filters}
                 onContext={onContext}
               />
             ))}
@@ -96,14 +99,15 @@ function TreeNode({
 /** 단일 소스의 트리(루트 항목들). */
 export function FileTree({
   source,
+  filters,
   onContext,
 }: {
   source: ContentSource;
+  filters: FileFilters;
   onContext?: ContextHandler;
 }) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
-  const filters = useViewer((s) => s.filters);
 
   useEffect(() => {
     let active = true;
@@ -131,6 +135,7 @@ export function FileTree({
             entry={entry}
             source={source}
             depth={0}
+            filters={filters}
             onContext={onContext}
           />
         ))}

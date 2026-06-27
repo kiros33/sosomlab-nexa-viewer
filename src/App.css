@@ -1102,6 +1102,12 @@ body {
   margin: 0 0 8px;
   font-size: 13px;
 }
+.pref-desc {
+  margin: 0 0 10px;
+  font-size: 12px;
+  line-height: 1.5;
+  color: var(--text-dim);
+}
 .pref-check {
   display: flex;
   align-items: center;

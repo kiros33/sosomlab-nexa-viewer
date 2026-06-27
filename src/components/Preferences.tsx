@@ -21,6 +21,10 @@ export function Preferences({ onClose }: { onClose: () => void }) {
 
         <section className="pref-section">
           <h4>탐색기에 보여질 파일</h4>
+          <p className="pref-desc">
+            여기서 선택하면 <b>모든 폴더/저장소에 일괄 적용</b>됩니다. 저장소별로 다르게 보려면
+            탐색기에서 저장소/폴더를 <b>우클릭 → 파일 보기</b>로 개별 설정할 수 있어요.
+          </p>
           <label className="pref-check">
             <input
               type="checkbox"

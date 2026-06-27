@@ -18,6 +18,9 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const toggleExpanded = useViewer((s) => s.toggleExpanded);
   const bumpRefresh = useViewer((s) => s.bumpRefresh);
   const tick = useViewer((s) => s.refreshTicks[key] ?? 0);
+  const globalFilters = useViewer((s) => s.filters);
+  const override = useViewer((s) => s.filterOverrides[key]);
+  const filters = override ?? globalFilters;
   // 소스 객체를 key 기준 memo → 재렌더 시 재요청/깜빡임 방지
   const source = useMemo(() => sourceFromRef(wsRef), [key]); // eslint-disable-line react-hooks/exhaustive-deps
   const isGithub = wsRef.kind === "github";

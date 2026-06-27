@@ -20,8 +20,10 @@ export function SourceContextMenu({
   const key = sourceKey(wsRef);
   const removeWorkspace = useViewer((s) => s.removeWorkspace);
   const bumpRefresh = useViewer((s) => s.bumpRefresh);
-  const filters = useViewer((s) => s.filters);
-  const setFilters = useViewer((s) => s.setFilters);
+  const globalFilters = useViewer((s) => s.filters);
+  const override = useViewer((s) => s.filterOverrides[key]);
+  const filters = override ?? globalFilters;
+  const setSourceFilter = useViewer((s) => s.setSourceFilter);
 
   const openOnline = () => {
     if (wsRef.kind === "github") {
@@ -62,12 +64,12 @@ export function SourceContextMenu({
         </button>
 
         <div className="ctx-sep" />
-        <div className="ctx-subtitle">파일 보기</div>
+        <div className="ctx-subtitle">파일 보기 (이 저장소만)</div>
         <label className="ctx-check">
           <input
             type="checkbox"
             checked={filters.all}
-            onChange={(e) => setFilters({ all: e.target.checked })}
+            onChange={(e) => setSourceFilter(key, { all: e.target.checked })}
           />
           전체
         </label>
@@ -76,7 +78,7 @@ export function SourceContextMenu({
             type="checkbox"
             disabled={filters.all}
             checked={filters.markdown}
-            onChange={(e) => setFilters({ markdown: e.target.checked })}
+            onChange={(e) => setSourceFilter(key, { markdown: e.target.checked })}
           />
           마크다운
         </label>
@@ -85,7 +87,7 @@ export function SourceContextMenu({
             type="checkbox"
             disabled={filters.all}
             checked={filters.text}
-            onChange={(e) => setFilters({ text: e.target.checked })}
+            onChange={(e) => setSourceFilter(key, { text: e.target.checked })}
           />
           일반텍스트
         </label>
@@ -94,7 +96,7 @@ export function SourceContextMenu({
             type="checkbox"
             disabled={filters.all}
             checked={filters.web}
-            onChange={(e) => setFilters({ web: e.target.checked })}
+            onChange={(e) => setSourceFilter(key, { web: e.target.checked })}
           />
           HTML / CSS
         </label>
