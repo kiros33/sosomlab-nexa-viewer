@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { useViewer } from "../store/viewer";
 import type { HistoryEntry } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
+import { Icon } from "./Icon";
 
 function truncate(s: string, max = 16): string {
   if (s.length <= max) return s;
@@ -106,7 +107,7 @@ export function HistoryBar() {
           onClick={() => void reload()}
           title={updateAvailable ? "온라인에 갱신됨 — 새로고침" : "새로고침"}
         >
-          {updateAvailable ? "🔄 갱신 가능" : "🔄"}
+          <Icon name="refresh" size={14} /> {updateAvailable ? "갱신 가능" : ""}
         </button>
       )}
 

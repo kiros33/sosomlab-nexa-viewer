@@ -76,6 +76,16 @@ body {
   border-radius: 6px;
   cursor: pointer;
 }
+.tb-btn {
+  display: inline-flex;
+  align-items: center;
+  gap: 5px;
+}
+.tb-icon {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+}
 .toolbar button:hover:not(:disabled) {
   border-color: var(--accent);
 }
@@ -250,7 +260,9 @@ body {
   max-width: 240px;
 }
 .ctx-item {
-  display: block;
+  display: flex;
+  align-items: center;
+  gap: 8px;
   width: 100%;
   text-align: left;
   border: none;
@@ -827,6 +839,9 @@ body {
   padding: 4px;
 }
 .gh-menu button {
+  display: flex;
+  align-items: center;
+  gap: 8px;
   text-align: left;
   border: none;
   background: none;

@@ -15,6 +15,7 @@ import type { RepoInfo } from "../sources/githubSource";
 import type { SourceRef } from "../sources/types";
 import { sourceKey } from "../sources/registry";
 import { GithubMark } from "./GithubMark";
+import { Icon } from "./Icon";
 
 /** 등록된 저장소 한 줄 — 이름 넓게, 관리는 ⋯ 뒤로. */
 function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
@@ -30,11 +31,15 @@ function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
       <span className="gh-reg-name" title={label}>
         <GithubMark size={13} /> {wsRef.root}
         {wsRef.gitRef && <span className="gh-branch">@{wsRef.gitRef}</span>}
-        {hidden && <span className="gh-hidden-dot" title="탐색기에서 숨김">🚫</span>}
+        {hidden && (
+          <span className="gh-hidden-dot" title="탐색기에서 숨김">
+            <Icon name="visibility_off" size={12} />
+          </span>
+        )}
       </span>
       <div className="gh-kebab-wrap">
         <button className="gh-kebab" onClick={() => setMenu((m) => !m)} title="설정">
-          ⋯
+          <Icon name="more_horiz" size={16} />
         </button>
         {menu && (
           <>
@@ -46,7 +51,8 @@ function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
                   setMenu(false);
                 }}
               >
-                {hidden ? "👁 탐색기에 표시" : "🚫 탐색기에서 숨김"}
+                <Icon name={hidden ? "visibility" : "visibility_off"} size={16} />{" "}
+                {hidden ? "탐색기에 표시" : "탐색기에서 숨김"}
               </button>
               <button
                 className="gh-menu-danger"
@@ -55,7 +61,7 @@ function RegisteredRow({ wsRef }: { wsRef: SourceRef }) {
                   setMenu(false);
                 }}
               >
-                🗑 삭제
+                <Icon name="delete" size={16} /> 삭제
               </button>
             </div>
           </>
@@ -84,11 +90,11 @@ function AvailRow({
       </span>
       {registered ? (
         <button className="gh-pm-btn minus" onClick={onRemove} title="등록 해제(삭제)">
-          −
+          <Icon name="remove" size={16} />
         </button>
       ) : (
         <button className="gh-pm-btn plus" onClick={onAdd} title="추가">
-          +
+          <Icon name="add" size={16} />
         </button>
       )}
     </li>
@@ -193,7 +199,7 @@ export function GithubPanel() {
               <GithubMark size={13} /> {login}
             </span>
             <button className="gh-icon-btn" onClick={() => void signOut()} title="로그아웃">
-              🚪
+              <Icon name="logout" size={16} />
             </button>
           </div>
         ) : (
@@ -216,7 +222,7 @@ export function GithubPanel() {
               disabled={busy || !token.trim()}
               title="로그인"
             >
-              {busy ? "…" : "🔑"}
+              {busy ? "…" : <Icon name="login" size={16} />}
             </button>
             <a
               className="gh-hint"
@@ -239,7 +245,7 @@ export function GithubPanel() {
                 onChange={(e) => setFilter(e.target.value)}
               />
               <button className="gh-refresh-sm" onClick={() => void fetchAvailable()} title="목록 새로고침">
-                ↻
+                <Icon name="refresh" size={16} />
               </button>
             </div>
             {loadingAvailable ? (

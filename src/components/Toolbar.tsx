@@ -5,6 +5,7 @@ import { listProfiles } from "../renderer/profiles";
 import { exportHtml, exportPdfViaPrint } from "../lib/exporters";
 import { useViewer } from "../store/viewer";
 import { Preferences } from "./Preferences";
+import { Icon } from "./Icon";
 
 interface Props {
   bodyRef: React.RefObject<HTMLDivElement | null>;
@@ -49,8 +50,12 @@ export function Toolbar({ bodyRef }: Props) {
   return (
     <header className="toolbar">
       <div className="toolbar-left">
-        <button onClick={onOpenFolder}>📂 폴더 열기</button>
-        <button onClick={onOpenFile}>📄 파일 열기</button>
+        <button className="tb-btn" onClick={onOpenFolder}>
+          <Icon name="folder_open" /> 폴더 열기
+        </button>
+        <button className="tb-btn" onClick={onOpenFile}>
+          <Icon name="description" /> 파일 열기
+        </button>
       </div>
 
       <div className="toolbar-title" title={docPath ?? ""}>
@@ -72,17 +77,17 @@ export function Toolbar({ bodyRef }: Props) {
             ))}
           </select>
         </label>
-        <button onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
-          ⬇ HTML
+        <button className="tb-btn" onClick={onExportHtml} disabled={!docPath} title="HTML로 내보내기">
+          <Icon name="download" /> HTML
         </button>
-        <button onClick={exportPdfViaPrint} disabled={!docPath} title="인쇄/PDF로 저장">
-          ⬇ PDF
+        <button className="tb-btn" onClick={exportPdfViaPrint} disabled={!docPath} title="인쇄/PDF로 저장">
+          <Icon name="download" /> PDF
         </button>
-        <button onClick={toggleTheme} title="테마 전환">
-          {theme === "light" ? "🌙" : "☀️"}
+        <button className="tb-icon" onClick={toggleTheme} title="테마 전환">
+          <Icon name={theme === "light" ? "dark_mode" : "light_mode"} size={18} />
         </button>
-        <button onClick={() => setPrefsOpen(true)} title="환경설정">
-          ⚙️
+        <button className="tb-icon" onClick={() => setPrefsOpen(true)} title="환경설정">
+          <Icon name="settings" size={18} />
         </button>
       </div>
 

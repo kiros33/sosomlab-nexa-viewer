@@ -5,6 +5,7 @@ import type { ContentSource, TreeEntry } from "../sources/types";
 import { useViewer } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
 import { isFileVisible, isMarkdownName } from "../lib/filetypes";
+import { Icon } from "./Icon";
 
 type ContextHandler = (e: React.MouseEvent) => void;
 
@@ -51,9 +52,6 @@ function TreeNode({
   const selected = !entry.isDir && isActiveSource && currentPath === entry.path;
   const md = isMarkdownName(entry.name);
 
-  // 아이콘: 폴더(닫힘/열림) vs 파일(마크다운/일반)
-  const icon = entry.isDir ? (open ? "📂" : "📁") : md ? "📄" : "📃";
-
   return (
     <div className="tree-node">
       <button
@@ -63,8 +61,12 @@ function TreeNode({
         onContextMenu={onContext}
         title={entry.name}
       >
-        {entry.isDir && <span className="tree-caret">{open ? "▾" : "▸"}</span>}
-        <span className="tree-icon">{icon}</span>
+        <span className="tree-caret">
+          {entry.isDir ? <Icon name={open ? "expand_more" : "chevron_right"} size={15} /> : null}
+        </span>
+        <span className={`tree-icon${entry.isDir ? " dir" : md ? " md" : ""}`}>
+          <Icon name={entry.isDir ? (open ? "folder_open" : "folder") : "description"} size={15} />
+        </span>
         <span className="tree-name">{entry.name}</span>
       </button>
       {open && (

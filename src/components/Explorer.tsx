@@ -10,6 +10,7 @@ import { useViewer } from "../store/viewer";
 import { FileTree } from "./FileTree";
 import { GithubMark } from "./GithubMark";
 import { SourceContextMenu } from "./SourceContextMenu";
+import { Icon } from "./Icon";
 
 function RootNode({ wsRef }: { wsRef: SourceRef }) {
   const key = sourceKey(wsRef);
@@ -31,16 +32,16 @@ function RootNode({ wsRef }: { wsRef: SourceRef }) {
     <div className="ws-root">
       <div className="ws-head">
         <button className="ws-toggle" onClick={() => toggleExpanded(key)} onContextMenu={openMenu} title={source.ref.root}>
-          <span className="ws-caret">{expanded ? "▾" : "▸"}</span>
-          <span className="ws-icon">{isGithub ? <GithubMark size={14} /> : "📁"}</span>
+          <span className="ws-caret">
+            <Icon name={expanded ? "expand_more" : "chevron_right"} size={16} />
+          </span>
+          <span className="ws-icon">
+            {isGithub ? <GithubMark size={14} /> : <Icon name="folder" size={15} />}
+          </span>
           <span className="ws-label">{source.label}</span>
         </button>
-        <button
-          className="ws-refresh"
-          onClick={() => bumpRefresh(key)}
-          title="저장소 갱신"
-        >
-          🔄
+        <button className="ws-refresh" onClick={() => bumpRefresh(key)} title="저장소 갱신">
+          <Icon name="refresh" size={16} />
         </button>
       </div>
       {expanded && (

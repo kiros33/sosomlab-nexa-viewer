@@ -4,6 +4,7 @@ import { openUrl, openPath } from "@tauri-apps/plugin-opener";
 import type { SourceRef } from "../sources/types";
 import { sourceKey } from "../sources/registry";
 import { useViewer } from "../store/viewer";
+import { Icon } from "./Icon";
 
 export function SourceContextMenu({
   wsRef,
@@ -44,10 +45,11 @@ export function SourceContextMenu({
             onClose();
           }}
         >
-          🔄 저장소 갱신
+          <Icon name="refresh" size={16} /> 저장소 갱신
         </button>
         <button className="ctx-item" onClick={openOnline}>
-          🌐 {wsRef.kind === "github" ? "온라인(브라우저)에서 보기" : "폴더 열기"}
+          <Icon name="open_in_new" size={16} />{" "}
+          {wsRef.kind === "github" ? "온라인(브라우저)에서 보기" : "폴더 열기"}
         </button>
         <button
           className="ctx-item ctx-danger"
@@ -56,7 +58,7 @@ export function SourceContextMenu({
             onClose();
           }}
         >
-          ✕ 제거(닫기)
+          <Icon name="close" size={16} /> 제거(닫기)
         </button>
 
         <div className="ctx-sep" />

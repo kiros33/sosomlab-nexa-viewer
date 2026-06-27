@@ -4,6 +4,7 @@
  */
 import { useViewer } from "../store/viewer";
 import { GithubMark } from "./GithubMark";
+import { Icon } from "./Icon";
 
 export function ActivityBar() {
   const sidebarVisible = useViewer((s) => s.sidebarVisible);
@@ -20,7 +21,7 @@ export function ActivityBar() {
         title="탐색기 (파일 목록)"
         aria-pressed={isActive("files")}
       >
-        🗂
+        <Icon name="folder" size={20} />
       </button>
       <button
         className={`activity-btn${isActive("github") ? " active" : ""}`}
