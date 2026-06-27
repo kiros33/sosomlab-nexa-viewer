@@ -110,6 +110,16 @@ src-tauri/
 
 ---
 
+## 📝 변경 이력 / 릴리스 노트
+
+최근 변경 요약(자세한 내용은 아래 링크):
+- **GitHub 원격 저장소** 연동 — PAT 로그인(공개 repo는 로그인 불필요), 계정 저장소 목록에서
+  선택 추가, 트리 탐색·열람, **온라인 갱신 감지 + 새로고침**
+- 패널 **크기 조절** + VSCode/Eclipse 스타일 **토글**, **이동 기록(파일#앵커)**
+- 앱 아이콘/About 화면, **Windows·macOS·Linux** 자동 빌드/배포
+
+> 📓 상세 변경 이력: **[CHANGELOG.md](CHANGELOG.md)** · 다운로드/노트: **[GitHub Releases](https://github.com/kiros33/sosomlab-nexa-viewer/releases)**
+
 ## 🗺 로드맵
 
 데스크톱(Windows/macOS) 우선, 이후 Linux·모바일. 단계별 계획과 요구사항 추적은

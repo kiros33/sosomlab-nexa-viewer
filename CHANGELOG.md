@@ -3,6 +3,24 @@
 이 프로젝트의 주요 변경사항을 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/),
 버전은 [SemVer](https://semver.org/)를 따릅니다.
 
+## [Unreleased]
+
+### Added
+- **GitHub 원격 저장소 연동(M3)** — PAT 로그인(공개 repo는 로그인 불필요, 토큰은 AES-256-GCM
+  암호화 로컬 저장), **계정 접근 저장소 목록에서 선택 추가**, 트리 탐색·md 열람,
+  상대 이미지/문서 링크 해석
+- **온라인 갱신 감지 + 새로고침** — 문서 blob sha 비교(창 포커스 시), "🔄 갱신 가능" 배지
+- **이동 기록(파일#앵커)** — ←/→, 브레드크럼(최대 3개), 파일별 그룹 기록 1-클릭 점프, ToC 클릭 기록
+- 패널 **크기 조절**(드래그) + **토글**(좌측 VSCode 스타일 탐색기/GitHub, 우측 Eclipse 스타일 ToC)
+- 앱 **아이콘/파비콘**(S 배경 + M↓), macOS **About** 패널(아이콘+목적 설명)
+- **Linux 빌드**(deb/rpm/AppImage) 추가 → Windows·macOS·Linux 3-OS 자동 배포
+
+### Changed
+- 배포 산출물 이름 정리(`NexaMarkdownViewer_<버전>_*`), 앱 이름/조직(SosomLab) 반영
+
+### Security
+- 자격증명 암호화 저장, 외부 통신 HTTPS만, 토큰은 프론트로 노출하지 않음
+
 ## [0.1.0] - 2026-06-27
 
 첫 공개 빌드 — **M1: 로컬 Markdown 뷰어**.
