@@ -24,7 +24,7 @@
   },
   "bundle": {
     "active": true,
-    "targets": ["dmg", "nsis"],
+    "targets": ["dmg", "nsis", "deb", "rpm", "appimage"],
     "publisher": "SosomLab",
     "copyright": "© 2026 SosomLab",
     "category": "Productivity",
