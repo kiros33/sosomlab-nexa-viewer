@@ -2,7 +2,7 @@
 <package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
   <metadata>
     <id>nexa-markdown-viewer</id>
-    <!-- version은 CI에서 `choco pack --version <릴리스 버전>` 으로 덮어씁니다 -->
+    <!-- version은 CI에서 choco pack 의 version 옵션으로 덮어씁니다 -->
     <version>0.0.0</version>
     <title>Nexa Markdown Viewer</title>
     <authors>SosomLab</authors>
