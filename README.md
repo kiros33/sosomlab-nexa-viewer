@@ -74,6 +74,18 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 ## ⬇️ 다운로드 & 설치
 
+### 🍺 Homebrew (macOS, 권장)
+
+```sh
+brew install --cask kiros33/tap/nexa-markdown-viewer
+```
+
+업그레이드는 `brew upgrade --cask nexa-markdown-viewer`, 제거는 `brew uninstall --cask nexa-markdown-viewer`.
+Homebrew Cask는 설치 시 quarantine 속성을 자동 제거하므로 아래 서명 경고 없이 바로 실행됩니다.
+(탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap))
+
+### 직접 내려받기
+
 [**Releases**](https://github.com/kiros33/sosomlab-nexa-viewer/releases) 에서 OS에 맞는 파일을 받으세요.
 
 | OS | 파일 | 설치 |

@@ -5,6 +5,11 @@
 
 ## [Unreleased]
 
+### Docs
+- **Homebrew Tap(Cask) 설치 안내** 추가 — macOS에서 `brew install --cask kiros33/tap/nexa-markdown-viewer`
+  한 줄 설치 지원. 탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap).
+  README "다운로드 & 설치" + 위키 Installation 페이지 반영
+
 ## [0.2.1] - 2026-06-28
 
 ### Added

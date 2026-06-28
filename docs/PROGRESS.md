@@ -349,3 +349,34 @@
 - **도구**: gh(릴리스), cliclick/screencapture(자동 캡처 시도 — 합성 클릭 차단으로 수동 캡처로 전환),
   rsvg-convert/ImageMagick(아이콘·크롭). 모두 brew 설치.
 - **검증**: 각 기능 커밋마다 `pnpm build` 통과, v0.2.0 CI 성공.
+
+---
+
+## 2026-06-28 — 배포 채널: Homebrew Tap(Cask) 등록
+
+- **요청**: Nexa Markdown Viewer를 Brew로 받을 수 있게 등록(빠른 Tap 방식). 진행 내용 정리,
+  메뉴(설치 안내)에 Homebrew 방법 추가, 위키까지 반영 후 push.
+- **목적**: macOS 사용자가 `brew install --cask`로 한 줄 설치/업그레이드/제거할 수 있도록
+  배포 채널 추가(로드맵의 "배포 채널 — WinGet/Chocolatey/Homebrew 등록" 중 Homebrew 선행).
+- **변경내역**
+  1. **탭 저장소 생성**: `kiros33/homebrew-tap`(public) — `gh repo create`로 생성/푸시.
+     - `Casks/nexa-markdown-viewer.rb`: v0.2.1 universal DMG 기준 Cask
+       (`url` = Release 자산, `sha256` = 08a0f996…125c725, `app "NexaMarkdownViewer.app"`,
+       `zap trash`로 앱 데이터/Preferences/SavedState 정리). 불필요한 `verified:` 파라미터 제거.
+     - `README.md`: 설치/업그레이드/제거 안내.
+  2. **설치 안내 보강**: `README.md` "다운로드 & 설치"에 **🍺 Homebrew(권장)** 서브섹션 추가
+     (직접 내려받기와 분리). 위키 `docs/wiki/Installation.md` 최상단에 Homebrew 섹션 추가.
+  3. **CHANGELOG**: `[Unreleased] > Docs`에 Homebrew Tap 설치 안내 항목 추가.
+- **SHA256 산출 방법**: `shasum -a 256 NexaMarkdownViewer_<버전>_universal.dmg`
+  (다음 버전 릴리스 시 Cask의 `version`/`sha256` 두 줄만 갱신해 탭에 푸시).
+- **검증**
+  - `brew tap kiros33/tap` → `brew info --cask` 정상 인식.
+  - `brew audit --cask --new` — 서명/`verified`/저장소 인지도 경고만(개인 탭에선 무관),
+    `verified` 경고는 파라미터 제거로 해소.
+  - `brew install --cask kiros33/tap/nexa-markdown-viewer` — 다운로드 + **SHA256 체크섬
+    검증 통과**(`✔︎ Cask nexa-markdown-viewer (0.2.1)`). 파일 복사 단계는 기존
+    `/Applications/NexaMarkdownViewer.app`(수동 설치본) 존재로 멈춤 → 기존 앱 보존 위해
+    덮어쓰지 않음(탭 동작 자체는 정상).
+- **참고**
+  - GUI 앱(.app/.dmg)이라 Formula가 아닌 **Cask**로 등록.
+  - 앱이 미서명이나 Homebrew Cask는 설치 시 quarantine를 자동 제거 → Gatekeeper 경고 없이 실행.

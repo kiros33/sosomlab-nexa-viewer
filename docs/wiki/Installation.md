@@ -1,5 +1,22 @@
 # 설치 (Installation)
 
+## 🍺 Homebrew (macOS, 권장)
+Homebrew 탭으로 한 줄 설치/업그레이드가 가능합니다.
+
+```bash
+# 설치
+brew install --cask kiros33/tap/nexa-markdown-viewer
+
+# 업그레이드
+brew upgrade --cask nexa-markdown-viewer
+
+# 제거
+brew uninstall --cask nexa-markdown-viewer
+```
+
+- 탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap)
+- Homebrew Cask는 설치 시 quarantine 속성을 자동 제거하므로, 아래의 **코드 서명 경고 없이** 바로 실행됩니다.
+
 ## 다운로드
 [GitHub Releases](https://github.com/kiros33/sosomlab-nexa-viewer/releases) 에서 OS에 맞는 파일을 받습니다.
 
