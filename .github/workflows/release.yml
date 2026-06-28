@@ -67,6 +67,6 @@ jobs:
             > - Windows: SmartScreen **추가 정보 → 실행**
 
             변경사항은 [CHANGELOG.md](https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/CHANGELOG.md) 참고.
-          releaseDraft: true       # 검토 후 게시 (자동 게시하려면 false)
+          releaseDraft: false      # 자동 게시 → published 이벤트로 chocolatey.yml 자동 트리거
           prerelease: false
           args: ${{ matrix.args }}
