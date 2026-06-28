@@ -2,6 +2,7 @@
   "name": "sosomlab-tauri-test1",
   "private": true,
   "version": "0.2.1",
+  "license": "MIT",
   "type": "module",
   "packageManager": "pnpm@11.8.0",
   "scripts": {

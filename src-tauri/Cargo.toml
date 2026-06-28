@@ -3,6 +3,7 @@ name = "tauri-scaffold"
 version = "0.2.1"
 description = "Nexa Markdown Viewer — GitHub 스타일 Markdown 뷰어"
 authors = ["SosomLab"]
+license = "MIT"
 edition = "2021"
 
 # See more keys and their definitions at https://doc.rust-lang.org/cargo/reference/manifest.html

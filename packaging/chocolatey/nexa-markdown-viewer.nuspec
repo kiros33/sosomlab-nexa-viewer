@@ -8,6 +8,8 @@
     <authors>SosomLab</authors>
     <owners>kiros33</owners>
     <projectUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectUrl>
+    <licenseUrl>https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/LICENSE</licenseUrl>
+    <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectSourceUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectSourceUrl>
     <packageSourceUrl>https://github.com/kiros33/sosomlab-nexa-viewer/tree/main/packaging/chocolatey</packageSourceUrl>
     <docsUrl>https://github.com/kiros33/sosomlab-nexa-viewer/wiki</docsUrl>

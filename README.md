@@ -146,6 +146,10 @@ src-tauri/
 
 작업 일지: **[docs/PROGRESS.md](docs/PROGRESS.md)**
 
+## 📄 라이선스
+
+[MIT License](LICENSE) © 2026 SosomLab
+
 ---
 
 <p align="center"><sub>© 2026 SosomLab · Built with Tauri + React</sub></p>
