@@ -1,0 +1,31 @@
+<?xml version="1.0" encoding="utf-8"?>
+<package xmlns="http://schemas.microsoft.com/packaging/2015/06/nuspec.xsd">
+  <metadata>
+    <id>nexa-markdown-viewer</id>
+    <!-- version은 CI에서 `choco pack --version <릴리스 버전>` 으로 덮어씁니다 -->
+    <version>0.0.0</version>
+    <title>Nexa Markdown Viewer</title>
+    <authors>SosomLab</authors>
+    <owners>kiros33</owners>
+    <projectUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectUrl>
+    <projectSourceUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectSourceUrl>
+    <packageSourceUrl>https://github.com/kiros33/sosomlab-nexa-viewer/tree/main/packaging/chocolatey</packageSourceUrl>
+    <docsUrl>https://github.com/kiros33/sosomlab-nexa-viewer/wiki</docsUrl>
+    <bugTrackerUrl>https://github.com/kiros33/sosomlab-nexa-viewer/issues</bugTrackerUrl>
+    <releaseNotes>https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/CHANGELOG.md</releaseNotes>
+    <tags>markdown viewer md tauri documentation reader</tags>
+    <summary>GitHub 스타일 Markdown 뷰어 (Tauri 기반 데스크톱 앱)</summary>
+    <description>
+Nexa Markdown Viewer는 Tauri 2 + React로 만든 GitHub 스타일 Markdown 뷰어입니다.
+
+- 로컬 폴더 / GitHub 원격 저장소를 다중 루트 탐색기로 열람
+- GitHub 스타일 렌더링, 코드 하이라이팅, 목차(ToC), 문서 간 이동 기록
+- HTML/PDF 내보내기, 라이트/다크 테마, 글꼴 설정
+
+by SosomLab.
+    </description>
+  </metadata>
+  <files>
+    <file src="tools\**" target="tools" />
+  </files>
+</package>

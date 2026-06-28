@@ -1,0 +1,71 @@
+# Chocolatey 커뮤니티 저장소에 패키지를 빌드/게시합니다.
+# - 릴리스가 publish되면 자동 실행 (또는 workflow_dispatch로 태그 지정 수동 실행)
+# - windows-latest 러너에서 choco pack/push → 물리 Windows PC 불필요
+# 사전 준비: 저장소 Settings > Secrets > Actions 에 CHOCO_API_KEY 등록
+#   (https://community.chocolatey.org/account 의 API Key)
+name: chocolatey
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '릴리스 태그 (예: v0.2.1)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: 버전/자산 URL 계산
+        id: meta
+        shell: pwsh
+        run: |
+          $tag = "${{ github.event.release.tag_name }}"
+          if (-not $tag) { $tag = "${{ github.event.inputs.tag }}" }
+          if (-not $tag) { throw "릴리스 태그를 확인할 수 없습니다." }
+          $version = $tag.TrimStart('v')
+          $asset = "NexaMarkdownViewer_${version}_x64-setup.exe"
+          $url = "https://github.com/kiros33/sosomlab-nexa-viewer/releases/download/$tag/$asset"
+          "version=$version" >> $env:GITHUB_OUTPUT
+          "url=$url"         >> $env:GITHUB_OUTPUT
+          Write-Host "version=$version url=$url"
+
+      - name: 설치 파일 다운로드 + SHA256 계산
+        id: sum
+        shell: pwsh
+        run: |
+          $url = "${{ steps.meta.outputs.url }}"
+          Invoke-WebRequest -Uri $url -OutFile setup.exe
+          $hash = (Get-FileHash setup.exe -Algorithm SHA256).Hash.ToLower()
+          "sha256=$hash" >> $env:GITHUB_OUTPUT
+          Write-Host "sha256=$hash"
+
+      - name: install 스크립트 치환 (URL/체크섬)
+        shell: pwsh
+        run: |
+          $p = "packaging/chocolatey/tools/chocolateyinstall.ps1"
+          (Get-Content $p -Raw) `
+            -replace '__URL64__', "${{ steps.meta.outputs.url }}" `
+            -replace '__CHECKSUM64__', "${{ steps.sum.outputs.sha256 }}" |
+            Set-Content $p -NoNewline
+          Get-Content $p
+
+      - name: choco pack
+        shell: pwsh
+        run: |
+          choco pack packaging/chocolatey/nexa-markdown-viewer.nuspec `
+            --version ${{ steps.meta.outputs.version }} `
+            --out packaging/chocolatey
+
+      - name: choco push (community repo)
+        shell: pwsh
+        env:
+          CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}
+        run: |
+          if (-not $env:CHOCO_API_KEY) { throw "CHOCO_API_KEY Secret이 설정되지 않았습니다." }
+          choco push "packaging/chocolatey/nexa-markdown-viewer.${{ steps.meta.outputs.version }}.nupkg" `
+            --source https://push.chocolatey.org/ `
+            --api-key $env:CHOCO_API_KEY

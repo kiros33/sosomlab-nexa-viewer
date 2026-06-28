@@ -380,3 +380,28 @@
 - **참고**
   - GUI 앱(.app/.dmg)이라 Formula가 아닌 **Cask**로 등록.
   - 앱이 미서명이나 Homebrew Cask는 설치 시 quarantine를 자동 제거 → Gatekeeper 경고 없이 실행.
+
+---
+
+## 2026-06-28 — 배포 채널: Chocolatey(Windows) 패키지 준비 + CI 자동화
+
+- **요청**: Chocolatey에 등록하는 방법, Windows에서 진행해야 하는지 먼저 확인.
+- **확인 결과**: 패키지 정의 파일(.nuspec/install.ps1)은 OS 무관하게 작성 가능하나,
+  `choco pack`·설치 테스트·`choco push`는 **Windows 필요**. → 물리 Windows 없이 진행하도록
+  **GitHub Actions `windows-latest` 러너로 자동화**(사용자 선택: CI 자동화).
+- **변경내역**
+  1. `packaging/chocolatey/nexa-markdown-viewer.nuspec` — 패키지 메타데이터(버전은 CI에서
+     `choco pack --version`으로 덮어씀).
+  2. `packaging/chocolatey/tools/chocolateyinstall.ps1` — Tauri NSIS 무인설치(`/S`),
+     `url64`/`checksum64`는 `__URL64__`/`__CHECKSUM64__` 플레이스홀더(CI에서 치환).
+  3. `.github/workflows/chocolatey.yml` — release publish 시(또는 수동 dispatch) windows 러너에서
+     버전·자산 URL 계산 → exe 다운로드·SHA256 계산 → install 스크립트 치환 → `choco pack` →
+     `choco push`(community.chocolatey.org).
+- **남은 수동 작업(사용자)**
+  - community.chocolatey.org 계정 생성 → API Key 발급 → 저장소 Secret `CHOCO_API_KEY` 등록.
+  - 그 후 워크플로 수동 실행(태그 `v0.2.1`) 또는 다음 릴리스에서 자동 게시.
+  - ⚠️ 커뮤니티 저장소는 **검수(moderation)** 절차가 있어 즉시 노출되지 않음(자동검증+사람 검수).
+  - 참고: 현재 repo에 LICENSE 파일이 없음 → 검수 원활화를 위해 LICENSE 추가 권장(licenseUrl).
+- **참고**: 참고용 v0.2.1 exe SHA256 = `eb7997…381646` (실제 게시 값은 CI가 매 릴리스 재계산).
+- **README/위키 안내**: Chocolatey 설치 안내(`choco install nexa-markdown-viewer`)는
+  **첫 게시 승인 후** 추가 예정(미게시 상태에서 안내하면 오인 소지).
