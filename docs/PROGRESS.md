@@ -460,3 +460,27 @@
   - CLA: 개인(회사 무관) 자격으로 `@microsoft-github-policy-service agree` 코멘트 게시 → Needs-CLA 해제.
   - 머지는 본인 불가(브랜치 보호: 마지막 push자 외 write 권한자 승인 필요) → 모더레이터 대기.
     추가 push 금지(승인/검증 리셋 방지).
+
+---
+
+## 2026-06-28 — Windows 코드 서명 방향 결정 + SignPath Foundation 신청
+
+- **요청/논의**: Windows 코드 서명 개념·필요성·인증서 종류·발급(유료/무료)·서명 방법 학습 후,
+  SmartScreen 무경고 목표로 무료 경로(SignPath Foundation) 검토.
+- **정리한 핵심**
+  - SmartScreen은 "서명 여부"가 아니라 **인증서/파일 평판**으로 동작 → OV는 다운로드 누적에 따라
+    점진적 해소, **EV만 첫날 즉시 무경고**.
+  - 2023.6 규정: 공개신뢰 OV/EV 개인키는 하드웨어/HSM/클라우드 보관 의무(단순 .pfx 발급 불가).
+  - SignPath: **Foundation(무료·영구·OSS)** vs **상용 trial(테스트 인증서·만료)** 구분 — 무료 영구는
+    Foundation 신청 경로(별도). 단 Foundation은 **인지도(notability) 요건**이 있어 신규 저장소는
+    거절 가능 → 대안은 Azure Trusted Signing(~$10/월, 공개신뢰 OV, 토큰 불필요).
+- **라이선스 점검(서명 무관 부수 작업)**: JS(prod) + Rust 521 크레이트 라이선스 조사 →
+  **GPL/AGPL 0건**, 대부분 MIT/Apache. MPL-2.0(5개: cssparser/selectors 등)은 파일단위 약한
+  카피레프트라 **수정 안 하면 MIT 유지 OK**. r-efi는 MIT 선택 가능. → **MIT 유지 가능**,
+  남은 의무는 서드파티 고지(THIRD-PARTY-NOTICES) 정도(추후).
+- **수행**: SignPath Foundation 신청서(signpath.org/apply) 작성 — 개인 maintainer, GitHub Actions,
+  홈페이지/다운로드 `https://sosomlab.com/apps/nexa-markdown-viewer/`(200 확인).
+  - **요건**: Download 페이지에 "SignPath Foundation 코드 서명 사용" 문구 필요 →
+    README 다운로드 섹션 + 위키 Installation에 SignPath Foundation 서명 안내 추가
+    (현재 미서명 상태는 정직하게 유지: 서명 적용/평판 누적 전 경고 가능 명시).
+- **다음**: 신청 승인 시 CI 연동(미서명 빌드 → SignPath 서명 → 릴리스 첨부). 거절/지연 시 Azure로 전환.

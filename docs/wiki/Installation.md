@@ -26,8 +26,10 @@ brew uninstall --cask nexa-markdown-viewer
 | **Windows** | `NexaMarkdownViewer_<버전>_x64-setup.exe` | 실행 → 설치 마법사 진행 |
 | **Linux** | `*.AppImage` / `*.deb` / `*.rpm` | AppImage: 실행권한 후 실행 / deb·rpm: 패키지 설치 |
 
-## ⚠️ 코드 서명 안내 (중요)
-현재 빌드는 **코드 서명이 적용되지 않았습니다.** 첫 실행 시 OS 보안 경고가 나올 수 있습니다.
+## 🔏 코드 서명 안내
+Windows 빌드는 [SignPath Foundation](https://signpath.org/)이 오픈소스 프로젝트에 무상 제공하는
+코드 서명 인증서로 서명됩니다. 서명 적용 전이거나 SmartScreen 평판이 쌓이기 전에는
+첫 실행 시 OS 보안 경고가 나올 수 있습니다.
 
 - **macOS** — "확인되지 않은 개발자" 경고 시
   - 앱을 **우클릭 → 열기**(최초 1회), 또는 터미널:
