@@ -428,3 +428,21 @@
 - **롤백 정리(문서 답변)**: GitHub Release·Homebrew 탭은 되돌리기 쉬움. Chocolatey·winget은
   중앙저장소+검수라 게시 버전 삭제가 어려움 → **상위 버전 roll-forward**가 정석.
 - **검증**: 워크플로/매니페스트 YAML 파싱 OK, SHA256 대조 일치.
+
+---
+
+## 2026-06-28 — winget 최초 등록 PR 제출 (komac)
+
+- **요청**: WINGET_TOKEN 등록 완료 → 첫 제출을 직접 진행(명령 안내받아 수행).
+- **수행**
+  1. `brew install komac` → `komac token update`(PAT 등록).
+  2. `komac new SosomLab.NexaMarkdownViewer --version 0.2.1 --urls <x64-setup.exe>` 대화형 진행.
+     - Install modes/Upgrade behavior=install/Commands·Protocols·File extensions=비움 등 입력.
+     - 생성 매니페스트는 ManifestVersion 1.12.0(komac 최신 스키마), 값은 사전 작성분과 일치.
+  3. Submit 시 `kiros33/winget-pkgs` fork 부재로 1차 실패 →
+     `gh repo fork microsoft/winget-pkgs --clone=false`로 fork 생성 후 재실행.
+  4. **PR 생성 성공: microsoft/winget-pkgs#394582**.
+- **다음**: MS 자동 검증(샌드박스 설치 테스트) + 검수 → 머지되면 `winget install SosomLab.NexaMarkdownViewer`
+  사용 가능. 이후 버전부터는 `.github/workflows/winget.yml`이 동일 fork/토큰으로 자동 PR.
+- **참고**: fork 계정·`WINGET_TOKEN` 소유 계정은 모두 kiros33(자동화 일관성). 미서명이라
+  SmartScreen 경고는 남지만 winget 검증/설치에는 지장 없음.
