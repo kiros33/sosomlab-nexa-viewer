@@ -8,6 +8,7 @@
     <authors>SosomLab</authors>
     <owners>kiros33</owners>
     <projectUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectUrl>
+    <iconUrl>https://cdn.jsdelivr.net/gh/kiros33/sosomlab-nexa-viewer@main/src-tauri/icons/128x128.png</iconUrl>
     <licenseUrl>https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/LICENSE</licenseUrl>
     <requireLicenseAcceptance>false</requireLicenseAcceptance>
     <projectSourceUrl>https://github.com/kiros33/sosomlab-nexa-viewer</projectSourceUrl>

@@ -446,3 +446,17 @@
   사용 가능. 이후 버전부터는 `.github/workflows/winget.yml`이 동일 fork/토큰으로 자동 PR.
 - **참고**: fork 계정·`WINGET_TOKEN` 소유 계정은 모두 kiros33(자동화 일관성). 미서명이라
   SmartScreen 경고는 남지만 winget 검증/설치에는 지장 없음.
+
+---
+
+## 2026-06-28 — Chocolatey/winget 검수 진행 + nuspec 품질 보완
+
+- **Chocolatey**: 0.2.1 푸시 후 chocolatey-ops 자동 검증/패키지 테스트(verification) 통과,
+  패키지 스캐닝 단계로 진행. Requirements 위반 없음(승인 가능). Guidelines 2건 지적.
+  - 반영: nuspec에 `iconUrl` 추가(jsDelivr CDN, `src-tauri/icons/128x128.png`, 200 확인).
+  - projectSourceUrl은 저장소(소스코드)를 정확히 가리키므로 유지(Guideline 요건 충족).
+  - 이미 푸시된 0.2.1은 변경 불가 → **다음 버전(CI)부터 반영**.
+- **winget**: PR #394582 자동 검증/CLA 통과, 모더레이터 승인 대기.
+  - CLA: 개인(회사 무관) 자격으로 `@microsoft-github-policy-service agree` 코멘트 게시 → Needs-CLA 해제.
+  - 머지는 본인 불가(브랜치 보호: 마지막 push자 외 write 권한자 승인 필요) → 모더레이터 대기.
+    추가 push 금지(승인/검증 리셋 방지).
