@@ -405,3 +405,26 @@
 - **참고**: 참고용 v0.2.1 exe SHA256 = `eb7997…381646` (실제 게시 값은 CI가 매 릴리스 재계산).
 - **README/위키 안내**: Chocolatey 설치 안내(`choco install nexa-markdown-viewer`)는
   **첫 게시 승인 후** 추가 예정(미게시 상태에서 안내하면 오인 소지).
+
+---
+
+## 2026-06-28 — 배포 파이프라인 자동화 + winget 채널 추가
+
+- **요청**: ① release.yml `releaseDraft`를 false로(자동 게시) ② 롤백 가능 여부 정리
+  ③ release 시 winget도 자동 진행되도록 구성, winget이 API 키가 필요한지.
+- **변경내역**
+  1. `release.yml`: `releaseDraft: true → false`. 이제 `v*` 태그 push → 3-OS 빌드 →
+     **자동 게시** → `release: published` 이벤트로 chocolatey/winget 워크플로 자동 트리거.
+  2. **winget 자동화** `.github/workflows/winget.yml`: release publish(또는 수동 dispatch) 시
+     `vedantmgoyal9/winget-releaser`로 microsoft/winget-pkgs에 버전 PR 자동 생성
+     (ubuntu 러너, x64 NSIS 자산 선택).
+  3. **winget 초기 매니페스트** `packaging/winget/0.2.1/`(version/installer/defaultLocale,
+     schema 1.6.0) + `packaging/winget/README.md`. InstallerType=nullsoft,
+     SHA256=EB7997…381646(실제 자산과 대조 일치).
+- **API/토큰**: winget은 별도 API 키 없음. fork→push→PR 구조라 **GitHub classic PAT
+  (`public_repo`)**를 Secret `WINGET_TOKEN`으로 등록해야 함. (Chocolatey의 `CHOCO_API_KEY`에 대응)
+- **최초 1회 수동**: winget-releaser는 기존 패키지의 새 버전만 올리므로, 첫 버전(0.2.1)은
+  komac/wingetcreate 또는 수동 PR로 등록 필요 → 이후 버전부터 자동.
+- **롤백 정리(문서 답변)**: GitHub Release·Homebrew 탭은 되돌리기 쉬움. Chocolatey·winget은
+  중앙저장소+검수라 게시 버전 삭제가 어려움 → **상위 버전 roll-forward**가 정석.
+- **검증**: 워크플로/매니페스트 YAML 파싱 OK, SHA256 대조 일치.

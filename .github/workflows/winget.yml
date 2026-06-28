@@ -1,0 +1,30 @@
+# winget(Windows Package Manager) 자동 등록.
+# - 릴리스가 publish되면 microsoft/winget-pkgs 에 버전 업데이트 PR을 자동 생성
+#   (또는 workflow_dispatch로 태그 지정 수동 실행)
+# - winget은 "API 키"가 아니라 GitHub PAT가 필요:
+#   fork → push → PR 흐름이라 public_repo 권한의 classic PAT를
+#   저장소 Settings > Secrets > Actions 에 WINGET_TOKEN 으로 등록해야 함.
+# ⚠️ winget-releaser는 "이미 winget-pkgs에 등록된 패키지의 새 버전"을 올리는 용도라,
+#    최초 1회는 packaging/winget 의 초기 매니페스트로 수동 PR이 필요합니다(README 참고).
+name: winget
+on:
+  release:
+    types: [published]
+  workflow_dispatch:
+    inputs:
+      tag:
+        description: '릴리스 태그 (예: v0.2.1)'
+        required: true
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: winget-pkgs에 버전 PR 생성
+        uses: vedantmgoyal9/winget-releaser@v2
+        with:
+          identifier: SosomLab.NexaMarkdownViewer
+          # Windows x64 NSIS 설치파일만 선택
+          installers-regex: '_x64-setup\.exe$'
+          release-tag: ${{ github.event.release.tag_name || github.event.inputs.tag }}
+          token: ${{ secrets.WINGET_TOKEN }}

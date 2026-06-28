@@ -1,0 +1,13 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.installer.1.6.0.schema.json
+PackageIdentifier: SosomLab.NexaMarkdownViewer
+PackageVersion: 0.2.1
+InstallerType: nullsoft
+InstallModes:
+  - silent
+  - silentWithProgress
+Installers:
+  - Architecture: x64
+    InstallerUrl: https://github.com/kiros33/sosomlab-nexa-viewer/releases/download/v0.2.1/NexaMarkdownViewer_0.2.1_x64-setup.exe
+    InstallerSha256: EB7997555223558CAF35BB710A724231869CCDD48DB851DE87ED99C963381646
+ManifestType: installer
+ManifestVersion: 1.6.0

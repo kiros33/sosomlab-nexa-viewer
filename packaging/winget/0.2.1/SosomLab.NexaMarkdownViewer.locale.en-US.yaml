@@ -1,0 +1,27 @@
+# yaml-language-server: $schema=https://aka.ms/winget-manifest.defaultLocale.1.6.0.schema.json
+PackageIdentifier: SosomLab.NexaMarkdownViewer
+PackageVersion: 0.2.1
+PackageLocale: en-US
+Publisher: SosomLab
+PublisherUrl: https://github.com/kiros33
+PublisherSupportUrl: https://github.com/kiros33/sosomlab-nexa-viewer/issues
+PackageName: Nexa Markdown Viewer
+PackageUrl: https://github.com/kiros33/sosomlab-nexa-viewer
+License: MIT
+LicenseUrl: https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/LICENSE
+Copyright: © 2026 SosomLab
+ShortDescription: GitHub-style Markdown viewer built with Tauri.
+Description: |-
+  Nexa Markdown Viewer is a GitHub-style Markdown viewer built with Tauri 2 + React.
+  It opens local folders and remote GitHub repositories in a multi-root explorer,
+  with code highlighting, a table of contents, navigation history, HTML/PDF export,
+  light/dark themes, and font settings.
+Moniker: nexa-markdown-viewer
+Tags:
+  - markdown
+  - viewer
+  - md
+  - documentation
+  - reader
+ManifestType: defaultLocale
+ManifestVersion: 1.6.0
