@@ -7,6 +7,28 @@
 
 ---
 
+## 2026-07-01 — 외부 인자 열기 macOS 디버깅 + 견고화(전역 버퍼)
+
+- **요청**: macOS에서 `open -a App 파일` 로 열어도 파일이 열리지 않음 → 원인 파악 및 수정.
+- **진단(.app 빌드 후 실측, /tmp/nexa-opened.log 추적)**
+  - `RunEvent::Opened` 는 **정상 발생**(파일 URL도 정확)하고, argv 직접 실행 경로도 정상.
+  - 그러나 프론트 부팅 시 `take_opened_targets`(당시 Tauri **managed state**(`PendingOpen`) 기반)가
+    **빈 배열**을 반환 → 콜드스타트 버퍼가 비어 파일이 열리지 않음.
+  - 원인 추정: 런루프 클로저(`.run(|app,e|…)`)에서 `app_handle.try_state::<PendingOpen>()`로
+    적재한 내용이 커맨드 측 managed state와 어긋남(런루프에서 managed state 접근 불안정).
+- **수정(견고화)**
+  - 버퍼를 **managed state → 전역 `OnceLock<Mutex<Vec<…>>>`** 로 변경(`commands.rs`:
+    `opened_buffer()`, `push_opened()`, 인자 없는 `take_opened_targets()`). 런루프 의존성 제거.
+  - `lib.rs`: `app.manage(PendingOpen)` 제거, `Opened` 핸들러에서 `push_opened()` + `emit("open-targets")`.
+  - `App.tsx`: **리스너 먼저 등록 → 그다음 버퍼 drain** 순서로 변경(누락 방지) + 1.5초 내
+    동일 대상 **중복 열기 방지**(버퍼 drain과 이벤트 중복 대비). 디버그 로그 전부 제거.
+- **소스 위치**: `src-tauri/src/commands.rs`(opened_buffer/push_opened/take_opened_targets),
+  `src-tauri/src/lib.rs`(Opened 핸들러), `src/App.tsx`(부팅 effect).
+- **검증**: `pnpm build` + `cargo check` 통과(경고 0), `.app` 재빌드. 실제 Finder/`open -a`
+  동작은 사용자 대화형 환경에서 확인(아래 절차).
+
+---
+
 ## 2026-07-01 — 외부 인자 열기 macOS 대응 구현
 
 - **요청**: 최근 Windows에 추가한 외부 인자(파일/폴더) 열기를 macOS에서도 동일하게 구현 + 테스트 방법 안내.

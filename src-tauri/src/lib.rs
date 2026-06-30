@@ -14,10 +14,6 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
-            use tauri::Manager;
-            // macOS `Opened`(파일 열기) 콜드스타트 버퍼를 앱 상태로 등록.
-            app.manage(commands::PendingOpen::default());
-
             // macOS: About 패널에 아이콘 + 요약 설명이 보이도록 커스텀 메뉴 구성
             #[cfg(target_os = "macos")]
             {
@@ -94,7 +90,7 @@ pub fn run() {
             // 콜드스타트(프론트 리스너 전)에는 버퍼에 쌓고, 실행 중에는 즉시 emit한다.
             #[cfg(target_os = "macos")]
             {
-                use tauri::{Emitter, Manager};
+                use tauri::Emitter;
                 if let tauri::RunEvent::Opened { urls } = event {
                     let targets: Vec<commands::StartupTarget> = urls
                         .iter()
@@ -102,9 +98,9 @@ pub fn run() {
                         .filter_map(|p| commands::resolve_target(&p.to_string_lossy()))
                         .collect();
                     if !targets.is_empty() {
-                        if let Some(state) = app_handle.try_state::<commands::PendingOpen>() {
-                            state.0.lock().unwrap().extend(targets.clone());
-                        }
+                        // 콜드스타트(프론트 리스너 전): 전역 버퍼에 적재 → 마운트 시 drain.
+                        commands::push_opened(targets.clone());
+                        // 실행 중: 즉시 이벤트로 전달.
                         let _ = app_handle.emit("open-targets", targets);
                     }
                 }

@@ -81,11 +81,38 @@ export default function App() {
     type Target = { root: string; file: string | null };
     let cancelled = false;
     let unlisten: (() => void) | undefined;
+    // 짧은 시간 내 동일 대상 중복 열기 방지(버퍼 drain과 이벤트가 겹치는 경우 대비)
+    const recent = new Map<string, number>();
+    const openOne = async (t: Target) => {
+      const key = `${t.root}::${t.file ?? ""}`;
+      const now = Date.now();
+      if (now - (recent.get(key) ?? 0) < 1500) return;
+      recent.set(key, now);
+      await openExternalTarget(t.root, t.file);
+    };
+    const openList = (list: Target[]) => {
+      void (async () => {
+        for (const t of list) await openOne(t);
+      })();
+    };
     void (async () => {
       try {
+        // 1) 실행 중 추가 열기(macOS Opened)를 먼저 구독 → 버퍼 drain 전후 누락 방지
+        unlisten = await listen<Target[]>("open-targets", (e) =>
+          openList(e.payload ?? []),
+        );
+        if (cancelled) {
+          unlisten?.();
+          return;
+        }
+        // 2) 부팅 수집: argv(Windows/터미널) + macOS 콜드스타트 전역 버퍼(drain)
         const initial: Target[] = [];
-        const argv = await invoke<Target | null>("startup_target");
-        if (argv) initial.push(argv);
+        try {
+          const argv = await invoke<Target | null>("startup_target");
+          if (argv) initial.push(argv);
+        } catch {
+          /* 무시 */
+        }
         try {
           const opened = await invoke<Target[]>("take_opened_targets");
           if (opened?.length) initial.push(...opened);
@@ -94,16 +121,8 @@ export default function App() {
         }
         // 이미 문서가 열려 있지 않을 때만 부팅 시 자동 열기
         if (!cancelled && initial.length && !useViewer.getState().docPath) {
-          for (const t of initial) await openExternalTarget(t.root, t.file);
+          for (const t of initial) await openOne(t);
         }
-        // 실행 중 추가 열기(macOS Opened) 구독
-        unlisten = await listen<Target[]>("open-targets", (e) => {
-          const list = e.payload ?? [];
-          void (async () => {
-            for (const t of list) await openExternalTarget(t.root, t.file);
-          })();
-        });
-        if (cancelled && unlisten) unlisten();
       } catch {
         /* 인자 없음/해석 실패는 무시 */
       }

@@ -2,7 +2,7 @@
 //! 소스 종류에 관계없이 `ContentProvider` 트레잇으로 디스패치한다.
 
 use std::path::{Path, PathBuf};
-use std::sync::Mutex;
+use std::sync::{Mutex, OnceLock};
 
 use base64::Engine;
 use tauri::Manager;
@@ -43,12 +43,22 @@ pub struct StartupTarget {
     pub file: Option<String>,
 }
 
-/// macOS `Opened`(파일 열기 Apple Event)로 전달된 열기 대상을 보관하는 버퍼.
+/// macOS `Opened`(파일 열기 Apple Event)로 전달된 열기 대상을 보관하는 **전역** 버퍼.
 ///
-/// 콜드스타트(앱이 파일 열기로 실행)에서는 프론트엔드 리스너가 붙기 전에 이벤트가 올 수 있어,
-/// 여기에 쌓아 두었다가 마운트 시 `take_opened_targets`로 비워(drain) 처리한다.
-#[derive(Default)]
-pub struct PendingOpen(pub Mutex<Vec<StartupTarget>>);
+/// 콜드스타트(앱이 파일 열기로 실행)에서는 프론트엔드 리스너가 붙기 전에 이벤트가 도착한다.
+/// 런루프 클로저에서 Tauri managed state 접근이 불안정할 수 있어, 의존성 없는 전역 버퍼에
+/// 쌓아 두었다가 마운트 시 `take_opened_targets`로 비운다(drain).
+fn opened_buffer() -> &'static Mutex<Vec<StartupTarget>> {
+    static BUF: OnceLock<Mutex<Vec<StartupTarget>>> = OnceLock::new();
+    BUF.get_or_init(|| Mutex::new(Vec::new()))
+}
+
+/// 런루프(`RunEvent::Opened`)에서 받은 열기 대상을 전역 버퍼에 적재한다.
+pub fn push_opened(targets: Vec<StartupTarget>) {
+    if let Ok(mut g) = opened_buffer().lock() {
+        g.extend(targets);
+    }
+}
 
 /// 임의의 경로 하나를 시작 대상으로 해석한다(존재하지 않으면 `None`).
 /// argv·macOS `Opened` 양쪽에서 공용으로 쓴다.
@@ -90,9 +100,11 @@ pub fn startup_target() -> Option<StartupTarget> {
 /// macOS `Opened` 콜드스타트 버퍼를 비워서 반환한다(없으면 빈 배열).
 /// 다른 OS에서는 항상 빈 배열.
 #[tauri::command]
-pub fn take_opened_targets(pending: tauri::State<'_, PendingOpen>) -> Vec<StartupTarget> {
-    let mut guard = pending.0.lock().unwrap();
-    std::mem::take(&mut *guard)
+pub fn take_opened_targets() -> Vec<StartupTarget> {
+    match opened_buffer().lock() {
+        Ok(mut g) => std::mem::take(&mut *g),
+        Err(_) => Vec::new(),
+    }
 }
 
 /// 폴더 선택 다이얼로그.
