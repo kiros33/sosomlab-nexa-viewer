@@ -58,6 +58,8 @@
 - [ ] 소스 종류별 인증 방식 정리
 
 ### M5 — UX 폴리시 & 지식관리
+- [x] **외부 인자로 파일/폴더 열기** — `Viewer.exe "문서.md"`/연결 프로그램으로 즉시 열람
+      (`startup_target` 커맨드, argv 기반). 향후: single-instance·macOS `Opened` 이벤트.
 - [ ] 문서 내/저장소 전체 검색
 - [ ] 탭(다중 문서)
 - [ ] 즐겨찾기(북마크)
@@ -76,6 +78,8 @@
       탭(tap) 저장소(`homebrew-tap`) 운영 또는 homebrew-cask PR.
 - 선행 조건: **코드 서명/공증**(미서명 시 다수 매니저 심사·사용자 신뢰 문제), 안정 버전 태깅,
   릴리스 자산 체크섬 자동화.
+- [ ] **포터블 배포(Windows zip)** — 설치 없이 단일 폴더 실행, 데이터(`./data`)를 앱 옆에 보관.
+      설계: [PORTABLE.md](PORTABLE.md). (포터블 모드 판별 + 데이터/WebView 경로 분기 + CI zip)
 
 ### M6 — Git diff 비교 — *요청 반영(설계)*
 - [ ] 원격 git 소스: 커밋/브랜치 간 md diff 비교 보기
@@ -105,3 +109,6 @@
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Chocolatey / Homebrew 등록 | 배포 채널 | 설계 |
+| 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(argv) |
+| 포터블 버전(Windows zip) | 배포 채널 | 설계([PORTABLE.md](PORTABLE.md)) |
+| 기술 구조·호출/동작 흐름 문서화 | 문서 | ✅ 완료([ARCHITECTURE.md](ARCHITECTURE.md)) |

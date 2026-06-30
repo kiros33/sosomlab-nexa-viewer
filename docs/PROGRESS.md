@@ -7,6 +7,36 @@
 
 ---
 
+## 2026-06-30 — 외부 인자 열기 + 포터블 설계 + 기술/동작 구조 문서화
+
+- **요청**: ① 포터블 버전을 만들 수 있는 설계 추가 ② 외부 인자로 파일/폴더를 받아 바로
+  보여주는 기능 ③ 기술 구조 분석 문서(없으면 추가) ④ 호출 구조·동작 방식 문서(없으면 추가).
+  + 전체 진행/소스 현황 점검 및 메모리.
+- **변경내역**
+  1. **외부 인자 열기(구현)**: `Viewer.exe "C:\docs\guide.md"`/연결 프로그램/끌어다 놓기로 실행 시
+     해당 파일·폴더를 즉시 연다.
+     - Rust `commands.rs::startup_target` — `argv`(0번 제외)에서 플래그가 아니면서 **실제 존재하는**
+       첫 경로를 해석해 `{root, file}` 반환(파일이면 상위폴더+파일명, 폴더면 root만). `lib.rs` 등록.
+     - 프론트 `store/viewer.ts::openExternalTarget(root, file)` — 워크스페이스 등록·펼침 후
+       파일이면 `openInSource`, 폴더면 `openSource`. `App.tsx` 마운트 effect에서 1회 호출
+       (이미 문서가 열려 있으면 무시).
+  2. **포터블 설계(문서)** `docs/PORTABLE.md`: `portable.txt` 마커로 모드 판별 → 데이터 경로를
+     `<exe>/data`로 분기(`secrets.rs`는 인자로 dir 받으므로 무수정), WebView2 UDF
+     (`WEBVIEW2_USER_DATA_FOLDER`) 옆으로 이동, CI에서 `exe+portable.txt` zip 산출. 적용 체크리스트 포함.
+  3. **기술 구조 + 호출/동작 문서(문서)** `docs/ARCHITECTURE.md`: 프론트(WebView)↔Rust 코어 경계,
+     디렉터리 구조, 소스/렌더 추상화(ContentSource↔ContentProvider 대칭), IPC 커맨드 표,
+     문서 열기/이동기록/갱신감지/부팅 흐름, localStorage 영속화, 빌드 파이프라인.
+  4. **로드맵 갱신** `docs/ROADMAP.md`: 외부 인자(완료)·포터블(설계)·문서화(완료) 항목/추적표 반영.
+- **소스 위치**: `src-tauri/src/commands.rs`(startup_target/StartupTarget), `src-tauri/src/lib.rs`(등록),
+  `src/store/viewer.ts`(openExternalTarget), `src/App.tsx`(부팅 effect),
+  `docs/ARCHITECTURE.md`, `docs/PORTABLE.md`, `docs/ROADMAP.md`.
+- **검증**: `pnpm build`(tsc+vite) 통과(841KB 번들, 경고는 기존 highlight.js 크기), `cargo check` 통과.
+  실제 인자 실행 동작은 배포/실행 환경에서 확인 필요(이 PC는 당분간 개발 미사용).
+- **현황 점검 요약**: M1 완료, M3(GitHub 원격) 1차 완료. 배포 채널 — Homebrew Tap 운영,
+  Chocolatey/winget 검수 진행, SignPath Foundation 서명 신청. M2(KaTeX/Mermaid)·검색·탭 미착수.
+
+---
+
 ## 2026-06-27 14:41 ~ 14:48 — 프로젝트 초기 골격 구축
 
 - **요청**: "Tauri 기반 크로스 플랫폼 프로그램 개발" → 협의 결과 "먼저 기본 골격만",
