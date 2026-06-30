@@ -14,6 +14,10 @@ pub fn run() {
         .plugin(tauri_plugin_dialog::init())
         .plugin(tauri_plugin_fs::init())
         .setup(|app| {
+            use tauri::Manager;
+            // macOS `Opened`(파일 열기) 콜드스타트 버퍼를 앱 상태로 등록.
+            app.manage(commands::PendingOpen::default());
+
             // macOS: About 패널에 아이콘 + 요약 설명이 보이도록 커스텀 메뉴 구성
             #[cfg(target_os = "macos")]
             {
@@ -68,6 +72,7 @@ pub fn run() {
         })
         .invoke_handler(tauri::generate_handler![
             commands::startup_target,
+            commands::take_opened_targets,
             commands::pick_folder,
             commands::pick_markdown_file,
             commands::source_list_dir,
@@ -82,6 +87,31 @@ pub fn run() {
             commands::github_default_branch,
             commands::github_list_repos,
         ])
-        .run(tauri::generate_context!())
-        .expect("error while running tauri application");
+        .build(tauri::generate_context!())
+        .expect("error while building tauri application")
+        .run(|app_handle, event| {
+            // macOS: Finder 더블클릭 / "다음으로 열기" / Dock 드래그 → `Opened` 이벤트.
+            // 콜드스타트(프론트 리스너 전)에는 버퍼에 쌓고, 실행 중에는 즉시 emit한다.
+            #[cfg(target_os = "macos")]
+            {
+                use tauri::{Emitter, Manager};
+                if let tauri::RunEvent::Opened { urls } = event {
+                    let targets: Vec<commands::StartupTarget> = urls
+                        .iter()
+                        .filter_map(|u| u.to_file_path().ok())
+                        .filter_map(|p| commands::resolve_target(&p.to_string_lossy()))
+                        .collect();
+                    if !targets.is_empty() {
+                        if let Some(state) = app_handle.try_state::<commands::PendingOpen>() {
+                            state.0.lock().unwrap().extend(targets.clone());
+                        }
+                        let _ = app_handle.emit("open-targets", targets);
+                    }
+                }
+            }
+            #[cfg(not(target_os = "macos"))]
+            {
+                let _ = (&app_handle, &event);
+            }
+        });
 }

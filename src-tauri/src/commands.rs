@@ -2,6 +2,7 @@
 //! 소스 종류에 관계없이 `ContentProvider` 트레잇으로 디스패치한다.
 
 use std::path::{Path, PathBuf};
+use std::sync::Mutex;
 
 use base64::Engine;
 use tauri::Manager;
@@ -35,24 +36,27 @@ fn provider_for(
 /// 실행 시 외부 인자로 전달된 시작 대상(파일/폴더).
 /// - 폴더면: `root`=폴더 절대경로, `file`=None
 /// - 파일이면: `root`=상위 폴더 절대경로, `file`=파일명(root 기준 상대)
-#[derive(serde::Serialize)]
+#[derive(Clone, serde::Serialize)]
 #[serde(rename_all = "camelCase")]
 pub struct StartupTarget {
     pub root: String,
     pub file: Option<String>,
 }
 
-/// 외부 인자(CLI 인자 / "연결 프로그램" / 파일 끌어다 놓기)로 받은 경로를 해석한다.
+/// macOS `Opened`(파일 열기 Apple Event)로 전달된 열기 대상을 보관하는 버퍼.
 ///
-/// `argv[0]`(실행 파일)을 건너뛰고, 플래그(`-…`)가 아니면서 **실제로 존재하는**
-/// 첫 경로를 시작 대상으로 사용한다. 인자가 없거나 존재하지 않으면 `None`.
-/// 데스크톱(특히 Windows 포터블)에서 `Viewer.exe "C:\docs\guide.md"` 형태로 동작.
-#[tauri::command]
-pub fn startup_target() -> Option<StartupTarget> {
-    let arg = std::env::args()
-        .skip(1)
-        .find(|a| !a.starts_with('-') && Path::new(a).exists())?;
-    let abs = std::path::absolute(&arg).unwrap_or_else(|_| PathBuf::from(&arg));
+/// 콜드스타트(앱이 파일 열기로 실행)에서는 프론트엔드 리스너가 붙기 전에 이벤트가 올 수 있어,
+/// 여기에 쌓아 두었다가 마운트 시 `take_opened_targets`로 비워(drain) 처리한다.
+#[derive(Default)]
+pub struct PendingOpen(pub Mutex<Vec<StartupTarget>>);
+
+/// 임의의 경로 하나를 시작 대상으로 해석한다(존재하지 않으면 `None`).
+/// argv·macOS `Opened` 양쪽에서 공용으로 쓴다.
+pub fn resolve_target(path: &str) -> Option<StartupTarget> {
+    let abs = std::path::absolute(path).unwrap_or_else(|_| PathBuf::from(path));
+    if !abs.exists() {
+        return None;
+    }
     if abs.is_dir() {
         Some(StartupTarget {
             root: abs.to_string_lossy().to_string(),
@@ -66,6 +70,29 @@ pub fn startup_target() -> Option<StartupTarget> {
             file: Some(name),
         })
     }
+}
+
+/// 외부 인자(CLI 인자 / "연결 프로그램" / 파일 끌어다 놓기)로 받은 경로를 해석한다.
+///
+/// `argv[0]`(실행 파일)을 건너뛰고, 플래그(`-…`)가 아니면서 **실제로 존재하는**
+/// 첫 경로를 시작 대상으로 사용한다. 인자가 없거나 존재하지 않으면 `None`.
+/// 데스크톱(특히 Windows·포터블)에서 `Viewer.exe "C:\docs\guide.md"` 형태로 동작.
+/// (macOS Finder 더블클릭/"다음으로 열기"는 argv가 아니라 `Opened` 이벤트로 오므로
+/// 그쪽은 `take_opened_targets` + `open-targets` 이벤트로 처리한다.)
+#[tauri::command]
+pub fn startup_target() -> Option<StartupTarget> {
+    let arg = std::env::args()
+        .skip(1)
+        .find(|a| !a.starts_with('-') && Path::new(a).exists())?;
+    resolve_target(&arg)
+}
+
+/// macOS `Opened` 콜드스타트 버퍼를 비워서 반환한다(없으면 빈 배열).
+/// 다른 OS에서는 항상 빈 배열.
+#[tauri::command]
+pub fn take_opened_targets(pending: tauri::State<'_, PendingOpen>) -> Vec<StartupTarget> {
+    let mut guard = pending.0.lock().unwrap();
+    std::mem::take(&mut *guard)
 }
 
 /// 폴더 선택 다이얼로그.

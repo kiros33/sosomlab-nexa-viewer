@@ -7,6 +7,31 @@
 
 ---
 
+## 2026-07-01 — 외부 인자 열기 macOS 대응 구현
+
+- **요청**: 최근 Windows에 추가한 외부 인자(파일/폴더) 열기를 macOS에서도 동일하게 구현 + 테스트 방법 안내.
+- **배경**: macOS는 Finder 더블클릭/"다음으로 열기"/Dock 드래그가 argv가 아니라 Apple `Opened`
+  이벤트로 전달돼, 기존 argv 기반(`startup_target`)만으로는 동작하지 않음.
+- **변경내역(구현)**
+  1. `commands.rs`: `resolve_target(path)` 헬퍼로 경로→`{root,file}` 해석 로직 공용화(argv·Opened 공유).
+     `StartupTarget`에 `Clone` 추가. macOS 콜드스타트 버퍼 `PendingOpen(Mutex<Vec<StartupTarget>>)`
+     + `take_opened_targets` 커맨드(버퍼 drain) 추가.
+  2. `lib.rs`: `app.manage(PendingOpen::default())` 등록, `take_opened_targets` 핸들러 추가.
+     `.run(generate_context!())` → `.build(…)?.run(|app, e| …)`로 전환해 `RunEvent::Opened { urls }`
+     처리 — 콜드스타트분은 버퍼에 적재, 실행 중이면 `open-targets` 이벤트 emit.
+  3. `tauri.conf.json`: `bundle.fileAssociations`(md/markdown/mdown/mkd, role=Viewer) 추가
+     → macOS Info.plist `CFBundleDocumentTypes` 자동 생성(Windows 연결도 함께).
+  4. `App.tsx`: 부팅 시 `startup_target`(argv) + `take_opened_targets`(macOS 버퍼) 수집 후 열기,
+     실행 중 추가 열기는 `listen("open-targets")` 구독. (이미 문서 열려 있으면 부팅 자동열기 생략)
+- **소스 위치**: `src-tauri/src/commands.rs`(resolve_target/PendingOpen/take_opened_targets),
+  `src-tauri/src/lib.rs`(manage + RunEvent::Opened), `src-tauri/tauri.conf.json`(fileAssociations),
+  `src/App.tsx`(부팅 effect + open-targets 구독).
+- **검증**: `pnpm build`(tsc+vite) 통과, `cargo check` 통과(경고 0). 실제 Finder 열기/Dock 드래그는
+  `.app` 번들 빌드 후 사용자 대화형 환경에서 확인 필요(아래 테스트 절차 안내).
+- **문서 반영**: ARCHITECTURE(IPC 표·부팅 흐름·외부 인자 설명), ROADMAP(완료 처리), FAQ(파일 더블클릭 열기).
+
+---
+
 ## 2026-07-01 — 검색·파일변경 갱신 설계 + 외부 인자 macOS 대응 확인
 
 - **요청**: ① 검색 기능(단어 단위 기본 + 정규식)을 구현 대상으로 단계 정리 ② 최근 Windows에

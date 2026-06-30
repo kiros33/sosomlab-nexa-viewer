@@ -1,5 +1,6 @@
 import { useCallback, useEffect, useRef } from "react";
 import { invoke } from "@tauri-apps/api/core";
+import { listen } from "@tauri-apps/api/event";
 // 테마별 GitHub 마크다운 CSS + highlight.js 테마를 raw로 가져와 토글한다.
 import githubLight from "github-markdown-css/github-markdown-light.css?raw";
 import githubDark from "github-markdown-css/github-markdown-dark.css?raw";
@@ -71,27 +72,47 @@ export default function App() {
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
 
-  // 최초 1회: 외부 인자(파일/폴더 경로)로 실행된 경우 해당 대상을 바로 연다.
+  // 외부 인자로 받은 파일/폴더 열기.
+  // - Windows/터미널: 실행 인자(argv) → startup_target
+  // - macOS Finder 더블클릭/"다음으로 열기"/Dock 드래그: Apple `Opened` 이벤트
+  //   · 콜드스타트(리스너 전 발생분)는 take_opened_targets로 비워서 처리
+  //   · 실행 중 추가 열기는 "open-targets" 이벤트로 수신
   useEffect(() => {
+    type Target = { root: string; file: string | null };
     let cancelled = false;
+    let unlisten: (() => void) | undefined;
     void (async () => {
       try {
-        const t = await invoke<{ root: string; file: string | null } | null>(
-          "startup_target",
-        );
-        if (!t || cancelled) return;
-        if (useViewer.getState().docPath) return; // 이미 문서가 열려 있으면 무시
-        await openExternalTarget(t.root, t.file);
+        const initial: Target[] = [];
+        const argv = await invoke<Target | null>("startup_target");
+        if (argv) initial.push(argv);
+        try {
+          const opened = await invoke<Target[]>("take_opened_targets");
+          if (opened?.length) initial.push(...opened);
+        } catch {
+          /* 비-macOS 등은 빈 배열/무시 */
+        }
+        // 이미 문서가 열려 있지 않을 때만 부팅 시 자동 열기
+        if (!cancelled && initial.length && !useViewer.getState().docPath) {
+          for (const t of initial) await openExternalTarget(t.root, t.file);
+        }
+        // 실행 중 추가 열기(macOS Opened) 구독
+        unlisten = await listen<Target[]>("open-targets", (e) => {
+          const list = e.payload ?? [];
+          void (async () => {
+            for (const t of list) await openExternalTarget(t.root, t.file);
+          })();
+        });
+        if (cancelled && unlisten) unlisten();
       } catch {
         /* 인자 없음/해석 실패는 무시 */
       }
     })();
     return () => {
       cancelled = true;
+      if (unlisten) unlisten();
     };
-    // 마운트 시 1회만 실행
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  }, []);
+  }, [openExternalTarget]);
 
   // 이동(navSeq)마다 스크롤 복원: 저장된 위치 > 앵커 > 맨 위
   useEffect(() => {

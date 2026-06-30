@@ -116,7 +116,8 @@ src-tauri/                   # 백엔드 (Rust + Tauri 2)
 
 | 커맨드 | 호출처(TS) | 역할 |
 |---|---|---|
-| `startup_target` | `App.tsx`(부팅) | 외부 인자(파일/폴더) 해석 → `{root, file}` |
+| `startup_target` | `App.tsx`(부팅) | 외부 인자(argv) 해석 → `{root, file}` (Windows/터미널) |
+| `take_opened_targets` | `App.tsx`(부팅) | macOS `Opened` 콜드스타트 버퍼 비우기 → `[{root, file}]` |
 | `pick_folder` / `pick_markdown_file` | `localSource.ts` | 네이티브 선택 다이얼로그 |
 | `source_list_dir` | `LocalSource/GithubSource.listDir` | 디렉터리 나열 |
 | `source_read_file` | `…readFile` | 텍스트 읽기(+version) |
@@ -161,16 +162,23 @@ src-tauri/                   # 백엔드 (Rust + Tauri 2)
 main.tsx → <App/>
   App 마운트 effect:
     ① 테마 적용(data-theme)
-    ② startup_target 조회 → 외부 인자 있으면 openExternalTarget(root, file)
-       · file 지정 → 상위 폴더를 워크스페이스 등록·펼침 + openInSource(파일 열기)
-       · 폴더      → 워크스페이스 등록·펼침 + openSource(활성 소스 설정)
+    ② 외부 인자로 열기 대상 수집 → openExternalTarget(root, file)
+       · startup_target(argv)        … Windows/터미널
+       · take_opened_targets()       … macOS Opened 콜드스타트 버퍼(drain)
+       · listen("open-targets")      … macOS 실행 중 추가 열기 구독
+       (file 지정→상위 폴더 등록·펼침+openInSource / 폴더→등록·펼침+openSource)
     ③ 창 포커스 리스너 등록(원격 갱신 확인)
   외부 인자가 없으면 Welcome 화면(최근 문서) 표시.
 ```
 
-> **외부 인자 처리**(`Viewer.exe "C:\docs\guide.md"`)는 현재 `argv` 기반이다.
-> macOS의 `Opened`(파일 열기) 이벤트와 실행 중인 인스턴스로의 전달(single-instance)은
-> 향후 확장 항목 — [PORTABLE.md](PORTABLE.md) 및 ROADMAP 참고.
+> **외부 인자 처리** — 두 경로로 동작한다.
+> - **Windows/터미널**: 프로세스 `argv` → `startup_target` (`Viewer.exe "C:\docs\guide.md"`).
+> - **macOS**: Finder 더블클릭/"다음으로 열기"/Dock 드래그는 argv가 아니라 Apple `Opened`
+>   이벤트로 전달된다. `lib.rs`가 `.build().run(|app, e| …)`에서 `RunEvent::Opened`를 받아
+>   ① 콜드스타트분은 `PendingOpen` 버퍼에 쌓고(마운트 시 `take_opened_targets`로 drain)
+>   ② 실행 중에는 `open-targets` 이벤트로 emit → 프론트가 구독해 즉시 연다.
+>   파일 연결은 `tauri.conf.json`의 `bundle.fileAssociations`(→ Info.plist `CFBundleDocumentTypes`).
+> - 향후: Windows/macOS **single-instance**로 2번째 실행을 기존 창으로 합치기 — ROADMAP 참고.
 
 ### 4.4 상태 영속화 (localStorage)
 

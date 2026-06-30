@@ -60,10 +60,10 @@
 ### M5 — UX 폴리시 & 지식관리
 - [x] **외부 인자로 파일/폴더 열기 (Windows, argv)** — `Viewer.exe "문서.md"`/연결 프로그램으로 즉시 열람
       (`startup_target` 커맨드).
-- [ ] **외부 인자 열기 macOS 대응** — Finder 더블클릭/"다음으로 열기"는 argv가 아닌 Apple Event라
-      별도 필요: `bundle.fileAssociations`(Info.plist `CFBundleDocumentTypes`) +
-      `RunEvent::Opened { urls }` 처리(`.build().run(|app,e| …)`) + 프론트 이벤트 listen.
-      (+ Windows/macOS single-instance로 2번째 실행 라우팅)
+- [x] **외부 인자 열기 macOS 대응** — `bundle.fileAssociations`(Info.plist `CFBundleDocumentTypes`)
+      + `RunEvent::Opened { urls }` 처리(콜드스타트 버퍼 `take_opened_targets` + 실행 중 `open-targets`
+      이벤트 emit/listen). Finder 더블클릭/"다음으로 열기"/Dock 드래그 지원.
+- [ ] **single-instance** — Windows/macOS에서 2번째 실행을 기존 창으로 합치기(추후)
 - [ ] **검색** — 현재 문서 단어 검색 + 정규식 → 파일명 필터 → 워크스페이스 전체(grep).
       설계: [SEARCH.md](SEARCH.md)
 - [ ] **파일 변경 시 갱신(미사용/변경 알림/자동)** — 자동은 현재 위치 유지. 설계: [AUTO-REFRESH.md](AUTO-REFRESH.md)
@@ -115,8 +115,8 @@
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Chocolatey / Homebrew 등록 | 배포 채널 | 설계 |
-| 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) / macOS 설계 |
-| 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | 설계 |
+| 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
+| 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료 |
 | 문서 검색(단어/정규식, 파일명, 전체 grep) | M5 | 설계([SEARCH.md](SEARCH.md)) |
 | 파일 변경 갱신(미사용/알림/자동·위치유지) | M5 | 설계([AUTO-REFRESH.md](AUTO-REFRESH.md)) |
 | 포터블 버전(Windows zip) | 배포 채널 | 설계([PORTABLE.md](PORTABLE.md)) |

@@ -25,6 +25,15 @@
   "bundle": {
     "active": true,
     "targets": ["dmg", "nsis", "deb", "rpm", "appimage"],
+    "fileAssociations": [
+      {
+        "ext": ["md", "markdown", "mdown", "mkd"],
+        "name": "Markdown Document",
+        "description": "Markdown 문서",
+        "role": "Viewer",
+        "mimeType": "text/markdown"
+      }
+    ],
     "publisher": "SosomLab",
     "copyright": "© 2026 SosomLab",
     "category": "Productivity",
