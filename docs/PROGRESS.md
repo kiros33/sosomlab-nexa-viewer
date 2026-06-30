@@ -7,6 +7,30 @@
 
 ---
 
+## 2026-07-01 — 검색·파일변경 갱신 설계 + 외부 인자 macOS 대응 확인
+
+- **요청**: ① 검색 기능(단어 단위 기본 + 정규식)을 구현 대상으로 단계 정리 ② 최근 Windows에
+  추가한 외부 인자 열기를 macOS에서도 동일하게 할 수 있는지 확인 ③ 설정에 "파일 변경 시 갱신"
+  옵션(미사용/변경 알림/자동, 자동은 현재 위치 유지)을 구현 대상으로 정리.
+- **변경내역(문서/설계)**
+  1. **검색 설계** `docs/SEARCH.md`: 공통 옵션 모델(대소문자/단어단위/정규식 → RegExp 통일),
+     단계 S1(현재 문서 단어 검색)→S2(정규식)→S3(파일명 필터)→S4(워크스페이스 grep, 로컬→GitHub)
+     →S5(고도화). 권장 진행 순서·보안(토큰 Rust 격리) 포함.
+  2. **파일 변경 갱신 설계** `docs/AUTO-REFRESH.md`: 모드 `manual/notify/auto`(기본 notify),
+     R1(설정+알림 정비)→R2(로컬 변경 감지: notify 워처 또는 mtime 폴링, 버전 개념 일반화)
+     →R3(자동 갱신 + **heading 기준 위치 유지**, 디바운스)→R4(폴링 간격/저장소별 override/트리 동기화).
+  3. **외부 인자 macOS 대응(확인 결과)**: 현재 argv 기반은 macOS Finder 더블클릭/"다음으로 열기"
+     (Apple Event)에서 동작 안 함. 필요: `bundle.fileAssociations`(Info.plist CFBundleDocumentTypes)
+     + `RunEvent::Opened { urls }` 처리(`.build().run(|app,e| …)`로 변경) + 프론트 이벤트 listen
+     (+ single-instance로 2번째 실행 라우팅). → **가능하나 별도 작업 항목**으로 로드맵 반영.
+  4. **로드맵 갱신** `docs/ROADMAP.md`: M5에 검색/파일변경갱신/외부인자 macOS 항목 추가, 추적표 반영.
+- **소스 위치**: `docs/SEARCH.md`, `docs/AUTO-REFRESH.md`, `docs/ROADMAP.md`(M5 + 추적표).
+  - 관련 기반 코드(향후 구현 지점): `src/store/viewer.ts`(checkForUpdate/scroll 복원/refreshMode 예정),
+    `src-tauri/src/commands.rs`(startup_target/검색·watch 커맨드 예정), `src-tauri/src/lib.rs`(RunEvent 예정).
+- **검증**: 설계/문서 작업으로 코드 변경 없음. 저장소는 `origin/main`과 동기 상태에서 진행.
+
+---
+
 ## 2026-06-30 — 외부 인자 열기 + 포터블 설계 + 기술/동작 구조 문서화
 
 - **요청**: ① 포터블 버전을 만들 수 있는 설계 추가 ② 외부 인자로 파일/폴더를 받아 바로
