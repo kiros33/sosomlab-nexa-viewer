@@ -17,6 +17,12 @@ Windows는 "추가 정보 → 실행". 자세히 → [설치](Installation).
 
 ## 온라인에서 바뀐 GitHub 문서를 어떻게 갱신하나요?
 창에 다시 포커스하면 변경을 감지해 상단에 "🔄 갱신 가능"이 표시됩니다. 클릭 시 최신으로 갱신.
+> 예정: 설정에서 **미사용 / 변경 알림 / 자동 갱신(현재 위치 유지)** 모드와 로컬 파일 변경 감지를
+> 지원할 계획입니다(로드맵 [AUTO-REFRESH.md](https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/docs/AUTO-REFRESH.md)).
+
+## 문서 안에서 검색이 되나요?
+아직 지원하지 않습니다(로드맵 예정). 단어 단위 검색 + 정규식부터 저장소 전체 검색까지 단계적으로
+추가할 계획입니다 — 설계 [SEARCH.md](https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/docs/SEARCH.md).
 
 ## 파일을 더블클릭해서 이 앱으로 바로 열 수 있나요?
 네. **Windows**는 파일을 앱에 끌어다 놓거나 "연결 프로그램"으로, 명령줄 `Viewer.exe "문서.md"`로

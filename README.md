@@ -144,7 +144,8 @@ src-tauri/
 - **M2** 수식(KaTeX) · Mermaid 다이어그램 · GitHub Alerts
 - **M3** GitHub 원격 소스 · 토큰 암호화 저장 · 다중 저장소
 - **M4** Bitbucket/GitLab provider
-- **M5** 검색 · 탭 · 백링크/링크 그래프 · 태그
+- **M5** 검색([SEARCH.md](docs/SEARCH.md)) · 파일 변경 갱신([AUTO-REFRESH.md](docs/AUTO-REFRESH.md)) ·
+  탭 · 백링크/링크 그래프 · 태그 · 외부 인자 열기(✅ Windows·macOS)
 - **M6** Git diff 비교 · **M7** 모바일(iOS/Android)
 
 작업 일지: **[docs/PROGRESS.md](docs/PROGRESS.md)**
