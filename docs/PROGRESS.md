@@ -7,6 +7,48 @@
 
 ---
 
+## 2026-07-01 — macOS 전달인자 처리: 동작 확인 + 줄단위 최종 정리 + 후속 이슈
+
+- **요청**: ① macOS `open -a` 동작 확인 결과 "동일 폴더가 또 등록되고 다시 열리는" 중복 문제를
+  **후속 이슈로 등록** ② macOS 전달인자 수정 내역을 **줄단위까지 기록** ③ 진행사항 정리 후 push.
+- **현재 상태**: macOS에서 외부 인자로 파일/폴더 **열림 동작 확인됨**(전역 버퍼 전환 후). 다만 이미
+  등록된 폴더를 다시 열면 **중복 등록·재열림** 발생 → ROADMAP에 🐞 이슈로 등록.
+
+### 최종 코드 맵 (커밋 `5925533` 기준, 줄 번호는 해당 시점)
+- **`src-tauri/src/commands.rs`**
+  - L4–5: `use std::path::{Path, PathBuf}; use std::sync::{Mutex, OnceLock};`
+  - L39–44: `StartupTarget { root, file }` — `#[derive(Clone, serde::Serialize)]` + `rename_all="camelCase"`.
+  - L51–55: `opened_buffer()` — `static BUF: OnceLock<Mutex<Vec<StartupTarget>>>` **전역 버퍼**(런루프 의존 제거).
+  - L57–61: `push_opened(targets)` — 런루프에서 받은 대상을 전역 버퍼에 적재.
+  - L65–82: `resolve_target(path)` — 경로→`{root,file}`(폴더=root, 파일=상위폴더+파일명), 미존재 시 `None`.
+  - L93–98: `startup_target()` — argv(0번 제외, 플래그 아님 + 존재)에서 첫 경로 → `resolve_target`.
+  - L103–108: `take_opened_targets()` — 인자 없음(전역 버퍼 drain). 다른 OS는 빈 배열.
+- **`src-tauri/src/lib.rs`**
+  - L70–71: `invoke_handler`에 `startup_target`, `take_opened_targets` 등록.
+  - L86–87: `.build(generate_context!())` 로 전환(이벤트 루프 클로저 사용 목적).
+  - L88–116: `.run(|app_handle, event| …)`
+    - L94: `if let RunEvent::Opened { urls } = event`(macOS만).
+    - L99–101: `urls`→`to_file_path()`→`resolve_target` 로 `targets` 구성.
+    - L102: `commands::push_opened(targets.clone())`(콜드스타트 대비 버퍼 적재).
+    - L104: `app_handle.emit("open-targets", targets)`(실행 중 즉시 전달).
+    - 비-macOS: `let _ = (&app_handle, &event);`(미사용 경고 방지).
+- **`src-tauri/tauri.conf.json`**
+  - L28–35: `bundle.fileAssociations` — `ext:[md,markdown,mdown,mkd]`, `role:Viewer` → Info.plist `CFBundleDocumentTypes`.
+- **`src/App.tsx`** (부팅 effect L80–134)
+  - L86–92: `openOne(t)` — `${root}::${file}` 키로 **1.5초 내 동일 대상 중복 열기 방지** 후 `openExternalTarget`.
+  - L93–97: `openList(list)` — 목록을 순차 `openOne`.
+  - L100–105: **리스너 먼저 등록** `listen("open-targets", …)`(버퍼 drain 전후 누락 방지).
+  - L110–118: argv(`startup_target`) + macOS 전역 버퍼(`take_opened_targets`) 수집.
+  - L123–125: `docPath` 비어 있을 때만 부팅 자동 열기(`openOne`).
+- **`src/store/viewer.ts`**
+  - L497–510: `openExternalTarget(root, file)` — `addWorkspace(ref)` → 펼침 → 파일이면 `openInSource`, 폴더면 `openSource`.
+
+### 후속 이슈(등록)
+- 🐞 **중복 등록·재열림**: `openExternalTarget`(viewer.ts L497)가 매번 `addWorkspace`(이미 있으면 최상단
+  이동)하고 `openInSource`로 재로딩함. → 이미 등록/열려 있으면 재사용하도록 개선 필요. ROADMAP M5 참고.
+
+---
+
 ## 2026-07-01 — 외부 인자 열기 macOS 디버깅 + 견고화(전역 버퍼)
 
 - **요청**: macOS에서 `open -a App 파일` 로 열어도 파일이 열리지 않음 → 원인 파악 및 수정.
