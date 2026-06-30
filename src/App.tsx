@@ -1,4 +1,5 @@
 import { useCallback, useEffect, useRef } from "react";
+import { invoke } from "@tauri-apps/api/core";
 // 테마별 GitHub 마크다운 CSS + highlight.js 테마를 raw로 가져와 토글한다.
 import githubLight from "github-markdown-css/github-markdown-light.css?raw";
 import githubDark from "github-markdown-css/github-markdown-dark.css?raw";
@@ -50,6 +51,7 @@ export default function App() {
   const resizeSidebar = useViewer((s) => s.resizeSidebar);
   const resizeToc = useViewer((s) => s.resizeToc);
   const checkForUpdate = useViewer((s) => s.checkForUpdate);
+  const openExternalTarget = useViewer((s) => s.openExternalTarget);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
@@ -68,6 +70,28 @@ export default function App() {
     document.documentElement.setAttribute("data-theme", theme);
     document.documentElement.style.colorScheme = theme;
   }, [theme]);
+
+  // 최초 1회: 외부 인자(파일/폴더 경로)로 실행된 경우 해당 대상을 바로 연다.
+  useEffect(() => {
+    let cancelled = false;
+    void (async () => {
+      try {
+        const t = await invoke<{ root: string; file: string | null } | null>(
+          "startup_target",
+        );
+        if (!t || cancelled) return;
+        if (useViewer.getState().docPath) return; // 이미 문서가 열려 있으면 무시
+        await openExternalTarget(t.root, t.file);
+      } catch {
+        /* 인자 없음/해석 실패는 무시 */
+      }
+    })();
+    return () => {
+      cancelled = true;
+    };
+    // 마운트 시 1회만 실행
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   // 이동(navSeq)마다 스크롤 복원: 저장된 위치 > 앵커 > 맨 위
   useEffect(() => {

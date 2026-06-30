@@ -67,6 +67,7 @@ pub fn run() {
             Ok(())
         })
         .invoke_handler(tauri::generate_handler![
+            commands::startup_target,
             commands::pick_folder,
             commands::pick_markdown_file,
             commands::source_list_dir,

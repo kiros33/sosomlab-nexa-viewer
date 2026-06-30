@@ -235,6 +235,12 @@ interface ViewerState {
   bumpRefresh: (key: string) => void;
 
   openSource: (source: ContentSource) => void;
+  /**
+   * 외부 인자(실행 시 전달된 파일/폴더 경로)로 시작 대상을 연다.
+   * - file 지정: 해당 파일을 바로 열고, 상위 폴더를 탐색기에 등록·펼침.
+   * - file=null(폴더): 폴더를 탐색기에 등록·펼치고 활성 소스로 설정.
+   */
+  openExternalTarget: (root: string, file: string | null) => Promise<void>;
   /** 특정 소스의 문서를 연다(필요 시 활성 소스 전환). */
   openInSource: (source: ContentSource, path: string) => Promise<void>;
   /** 현재 소스에서 문서 열기(이동 기록 push). hash 지정 시 해당 앵커로 */
@@ -486,6 +492,21 @@ export const useViewer = create<ViewerState>((set, get) => {
         historyIndex: -1,
         pendingHash: null,
       });
+    },
+
+    openExternalTarget: async (root, file) => {
+      const ref: SourceRef = { kind: "local", root, gitRef: null };
+      // 탐색기에 등록하고 펼쳐서 바로 보이게 한다(중복 등록은 addWorkspace가 정리).
+      get().addWorkspace(ref);
+      const key = sourceKey(ref);
+      if (!get().expandedKeys.includes(key)) get().toggleExpanded(key);
+      set({ sidebarView: "files", sidebarVisible: true });
+      const source = sourceFromRef(ref);
+      if (file) {
+        await get().openInSource(source, file);
+      } else {
+        get().openSource(source);
+      }
     },
 
     openInSource: async (source, path) => {

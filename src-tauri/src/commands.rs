@@ -1,7 +1,7 @@
 //! 프론트엔드에서 호출하는 Tauri 커맨드.
 //! 소스 종류에 관계없이 `ContentProvider` 트레잇으로 디스패치한다.
 
-use std::path::PathBuf;
+use std::path::{Path, PathBuf};
 
 use base64::Engine;
 use tauri::Manager;
@@ -29,6 +29,42 @@ fn provider_for(
             Ok(Box::new(GithubProvider::new(token)))
         }
         other => Err(format!("지원하지 않는 소스 종류입니다: {other}")),
+    }
+}
+
+/// 실행 시 외부 인자로 전달된 시작 대상(파일/폴더).
+/// - 폴더면: `root`=폴더 절대경로, `file`=None
+/// - 파일이면: `root`=상위 폴더 절대경로, `file`=파일명(root 기준 상대)
+#[derive(serde::Serialize)]
+#[serde(rename_all = "camelCase")]
+pub struct StartupTarget {
+    pub root: String,
+    pub file: Option<String>,
+}
+
+/// 외부 인자(CLI 인자 / "연결 프로그램" / 파일 끌어다 놓기)로 받은 경로를 해석한다.
+///
+/// `argv[0]`(실행 파일)을 건너뛰고, 플래그(`-…`)가 아니면서 **실제로 존재하는**
+/// 첫 경로를 시작 대상으로 사용한다. 인자가 없거나 존재하지 않으면 `None`.
+/// 데스크톱(특히 Windows 포터블)에서 `Viewer.exe "C:\docs\guide.md"` 형태로 동작.
+#[tauri::command]
+pub fn startup_target() -> Option<StartupTarget> {
+    let arg = std::env::args()
+        .skip(1)
+        .find(|a| !a.starts_with('-') && Path::new(a).exists())?;
+    let abs = std::path::absolute(&arg).unwrap_or_else(|_| PathBuf::from(&arg));
+    if abs.is_dir() {
+        Some(StartupTarget {
+            root: abs.to_string_lossy().to_string(),
+            file: None,
+        })
+    } else {
+        let parent = abs.parent()?.to_string_lossy().to_string();
+        let name = abs.file_name()?.to_string_lossy().to_string();
+        Some(StartupTarget {
+            root: parent,
+            file: Some(name),
+        })
     }
 }
 
