@@ -30,8 +30,22 @@
 - **소스 위치**: `src-tauri/src/commands.rs`(startup_target/StartupTarget), `src-tauri/src/lib.rs`(등록),
   `src/store/viewer.ts`(openExternalTarget), `src/App.tsx`(부팅 effect),
   `docs/ARCHITECTURE.md`, `docs/PORTABLE.md`, `docs/ROADMAP.md`.
-- **검증**: `pnpm build`(tsc+vite) 통과(841KB 번들, 경고는 기존 highlight.js 크기), `cargo check` 통과.
-  실제 인자 실행 동작은 배포/실행 환경에서 확인 필요(이 PC는 당분간 개발 미사용).
+- **검증**: `pnpm build`(tsc+vite) 통과(841KB 번들, 경고는 기존 highlight.js 크기).
+  - **백엔드 실제 컴파일 확인**: `pnpm tauri dev`로 릴리스 아님 디버그 빌드 수행 →
+    `Finished dev … 8m05s` → `Running target\debug\NexaMarkdownViewer.exe '…hello.md'` 까지 진행,
+    **외부 인자가 바이너리로 그대로 전달됨**을 로그로 확인(기존 macOS 한정 미사용 경고 3건만).
+  - ⚠️ 정정: 직전 기록의 "cargo check 통과"는 **거짓 양성**이었음 — `cargo check 2>&1 | tail`에서
+    파이프 종료코드가 tail(0)로 가려졌고, 당시 셸엔 `cargo`가 PATH에 없었음.
+  - **환경 메모(이 PC)**: `cargo`/`rustc`가 PATH에 없음 → `~/.cargo/bin`에 존재
+    (`$env:Path = "$env:USERPROFILE\.cargo\bin;$env:Path"` 또는 bash `export PATH="$HOME/.cargo/bin:$PATH"` 필요).
+  - **GUI 창은 에이전트 백그라운드 셸에서 유지 불가**(데스크톱 세션 미연결로 프로세스 즉시 종료) →
+    실제 창 렌더링/자동 열림은 사용자 대화형 터미널에서 확인.
+- **실행/테스트 방법(정리)**
+  - dev: `pnpm tauri dev -- -- "<파일|폴더 경로>"` (`-- --` = pnpm→tauri→앱 바이너리 인자 전달).
+    디버그 exe는 `devUrl(http://localhost:1420)`에서 화면을 불러오므로 **단독 실행 금지**, dev로 함께 실행.
+  - 자체 완결 테스트(더블클릭/연결 프로그램처럼): `pnpm tauri build --no-bundle` →
+    `target\release\NexaMarkdownViewer.exe "<경로>"` 직접 실행(릴리스는 번들 dist 사용).
+  - 테스트 픽스처(스크래치패드): `nexa-arg-test/{hello.md, more.md}`.
 - **현황 점검 요약**: M1 완료, M3(GitHub 원격) 1차 완료. 배포 채널 — Homebrew Tap 운영,
   Chocolatey/winget 검수 진행, SignPath Foundation 서명 신청. M2(KaTeX/Mermaid)·검색·탭 미착수.
 
