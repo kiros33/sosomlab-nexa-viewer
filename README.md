@@ -16,6 +16,8 @@
 빠르고 가벼운 [Tauri](https://tauri.app) 기반(네이티브 웹뷰, 작은 용량)이며, 소스(로컬/GitHub/…)와
 렌더링 방식을 **추상화**해 손쉽게 확장할 수 있도록 설계되었습니다. 제작: **SosomLab**.
 
+🏠 홈페이지: **[sosomlab.com](https://sosomlab.com)** · 📦 제품 소개: **[sosomlab.com/apps/nexa-markdown-viewer](https://sosomlab.com/apps/nexa-markdown-viewer)**
+
 <p align="center">
   <img src="docs/assets/screenshot.svg" alt="Nexa Markdown Viewer UI 미리보기" width="100%" />
 </p>
@@ -156,4 +158,4 @@ src-tauri/
 
 ---
 
-<p align="center"><sub>© 2026 SosomLab · Built with Tauri + React</sub></p>
+<p align="center"><sub>© 2026 <a href="https://sosomlab.com">SosomLab</a> · <a href="https://sosomlab.com/apps/nexa-markdown-viewer">제품 소개</a> · Built with Tauri + React</sub></p>
