@@ -7,6 +7,26 @@
 
 ---
 
+## 2026-07-25 — Mermaid 크기 보정: VS Code와 유사하게(폭 맞춤 + 폰트 고정)
+
+- **요청**: 앱/VS Code 캡처의 배율을 1차 보정해 크기·폰트 차이를 측정하고, 앱의 Mermaid를
+  VS Code와 비슷한 크기로 개선.
+- **측정(1차 보정)**: 제목 폭 기준 캡처 배율 앱≈1.22× vs VS Code 1×. 노드(P1) 절대폭
+  앱 218px vs VS Code 213px(≈1.02) → 배율 보정 시 앱 다이어그램이 **본문 대비 ≈0.84배**로
+  작게 보였고, 결정적으로 앱은 자연 폭 렌더로 **P5 노드가 잘림**(VS Code는 폭 맞춤 축소).
+- **변경내역** (`src/renderer/Mermaid.tsx`, `src/App.css`)
+  1. **초기 폭 맞춤(fit-to-width)**: 렌더 직후 svg viewBox 폭 측정 → 컨테이너 폭(패딩 제외)
+     대비 `fit=min(1, avail/natural)`을 초기 축척으로 — VS Code처럼 전체가 항상 보임.
+  2. **줌 방식 변경**: transform scale → **svg 실폭(width) 조절**. 레이아웃 높이가 함께
+     변해 축소 시 빈 공간/잘림이 없음. 팬(드래그)만 transform translate 유지.
+  3. "원래대로" 버튼 = 폭 맞춤 상태 복귀. 컨테이너 리사이즈 시 사용자가 줌을 만지지
+     않았으면 fit 재계산(ResizeObserver).
+  4. `themeVariables.fontSize: "16px"` 명시 — 본문(markdown-body 16px)과 노드 텍스트
+     비율 고정.
+- **검증**: `pnpm build` 통과. 실측 확인은 동일 문서로 앱/VS Code 비교 권장.
+
+---
+
 ## 2026-07-25 — v0.3.0 배포 완료: Release·brew·winget + Cask 오류 수정
 
 - **결과 요약**

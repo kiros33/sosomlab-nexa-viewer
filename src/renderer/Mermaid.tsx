@@ -6,7 +6,7 @@
  *  - 문법 오류 시 원본 코드를 오류 표시와 함께 보여준다
  * 라이선스: mermaid MIT.
  */
-import { useEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useRef, useState } from "react";
 import type { MermaidConfig } from "mermaid";
 
 import { useViewer } from "../store/viewer";
@@ -43,6 +43,7 @@ function vscodeThemeVariables(theme: Theme): NonNullable<MermaidConfig["themeVar
       textColor: "#cccccc",
       titleColor: "#cccccc",
       fontFamily: VSCODE_FONT,
+      fontSize: "16px", // 본문(markdown-body 16px)과 동일 비율 유지
     };
   }
   return {
@@ -60,6 +61,7 @@ function vscodeThemeVariables(theme: Theme): NonNullable<MermaidConfig["themeVar
     textColor: "#3b3b3b",
     titleColor: "#3b3b3b",
     fontFamily: VSCODE_FONT,
+    fontSize: "16px",
   };
 }
 
@@ -76,6 +78,11 @@ export function MermaidBlock({ code }: { code: string }) {
   const [scale, setScale] = useState(1);
   const [pan, setPan] = useState({ x: 0, y: 0 });
   const viewportRef = useRef<HTMLDivElement>(null);
+  const canvasRef = useRef<HTMLDivElement>(null);
+  /** 다이어그램 자연 폭(px, viewBox 기준) */
+  const naturalW = useRef(0);
+  /** 컨테이너 폭 맞춤(fit) 배율 — 초기값이자 "원래대로"의 기준 */
+  const fitScale = useRef(1);
 
   useEffect(() => {
     let cancelled = false;
@@ -111,6 +118,46 @@ export function MermaidBlock({ code }: { code: string }) {
     };
   }, [code, theme]);
 
+  // 렌더 직후: 자연 폭 측정 → VS Code처럼 컨테이너 폭에 맞춰 초기 축척(fit) 결정.
+  // 확대/축소는 svg 실폭을 바꾸는 방식이라 레이아웃 높이도 함께 줄어든다(잘림 방지).
+  useLayoutEffect(() => {
+    if (!svg) return;
+    const el = canvasRef.current?.querySelector("svg");
+    const vp = viewportRef.current;
+    if (!el || !vp) return;
+    const w = el.viewBox?.baseVal?.width || el.getBoundingClientRect().width;
+    if (!w) return;
+    naturalW.current = w;
+    const fit = Math.min(1, (vp.clientWidth - 32) / w); // 패딩 16px*2 제외
+    fitScale.current = fit;
+    setScale(fit);
+    setPan({ x: 0, y: 0 });
+  }, [svg]);
+
+  // scale 변경 → svg 실폭 반영 (mermaid가 넣는 max-width는 해제)
+  useLayoutEffect(() => {
+    const el = canvasRef.current?.querySelector("svg") as SVGSVGElement | null;
+    if (!el || !naturalW.current) return;
+    el.style.width = `${naturalW.current * scale}px`;
+    el.style.maxWidth = "none";
+    el.style.height = "auto";
+  }, [scale, svg]);
+
+  // 컨테이너 크기 변화 시, 사용자가 줌을 만지지 않았다면 fit 배율 재계산
+  useEffect(() => {
+    const vp = viewportRef.current;
+    if (!vp) return;
+    const ro = new ResizeObserver(() => {
+      if (!naturalW.current) return;
+      const prevFit = fitScale.current;
+      const fit = Math.min(1, (vp.clientWidth - 32) / naturalW.current);
+      fitScale.current = fit;
+      setScale((s) => (Math.abs(s - prevFit) < 0.001 ? fit : s));
+    });
+    ro.observe(vp);
+    return () => ro.disconnect();
+  }, [svg]);
+
   // Ctrl/⌘ + 휠 — 다이어그램 확대/축소 (본문 줌보다 우선; preventDefault 위해 non-passive)
   useEffect(() => {
     const el = viewportRef.current;
@@ -140,7 +187,7 @@ export function MermaidBlock({ code }: { code: string }) {
   };
 
   const reset = () => {
-    setScale(1);
+    setScale(fitScale.current); // "원래대로" = 폭 맞춤 상태
     setPan({ x: 0, y: 0 });
   };
 
@@ -169,13 +216,14 @@ export function MermaidBlock({ code }: { code: string }) {
           <button onClick={() => setScale((s) => clampScale(s * 1.25))} title="확대">
             <Icon name="zoom_in" size={16} />
           </button>
-          <button onClick={reset} title="원래 크기·위치로">
+          <button onClick={reset} title="폭 맞춤(원래대로)">
             <Icon name="fit_screen" size={16} />
           </button>
         </div>
         <div
           className="mermaid-canvas"
-          style={{ transform: `translate(${pan.x}px, ${pan.y}px) scale(${scale})` }}
+          ref={canvasRef}
+          style={{ transform: `translate(${pan.x}px, ${pan.y}px)` }}
           dangerouslySetInnerHTML={{ __html: svg }}
         />
       </div>
