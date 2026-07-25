@@ -7,6 +7,30 @@
 
 ---
 
+## 2026-07-25 — v0.3.0 배포 완료: Release·brew·winget + Cask 오류 수정
+
+- **결과 요약**
+  - **GitHub Release v0.3.0 게시**: 3-OS CI 성공, 자산 5종(dmg/exe/deb/rpm/AppImage) 확인.
+  - **Homebrew tap 갱신**: Cask `version 0.3.0` + dmg SHA256
+    `5277081a…3505f41`. `brew info`로 0.3.0 인식 확인.
+  - **🐞 Cask 오류 수정**: `brew` 실행 시 "undefined method 'license' for Cask" —
+    탭 커밋 11aa294가 넣은 `license :mit` 스탠자가 원인. **Cask DSL은 license 미지원**
+    (Formula 전용) → 해당 줄 제거로 해소(라이선스는 탭 README로만 표기).
+  - **winget**: PR [microsoft/winget-pkgs#407655](https://github.com/microsoft/winget-pkgs/pull/407655)
+    (0.3.0) 생성. **주의**: release.yml이 GITHUB_TOKEN으로 릴리스를 생성해
+    `release: published` 이벤트가 winget/choco 워크플로를 **자동 트리거하지 않음**
+    (GitHub 재귀 방지) → `gh workflow run winget.yml -f tag=v0.3.0` 수동 dispatch로 진행.
+    두 워크플로 헤더에 주석으로 기록(자동화하려면 릴리스 생성을 PAT로 전환).
+  - **choco**: 의도대로 미게시(CHOCO_PUSH 미설정; 0.2.1 검수 대기 중 이중 큐 회피).
+  - **README 설치 섹션 재구성**: 패키지 매니저(권장: brew/winget) + 직접 내려받기 표에
+    Linux(deb/rpm/AppImage) 추가. Chocolatey는 승인 후 안내 예정 문구만.
+  - **리눅스 배포 점검**: 이미 v0.2.0부터 deb/rpm/AppImage가 Release에 자동 첨부됨.
+    채널 확장 후보: Flathub(권장) → Snapcraft → AUR(별도 manifest·심사 필요, 미착수).
+- **소스 위치**: `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`,
+  `.github/workflows/{winget,chocolatey}.yml`(주석), `README.md`(설치 섹션).
+
+---
+
 ## 2026-07-25 — 문서화(조직 PAT) + v0.3.0 릴리스
 
 - **요청**: ① 조직 저장소 안내를 메뉴얼/위키에 문서화 ② 새 버전 배포 진행 ③ 내용 정리·진행사항

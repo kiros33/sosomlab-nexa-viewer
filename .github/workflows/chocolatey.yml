@@ -9,6 +9,8 @@
 #    (모더레이션 승인 대기 중 이중 큐 회피)
 #  - 게시 재개: Settings > Secrets and variables > Actions > Variables 에 CHOCO_PUSH=true 등록(코드 무변).
 #  - 프리릴리스(태그에 '-' 포함, 예: v0.3.0-beta.1)는 워크플로 자체를 건너뜀.
+# ⚠️ release.yml이 GITHUB_TOKEN으로 릴리스를 생성하므로 published 이벤트로는 실행되지 않음
+#    (GitHub 재귀 방지 정책) → 게시가 필요하면 workflow_dispatch로 태그 지정 수동 실행.
 name: chocolatey
 on:
   release:
