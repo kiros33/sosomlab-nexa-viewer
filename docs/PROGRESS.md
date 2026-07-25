@@ -7,6 +7,44 @@
 
 ---
 
+## 2026-07-25 — MD/TX 보기 모드 + 서식 있는 복사 + 우클릭 메뉴 + Mermaid 렌더링
+
+- **요청**: ① 새로고침 왼쪽에 1택 그룹 보기 모드 버튼(MD/TX, 기본 MD) — TX는 일반 텍스트
+  표시 + 스크롤/드래그(드래그 중 스크롤)/복사 기본 기능 ② 마크다운 복사 시 렌더링된 상태로
+  Word/PPT 붙여넣기 ③ 우클릭 복사 메뉴 ④ 마일스톤에 TX 모드 편집기 목표 추가
+  ⑤ (병행) Mermaid 렌더링 — 라이선스 문제 없으면 바로 개발(mermaid=MIT, 문제 없음 확인).
+- **변경내역**
+  1. **MD/TX 보기 모드**: `store/viewer.ts`에 `viewMode`(md|tx, 기본 md)+`setViewMode`.
+     `HistoryBar.tsx` 새로고침 왼쪽에 세그먼트 토글(`.view-mode`, 마크다운 문서일 때만 표시).
+     `App.tsx`는 `renderAsMarkdown`(마크다운 && md 모드)으로 MarkdownView/PlainTextView 분기,
+     TX에서도 Ctrl/⌘ +/- 글꼴 크기 동작. 드래그 선택 중 본문 가장자리 자동 스크롤
+     (mousedown+rAF, MD/TX 공통).
+  2. **서식 있는 복사** `src/lib/richCopy.ts`: 선택 Range를 `.markdown-body` 내부 숨김
+     컨테이너에 복제(클래스 CSS 적용 상태) → 요소별 computed style을 style 속성으로 인라인
+     → `text/html`+`text/plain`으로 클립보드 기록. Ctrl+C(App `onCopy`)와 우클릭 메뉴 모두 적용.
+     비동기 Clipboard API 실패 시 execCommand 폴백. SVG 내부는 인라인 제외.
+  3. **우클릭 메뉴** `src/components/ViewContextMenu.tsx`: 복사(서식 유지)/텍스트만 복사/
+     문서 전체 복사/전체 선택. 메뉴 mousedown preventDefault로 선택 영역 유지,
+     "텍스트만 복사"는 `markPlainCopyOnce()` 1회 플래그로 평문 강제.
+  4. **Mermaid** `src/renderer/Mermaid.tsx`: ```mermaid 코드펜스 → 다이어그램.
+     dynamic import 지연 로딩(다이어그램 없는 문서 비용 0, vite가 다이어그램별 chunk 분리),
+     라이트/다크 테마 동기화(`theme: default|dark`), securityLevel=strict, 오류 시 원본
+     코드+오류 박스. `MarkdownView.tsx` `pre` 오버라이드로 코드 박스 대신 렌더.
+  5. **로드맵**: M2 Mermaid ✅, M5에 보기 모드/서식 복사/우클릭 메뉴 ✅ 추가,
+     **M8 — 편집기(TX 모드)** 신설(편집/저장 Ctrl+S, 문법 하이라이트, 미리보기 동기 전환,
+     외부 변경 충돌 처리), 추적표 4행 갱신.
+- **소스 위치**: `src/store/viewer.ts`(viewMode), `src/components/HistoryBar.tsx`(토글),
+  `src/App.tsx`(분기/onCopy/컨텍스트 메뉴/자동 스크롤), `src/lib/richCopy.ts`,
+  `src/components/ViewContextMenu.tsx`, `src/renderer/Mermaid.tsx`,
+  `src/renderer/MarkdownView.tsx`(pre 오버라이드), `src/App.css`(.view-mode/.mermaid-*/
+  .plain-view user-select), `docs/ROADMAP.md`.
+- **검증**: `pnpm build`(tsc+vite) 통과. mermaid는 지연 chunk로 분리 확인(메인 번들 영향 최소).
+- **참고/한계**: 서식 복사는 현재 테마 색을 그대로 가져감(다크 테마에서 복사하면 어두운 서식) —
+  필요 시 "복사 시 항상 라이트" 옵션 후보. 본문 확대/축소는 "줌 비율(%)" 방식 권장으로 논의
+  (github-markdown-css가 em 기반이라 폰트만 키우면 이미지와 불균형 → CSS zoom이 일관적).
+
+---
+
 ## 2026-07-01 — macOS 전달인자 처리: 동작 확인 + 줄단위 최종 정리 + 후속 이슈
 
 - **요청**: ① macOS `open -a` 동작 확인 결과 "동일 폴더가 또 등록되고 다시 열리는" 중복 문제를

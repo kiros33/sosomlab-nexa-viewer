@@ -5,6 +5,15 @@
 
 ## [Unreleased]
 
+### Added
+- **MD/TX 보기 모드 토글** — 새로고침 왼쪽 세그먼트 버튼(기본 MD). TX는 마크다운 원문을
+  일반 텍스트로 표시(선택/복사, 드래그 중 가장자리 자동 스크롤, Ctrl/⌘ +/- 글꼴 크기)
+- **서식 있는 복사** — MD 렌더 화면에서 복사하면 Word/PPT/한글에 렌더된 모습(제목 크기·표·
+  코드 배경 등) 그대로 붙여넣기(text/html 인라인 스타일 동시 기록)
+- **본문 우클릭 메뉴** — 복사(서식 유지) · 텍스트만 복사 · 문서 전체 복사 · 전체 선택
+- **Mermaid 다이어그램 렌더링** — ```mermaid 코드펜스를 다이어그램으로 표시(지연 로딩,
+  라이트/다크 테마 동기화, 문법 오류 시 원본 코드 표시)
+
 ### Docs
 - **Homebrew Tap(Cask) 설치 안내** 추가 — macOS에서 `brew install --cask kiros33/tap/nexa-markdown-viewer`
   한 줄 설치 지원. 탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap).
