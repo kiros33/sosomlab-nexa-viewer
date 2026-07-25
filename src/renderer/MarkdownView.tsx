@@ -4,8 +4,8 @@
  * 활성 렌더 프로파일(remark/rehype 플러그인 + 본문 클래스)을 적용하고,
  * 상대 경로 이미지/문서 간 링크를 소스 추상화로 해석한다.
  */
-import { memo, useMemo } from "react";
-import type { ComponentPropsWithoutRef } from "react";
+import { Children, isValidElement, memo, useMemo } from "react";
+import type { ComponentPropsWithoutRef, ReactNode } from "react";
 import ReactMarkdown from "react-markdown";
 import type { Components } from "react-markdown";
 import { openUrl } from "@tauri-apps/plugin-opener";
@@ -14,6 +14,7 @@ import type { ContentSource } from "../sources/types";
 import { getProfile } from "./profiles";
 import { isExternalUrl, resolveRelative } from "../lib/paths";
 import { AsyncImage } from "./AsyncImage";
+import { MermaidBlock } from "./Mermaid";
 
 interface Props {
   markdown: string;
@@ -33,6 +34,14 @@ function splitHash(href: string): [string, string | null] {
   const i = href.indexOf("#");
   if (i < 0) return [href, null];
   return [href.slice(0, i), href.slice(i + 1) || null];
+}
+
+/** React 노드 트리에서 텍스트만 추출(코드펜스 원문 복원용) */
+function nodeText(node: ReactNode): string {
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(nodeText).join("");
+  if (isValidElement<{ children?: ReactNode }>(node)) return nodeText(node.props.children);
+  return "";
 }
 
 function MarkdownViewImpl({
@@ -80,7 +89,20 @@ function MarkdownViewImpl({
       );
     };
 
-    return { ...profile.components, img, a };
+    // ```mermaid 코드펜스 → 다이어그램 렌더(코드 박스 없이 교체)
+    const pre = ({ children, ...rest }: ComponentPropsWithoutRef<"pre">) => {
+      const arr = Children.toArray(children);
+      const first = arr.length === 1 ? arr[0] : null;
+      if (
+        isValidElement<{ className?: string; children?: ReactNode }>(first) &&
+        /\blanguage-mermaid\b/.test(first.props.className ?? "")
+      ) {
+        return <MermaidBlock code={nodeText(first.props.children).trim()} />;
+      }
+      return <pre {...rest}>{children}</pre>;
+    };
+
+    return { ...profile.components, img, a, pre };
   }, [source, docPath, profile, onNavigateDoc, onNavigateAnchor]);
 
   return (
