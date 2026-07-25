@@ -43,6 +43,10 @@
 - [ ] GitHub Alerts/콜아웃 (`> [!NOTE]`, `[!WARNING]` 등)
 - [ ] 각주, 이모지 shortcode
 - [ ] 추가 렌더 프로파일 예시(예: "수식·다이어그램 강화", "순수 텍스트")
+- [x] **Mermaid VS Code 스타일** — base 테마 + themeVariables로 VS Code 라이트/다크 팔레트·폰트 적용
+- [x] **다이어그램 확대/축소·이동** — 우상단 축소/확대/원래대로 툴바 + 드래그 팬 + Ctrl+휠 줌
+- [x] **본문 확대/축소(줌 %)** — CSS zoom으로 글씨·이미지·표 일관 스케일(50~300%, 기본 100).
+      HistoryBar −/%/＋ 컨트롤, Ctrl +/-/0, Ctrl+휠. 영속화. (TX/일반텍스트는 기존 글꼴 크기 유지)
 - [ ] 라이트/다크 정교화, 본문 폭/글꼴 크기 설정
 
 ### M3 — GitHub 원격 소스
@@ -51,6 +55,9 @@
 - [x] 저장소·트리 탐색, 원격 .md 열람 (`ContentProvider` github 구현)
 - [x] 원격 상대 이미지/링크 해석
 - [x] **온라인 갱신 감지(blob sha) + 갱신 버튼**(포커스 시 확인)
+- [x] **조직(Organization) 저장소 목록 보강** — `/user/repos`(affiliation)에 더해 `/user/orgs` →
+      `/orgs/{org}/repos`를 병합(중복 제거). fine-grained PAT(개인 Resource owner)·SSO 미승인으로
+      조직 저장소가 빠지던 문제 완화 + 토큰 발급 안내 문구 정비(조직용 classic/조직 Resource owner).
 - [ ] OAuth 디바이스 로그인(추후), 다중 계정, 자동 폴링 옵션, 브랜치 선택 UI
 
 ### M4 — 추상화 강화 + 타 저장소
@@ -142,3 +149,6 @@
 | 서식 있는 복사(Word/PPT 붙여넣기) | M5 | ✅ 완료 |
 | 본문 우클릭 복사 메뉴 | M5 | ✅ 완료 |
 | TX 모드 편집기(편집/저장) | M8 | 설계 |
+| 본문 확대/축소(줌 %) | M2 | ✅ 완료 |
+| Mermaid VS Code 색/폰트 + 다이어그램 줌/팬 | M2 | ✅ 완료 |
+| 조직(Org) 저장소 목록 표시 | M3 | ✅ 완료(병합 보강) |

@@ -13,6 +13,15 @@
 - **본문 우클릭 메뉴** — 복사(서식 유지) · 텍스트만 복사 · 문서 전체 복사 · 전체 선택
 - **Mermaid 다이어그램 렌더링** — ```mermaid 코드펜스를 다이어그램으로 표시(지연 로딩,
   라이트/다크 테마 동기화, 문법 오류 시 원본 코드 표시)
+- **본문 확대/축소(줌 %)** — 글씨·이미지·표를 일관 스케일(50~300%). 이동 기록 바의
+  −/%/＋ 컨트롤, Ctrl +/-/0, Ctrl+휠. 설정 영속화
+- **Mermaid VS Code 스타일 + 다이어그램 줌/팬** — VS Code 라이트/다크 색·폰트 적용,
+  우상단 축소/확대/원래대로 버튼 + 드래그 이동 + Ctrl+휠 확대/축소
+
+### Fixed
+- **조직(Organization) 저장소가 "내 저장소" 목록에 안 보이던 문제 완화** — 조직 목록을
+  병합 조회(중복 제거). fine-grained PAT(개인 Resource owner)는 조직 저장소를 반환하지
+  않으므로 토큰 발급 안내(조직: classic PAT(repo)+SSO 승인 또는 조직 Resource owner) 정비
 
 ### Docs
 - **Homebrew Tap(Cask) 설치 안내** 추가 — macOS에서 `brew install --cask kiros33/tap/nexa-markdown-viewer`

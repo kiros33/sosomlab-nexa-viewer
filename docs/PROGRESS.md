@@ -7,6 +7,42 @@
 
 ---
 
+## 2026-07-25 — 본문 줌(%) + Mermaid VS Code 스타일·다이어그램 줌/팬 + 조직 저장소 보강
+
+- **요청**: ① 다이어그램을 VS Code처럼 색·폰트 맞춤 ② 다이어그램 자체 확대/축소(이미지의
+  우상단 컨트롤처럼) ③ 본문 확대/축소 비율(줌) 적용 병행 ④ (추가) PAT 등록 시 Organization
+  저장소가 목록에 안 보이는 문제 ⑤ (추가) winget/choco 진행상태 점검.
+- **변경내역**
+  1. **본문 줌** `store/viewer.ts`: `zoomPct`(50~300, 기본 100, 영속화)+`setZoom/adjustZoom`.
+     `App.tsx`: MD 렌더 래퍼에 CSS `zoom` 적용(글씨·이미지·표 일관 스케일), Ctrl +/-/0
+     (MD=줌, TX/일반텍스트=기존 글꼴 크기 유지), Ctrl+휠 줌(다이어그램 위 제외, non-passive).
+     `HistoryBar.tsx`: −/100%/＋ 컨트롤(% 클릭=재설정), MD 모드에서만 표시.
+  2. **Mermaid VS Code 스타일** `renderer/Mermaid.tsx`: theme=base + themeVariables로
+     VS Code 팔레트(다크 #1e1e1e/#252526/#3794ff/#cccccc, 라이트 #ffffff/#f8f8f8/#005fb8/#3b3b3b)
+     + UI 폰트 스택(Segoe UI/Noto Sans KR 등). 뷰포트 배경도 테마별 일치(App.css).
+  3. **다이어그램 줌/팬**: 뷰포트(overflow hidden) + 캔버스 transform(translate+scale).
+     우상단 툴바(축소/확대/원래대로 — Material zoom_out/zoom_in/fit_screen 아이콘 추가),
+     드래그 팬(grab 커서), Ctrl+휠 줌(0.25~4배). 본문 자동 스크롤/본문 줌과 충돌 없게
+     `.mermaid-viewport`는 App 리스너에서 제외.
+  4. **조직 저장소 보강** `providers/github.rs::list_user_repos`: 기존 `/user/repos`
+     (affiliation=owner,collaborator,organization_member) 결과에 `/user/orgs` →
+     `/orgs/{org}/repos`(최대 2페이지/조직)를 **병합+중복 제거**. 원인: fine-grained PAT는
+     Resource owner가 개인이면 조직 저장소를 반환하지 않음(+SSO 미승인 케이스).
+     `GithubPanel.tsx` 토큰 안내 문구/툴팁 정비(조직용 classic PAT(repo)+SSO 승인 또는
+     조직 Resource owner fine-grained).
+  5. **배포 채널 점검**: winget PR #394582 **머지·게시 완료**(2026-07-15,
+     `winget install SosomLab.NexaMarkdownViewer` 가능). Chocolatey 0.2.1은 자동
+     검증(Validation/Verification) 통과, Scan은 Note 플래그(미서명 참고 수준),
+     상태 "Ready for review" — 모더레이터 승인 대기(액션 불필요).
+- **소스 위치**: `src/store/viewer.ts`, `src/App.tsx`, `src/components/HistoryBar.tsx`,
+  `src/renderer/Mermaid.tsx`, `src/components/Icon.tsx`(zoom_in/zoom_out/fit_screen),
+  `src/App.css`(.zoom-group/.mermaid-viewport/.mermaid-toolbar), `src-tauri/src/providers/github.rs`,
+  `src/components/GithubPanel.tsx`, `docs/ROADMAP.md`.
+- **검증**: `pnpm build`(tsc+vite) 통과, `cargo check` 통과. 조직 저장소 실표시는 사용자
+  PAT 환경(조직 SSO 정책)에서 확인 필요.
+
+---
+
 ## 2026-07-25 — MD/TX 보기 모드 + 서식 있는 복사 + 우클릭 메뉴 + Mermaid 렌더링
 
 - **요청**: ① 새로고침 왼쪽에 1택 그룹 보기 모드 버튼(MD/TX, 기본 MD) — TX는 일반 텍스트
