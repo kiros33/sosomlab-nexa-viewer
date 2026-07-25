@@ -564,11 +564,14 @@ body {
   border: none;
   background: var(--bg);
   color: var(--text-dim);
-  padding: 2px 10px;
+  /* 우측 새로고침(.hist-refresh)·기록(.hist-nav) 버튼과 동일 규격 */
+  padding: 2px 8px;
   font-size: 12px;
-  font-weight: 600;
+  font-weight: 500;
   cursor: pointer;
-  line-height: 20px;
+}
+.view-mode-btn.active {
+  font-weight: 600;
 }
 .view-mode-btn + .view-mode-btn {
   border-left: 1px solid var(--border);
