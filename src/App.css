@@ -289,8 +289,12 @@ body {
   border-radius: 6px;
   font-size: 13px;
 }
-.ctx-item:hover {
+.ctx-item:hover:not(:disabled) {
   background: var(--selected);
+}
+.ctx-item:disabled {
+  opacity: 0.4;
+  cursor: default;
 }
 .ctx-danger {
   color: #cf222e;
@@ -546,6 +550,35 @@ body {
 }
 .hist-anchor {
   font-family: ui-monospace, SFMono-Regular, Menlo, monospace;
+}
+
+/* ===== 보기 모드(MD/TX) 세그먼트 토글 ===== */
+.view-mode {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.view-mode-btn {
+  border: none;
+  background: var(--bg);
+  color: var(--text-dim);
+  padding: 2px 10px;
+  font-size: 12px;
+  font-weight: 600;
+  cursor: pointer;
+  line-height: 20px;
+}
+.view-mode-btn + .view-mode-btn {
+  border-left: 1px solid var(--border);
+}
+.view-mode-btn:hover {
+  color: var(--text);
+}
+.view-mode-btn.active {
+  background: var(--accent);
+  color: #fff;
 }
 
 /* ===== History refresh / update ===== */
@@ -1082,6 +1115,42 @@ body {
   line-height: 1.55;
   color: var(--text);
   tab-size: 4;
+  user-select: text;
+  -webkit-user-select: text;
+  cursor: text;
+}
+
+/* ===== Mermaid 다이어그램 ===== */
+.mermaid-block {
+  display: flex;
+  justify-content: center;
+  margin: 16px 0;
+  overflow-x: auto;
+}
+.mermaid-block svg {
+  max-width: 100%;
+  height: auto;
+}
+.mermaid-loading {
+  color: var(--text-dim);
+  font-size: 13px;
+  padding: 12px 0;
+}
+.mermaid-error {
+  border: 1px solid #cf222e;
+  border-radius: 6px;
+  padding: 10px 12px;
+  margin: 16px 0;
+}
+.mermaid-error-title {
+  color: #cf222e;
+  font-size: 12px;
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+.mermaid-error pre {
+  margin: 0;
+  white-space: pre-wrap;
 }
 
 /* ===== Modal (Preferences) ===== */

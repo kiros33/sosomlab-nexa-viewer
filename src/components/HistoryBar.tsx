@@ -8,6 +8,7 @@ import { useMemo, useState } from "react";
 import { useViewer } from "../store/viewer";
 import type { HistoryEntry } from "../store/viewer";
 import { sourceKey } from "../sources/registry";
+import { isMarkdownName } from "../lib/filetypes";
 import { Icon } from "./Icon";
 
 function truncate(s: string, max = 16): string {
@@ -40,6 +41,8 @@ export function HistoryBar() {
   const docPath = useViewer((s) => s.docPath);
   const updateAvailable = useViewer((s) => s.updateAvailable);
   const reload = useViewer((s) => s.reload);
+  const viewMode = useViewer((s) => s.viewMode);
+  const setViewMode = useViewer((s) => s.setViewMode);
   const [open, setOpen] = useState(false);
 
   // 전체 기록을 "파일별 그룹"으로 (최초 등장 순서 유지)
@@ -100,6 +103,25 @@ export function HistoryBar() {
           );
         })}
       </nav>
+
+      {docPath && isMarkdownName(docPath) && (
+        <div className="view-mode" role="group" aria-label="보기 모드">
+          <button
+            className={`view-mode-btn${viewMode === "md" ? " active" : ""}`}
+            onClick={() => setViewMode("md")}
+            title="마크다운 렌더링 보기"
+          >
+            MD
+          </button>
+          <button
+            className={`view-mode-btn${viewMode === "tx" ? " active" : ""}`}
+            onClick={() => setViewMode("tx")}
+            title="원문(일반 텍스트) 보기"
+          >
+            TX
+          </button>
+        </div>
+      )}
 
       {docPath && (
         <button

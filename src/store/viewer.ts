@@ -12,6 +12,9 @@ const DEFAULT_PLAIN_FONT =
 
 export type Theme = "light" | "dark";
 
+/** 본문 보기 모드 — md: 마크다운 렌더링, tx: 원문(일반 텍스트) */
+export type ViewMode = "md" | "tx";
+
 export interface RecentItem {
   ref: SourceRef;
   path: string;
@@ -177,6 +180,10 @@ interface ViewerState {
   navSeq: number;
   loading: boolean;
   error: string | null;
+
+  /** 마크다운 문서 보기 모드(기본 md). tx면 원문(일반 텍스트)으로 표시 */
+  viewMode: ViewMode;
+  setViewMode: (mode: ViewMode) => void;
 
   // 갱신 감지(원격)
   /** 현재 열린 문서의 버전(sha 등) */
@@ -351,6 +358,8 @@ export const useViewer = create<ViewerState>((set, get) => {
     navSeq: 0,
     loading: false,
     error: null,
+    viewMode: "md",
+    setViewMode: (mode) => set({ viewMode: mode }),
     currentVersion: null,
     updateAvailable: false,
 

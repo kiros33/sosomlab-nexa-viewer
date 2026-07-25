@@ -1,4 +1,4 @@
-import { useCallback, useEffect, useRef } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import { invoke } from "@tauri-apps/api/core";
 import { listen } from "@tauri-apps/api/event";
 // 테마별 GitHub 마크다운 CSS + highlight.js 테마를 raw로 가져와 토글한다.
@@ -17,9 +17,11 @@ import { Resizer } from "./components/Resizer";
 import { GithubPanel } from "./components/GithubPanel";
 import { MarkdownView } from "./renderer/MarkdownView";
 import { PlainTextView } from "./renderer/PlainTextView";
+import { ViewContextMenu } from "./components/ViewContextMenu";
 import { useViewer } from "./store/viewer";
 import type { RecentItem, Theme } from "./store/viewer";
 import { isMarkdownName } from "./lib/filetypes";
+import { buildRichSelectionClip, consumePlainCopyOnce } from "./lib/richCopy";
 import "./App.css";
 
 function themeCss(theme: Theme): string {
@@ -53,9 +55,14 @@ export default function App() {
   const resizeToc = useViewer((s) => s.resizeToc);
   const checkForUpdate = useViewer((s) => s.checkForUpdate);
   const openExternalTarget = useViewer((s) => s.openExternalTarget);
+  const viewMode = useViewer((s) => s.viewMode);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
+  const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
+
+  // 현재 문서가 "마크다운 렌더링"으로 표시 중인지 (TX 모드/비마크다운이면 원문 보기)
+  const renderAsMarkdown = !!docPath && isMarkdownName(docPath) && viewMode === "md";
 
   // 콜백 안정화 → memo된 MarkdownView가 탭 전환 등으로 재렌더되지 않게
   const handleNavigateDoc = useCallback(
@@ -160,9 +167,9 @@ export default function App() {
     return () => window.removeEventListener("focus", onFocus);
   }, [checkForUpdate]);
 
-  // 비-마크다운(plain) 문서에서 Ctrl/⌘ +/- 로 글꼴 크기 조절
+  // 원문(plain) 보기에서 Ctrl/⌘ +/- 로 글꼴 크기 조절 (비마크다운 또는 TX 모드)
   useEffect(() => {
-    const isPlain = !!docPath && !isMarkdownName(docPath);
+    const isPlain = !!docPath && !renderAsMarkdown;
     if (!isPlain) return;
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey)) return;
@@ -179,7 +186,67 @@ export default function App() {
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [docPath, adjustPlainFontSize, setPlainFontSize]);
+  }, [docPath, renderAsMarkdown, adjustPlainFontSize, setPlainFontSize]);
+
+  // 드래그 선택 중 본문 가장자리에 닿으면 자동 스크롤 (TX/MD 공통)
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    let raf = 0;
+    let speed = 0;
+    let selecting = false;
+    const tick = () => {
+      if (speed !== 0) el.scrollTop += speed;
+      raf = requestAnimationFrame(tick);
+    };
+    const onDown = (e: MouseEvent) => {
+      if (e.button !== 0) return;
+      selecting = true;
+      if (!raf) raf = requestAnimationFrame(tick);
+    };
+    const onMove = (e: MouseEvent) => {
+      if (!selecting) return;
+      const r = el.getBoundingClientRect();
+      const margin = 28;
+      if (e.clientY < r.top + margin) speed = -Math.ceil((r.top + margin - e.clientY) / 4);
+      else if (e.clientY > r.bottom - margin) speed = Math.ceil((e.clientY - (r.bottom - margin)) / 4);
+      else speed = 0;
+    };
+    const stop = () => {
+      selecting = false;
+      speed = 0;
+      if (raf) {
+        cancelAnimationFrame(raf);
+        raf = 0;
+      }
+    };
+    el.addEventListener("mousedown", onDown);
+    window.addEventListener("mousemove", onMove);
+    window.addEventListener("mouseup", stop);
+    return () => {
+      el.removeEventListener("mousedown", onDown);
+      window.removeEventListener("mousemove", onMove);
+      window.removeEventListener("mouseup", stop);
+      stop();
+    };
+  }, []);
+
+  // 복사 시 서식 있는 HTML을 함께 클립보드에 넣는다(MD 렌더링 중일 때).
+  // → Word/PPT에 붙여넣으면 렌더된 모습이 유지된다.
+  const handleCopy = useCallback(
+    (e: React.ClipboardEvent) => {
+      if (consumePlainCopyOnce()) return; // 우클릭 "텍스트만 복사"
+      if (!renderAsMarkdown) return; // 원문 보기: 기본(평문) 복사
+      const body = bodyRef.current;
+      if (!body) return;
+      const clip = buildRichSelectionClip(body);
+      if (!clip) return;
+      e.preventDefault();
+      e.clipboardData.setData("text/html", clip.html);
+      e.clipboardData.setData("text/plain", clip.text);
+    },
+    [renderAsMarkdown],
+  );
 
   return (
     <div className={`app theme-${theme}`}>
@@ -212,13 +279,19 @@ export default function App() {
               className="content"
               ref={contentRef}
               onScroll={(e) => noteScroll(e.currentTarget.scrollTop)}
+              onCopy={handleCopy}
+              onContextMenu={(e) => {
+                if (!docPath) return; // 문서 없으면 기본 메뉴
+                e.preventDefault();
+                setCtxMenu({ x: e.clientX, y: e.clientY });
+              }}
             >
               {loading ? (
                 <div className="placeholder">불러오는 중…</div>
               ) : error ? (
                 <div className="placeholder error">{error}</div>
               ) : docPath && source ? (
-                isMarkdownName(docPath) ? (
+                renderAsMarkdown ? (
                   <MarkdownView
                     markdown={markdown}
                     source={source}
@@ -235,6 +308,16 @@ export default function App() {
                 <Welcome recent={recent} onOpenRecent={(item) => void openRecent(item)} />
               )}
             </main>
+
+            {ctxMenu && (
+              <ViewContextMenu
+                x={ctxMenu.x}
+                y={ctxMenu.y}
+                richScope={renderAsMarkdown ? bodyRef.current : null}
+                container={contentRef.current}
+                onClose={() => setCtxMenu(null)}
+              />
+            )}
 
             {tocVisible && <Resizer onResize={resizeToc} />}
             {tocVisible && (
