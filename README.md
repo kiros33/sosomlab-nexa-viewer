@@ -80,7 +80,9 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 ## ⬇️ 다운로드 & 설치
 
-### 🍺 Homebrew (macOS, 권장)
+### 패키지 매니저로 설치 (권장)
+
+**🍺 macOS — Homebrew**
 
 ```sh
 brew install --cask kiros33/tap/nexa-markdown-viewer
@@ -90,6 +92,16 @@ brew install --cask kiros33/tap/nexa-markdown-viewer
 Homebrew Cask는 설치 시 quarantine 속성을 자동 제거하므로 아래 서명 경고 없이 바로 실행됩니다.
 (탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap))
 
+**🪟 Windows — winget**
+
+```powershell
+winget install SosomLab.NexaMarkdownViewer
+```
+
+업그레이드는 `winget upgrade SosomLab.NexaMarkdownViewer`, 제거는 `winget uninstall SosomLab.NexaMarkdownViewer`.
+
+> Chocolatey(`choco install nexa-markdown-viewer`)는 커뮤니티 저장소 검수 승인 후 안내 예정입니다.
+
 ### 직접 내려받기
 
 [**Releases**](https://github.com/kiros33/sosomlab-nexa-viewer/releases) 에서 OS에 맞는 파일을 받으세요.
@@ -98,6 +110,9 @@ Homebrew Cask는 설치 시 quarantine 속성을 자동 제거하므로 아래 �
 |----|------|------|
 | **macOS** | `…_universal.dmg` | 열어서 앱을 Applications로 드래그 |
 | **Windows** | `…_x64-setup.exe` | 실행 후 마법사 진행 |
+| **Linux** | `…_amd64.AppImage` | `chmod +x` 후 바로 실행(설치 불필요) |
+| **Linux (Debian/Ubuntu)** | `…_amd64.deb` | `sudo apt install ./NexaMarkdownViewer_<버전>_amd64.deb` |
+| **Linux (Fedora/RHEL)** | `…-1.x86_64.rpm` | `sudo dnf install ./NexaMarkdownViewer-<버전>-1.x86_64.rpm` |
 
 > 🔏 **코드 서명**: Windows 빌드는 [SignPath Foundation](https://signpath.org/)이 무상 제공하는
 > 코드 서명 인증서로 서명됩니다. (서명 적용 전까지는 아래 보안 경고가 나타날 수 있습니다.)
