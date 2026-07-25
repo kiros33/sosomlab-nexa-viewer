@@ -107,6 +107,26 @@ export function HistoryBar() {
         })}
       </nav>
 
+      {/* 줌은 MD 모드에서만 보이므로, MD/TX 토글보다 왼쪽에 둔다.
+          (오른쪽에 두면 TX 전환 시 줌이 사라지며 MD/TX 버튼 위치가 밀림) */}
+      {docPath && isMarkdownName(docPath) && viewMode === "md" && (
+        <div className="zoom-group" role="group" aria-label="확대/축소">
+          <button className="zoom-btn" onClick={() => adjustZoom(-10)} title="축소 (Ctrl −)">
+            −
+          </button>
+          <button
+            className="zoom-btn zoom-label"
+            onClick={() => setZoom(100)}
+            title="100%로 재설정 (Ctrl 0)"
+          >
+            {zoomPct}%
+          </button>
+          <button className="zoom-btn" onClick={() => adjustZoom(10)} title="확대 (Ctrl +)">
+            +
+          </button>
+        </div>
+      )}
+
       {docPath && isMarkdownName(docPath) && (
         <div className="view-mode" role="group" aria-label="보기 모드">
           <button
@@ -122,24 +142,6 @@ export function HistoryBar() {
             title="원문(일반 텍스트) 보기"
           >
             TX
-          </button>
-        </div>
-      )}
-
-      {docPath && isMarkdownName(docPath) && viewMode === "md" && (
-        <div className="zoom-group" role="group" aria-label="확대/축소">
-          <button className="zoom-btn" onClick={() => adjustZoom(-10)} title="축소 (Ctrl −)">
-            −
-          </button>
-          <button
-            className="zoom-btn zoom-label"
-            onClick={() => setZoom(100)}
-            title="100%로 재설정 (Ctrl 0)"
-          >
-            {zoomPct}%
-          </button>
-          <button className="zoom-btn" onClick={() => adjustZoom(10)} title="확대 (Ctrl +)">
-            +
           </button>
         </div>
       )}
