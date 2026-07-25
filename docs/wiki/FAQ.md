@@ -34,6 +34,17 @@ Windows는 "추가 정보 → 실행". 자세히 → [설치](Installation).
 네. PAT는 Rust 측에서 AES-256-GCM으로 **암호화되어 로컬 저장**되며, 프론트엔드로 노출되지 않고,
 통신은 HTTPS만 사용합니다.
 
+## 조직(Organization) 저장소가 "내 저장소" 목록에 안 보여요
+대부분 **토큰 종류** 문제입니다. **Fine-grained PAT(Resource owner=본인)** 는 GitHub 정책상
+조직 저장소를 반환하지 않습니다. 해결 순서:
+
+1. **Classic PAT 재발급** — `repo` 스코프 체크 → 발급.
+2. 조직이 **SAML SSO**를 쓰면 토큰 목록에서 **Configure SSO → 조직 Authorize**(필수).
+3. 앱에서 **로그아웃 → 새 토큰으로 재로그인**.
+4. 그래도 안 보이면: 조직 멤버십/조직 정책 확인, 또는 **직접 등록**에 `조직명/저장소명` 입력(우회).
+
+자세한 단계와 토큰 검증 방법 → [GitHub 연동](GitHub-Integration)
+
 ---
 
 ## 📷 위키에 스크린샷 추가하는 법
