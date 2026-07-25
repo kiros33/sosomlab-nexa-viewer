@@ -23,6 +23,11 @@
   병합 조회(중복 제거). fine-grained PAT(개인 Resource owner)는 조직 저장소를 반환하지
   않으므로 토큰 발급 안내(조직: classic PAT(repo)+SSO 승인 또는 조직 Resource owner) 정비
 
+### CI
+- **choco 미게시 릴리스 스위치** — 저장소 변수 `CHOCO_PUSH=true`일 때만 Chocolatey에
+  push(기본은 pack까지만 수행하고 nupkg 아티팩트 보존). 프리릴리스 태그(`-` 포함)는
+  choco/winget 자동 게시 제외
+
 ### Docs
 - **Homebrew Tap(Cask) 설치 안내** 추가 — macOS에서 `brew install --cask kiros33/tap/nexa-markdown-viewer`
   한 줄 설치 지원. 탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap).

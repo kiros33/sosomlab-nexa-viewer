@@ -7,6 +7,29 @@
 
 ---
 
+## 2026-07-25 — 배포: choco 미게시 릴리스 스위치(nexa-dir2 규약 이식)
+
+- **요청**: choco에는 게시되지 않도록 release 하는 방법 구현 → nexa-dir2 저장소에 이미
+  반영된 기능을 확인해 동일하게 처리.
+- **nexa-dir2 규약(이식 원본)**: choco push 단계만 저장소 변수 `CHOCO_PUSH=='true'`일 때
+  실행. 미설정(기본)=GitHub Release까지만(pack·검증 수행, nupkg 아티팩트 보존) —
+  모더레이션 승인 대기 중 이중 큐 회피. 승인 후 변수 등록으로 재개(코드 무변).
+- **변경내역**
+  1. `.github/workflows/chocolatey.yml`: push 단계에 `if: vars.CHOCO_PUSH == 'true'` 게이트,
+     pack 결과 `actions/upload-artifact@v4`(choco-nupkg)로 항상 보존, 헤더에 규약 주석.
+     프리릴리스(release.prerelease)는 잡 자체 스킵(수동 dispatch는 항상 진행).
+  2. `.github/workflows/release.yml`: 태그에 '-' 포함(예: v0.3.0-beta.1) 시
+     `prerelease: true`로 게시 → choco/winget 자동 게시 대상에서 제외.
+  3. `.github/workflows/winget.yml`: 프리릴리스면 PR 생성 스킵.
+- **효과(기본 동작)**: 지금 태그를 push하면 GitHub Release + winget PR은 진행되지만
+  **choco는 pack까지만 하고 게시하지 않음**(CHOCO_PUSH 미설정이므로). 0.2.1 검수 승인 후
+  Variables에 `CHOCO_PUSH=true` 등록 시 다음 릴리스부터 자동 게시 재개.
+- **참고**: VS Code Actions 확장의 "Context access might be invalid: CHOCO_PUSH" 경고는
+  변수 미등록 상태라 검증 불가해 뜨는 것(문법 정상, nexa-dir2와 동일).
+- **소스 위치**: `.github/workflows/{chocolatey,release,winget}.yml`.
+
+---
+
 ## 2026-07-25 — 본문 줌(%) + Mermaid VS Code 스타일·다이어그램 줌/팬 + 조직 저장소 보강
 
 - **요청**: ① 다이어그램을 VS Code처럼 색·폰트 맞춤 ② 다이어그램 자체 확대/축소(이미지의
