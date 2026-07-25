@@ -584,6 +584,34 @@ body {
   color: #fff;
 }
 
+/* ===== 본문 확대/축소(줌 %) 컨트롤 ===== */
+.zoom-group {
+  display: inline-flex;
+  flex: 0 0 auto;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  overflow: hidden;
+}
+.zoom-btn {
+  border: none;
+  background: var(--bg);
+  color: var(--text-dim);
+  padding: 2px 8px;
+  font-size: 12px;
+  cursor: pointer;
+}
+.zoom-btn + .zoom-btn {
+  border-left: 1px solid var(--border);
+}
+.zoom-btn:hover {
+  color: var(--text);
+}
+.zoom-label {
+  min-width: 44px;
+  text-align: center;
+  font-variant-numeric: tabular-nums;
+}
+
 /* ===== History refresh / update ===== */
 .hist-refresh {
   border: 1px solid var(--border);
@@ -1125,14 +1153,61 @@ body {
 
 /* ===== Mermaid 다이어그램 ===== */
 .mermaid-block {
+  margin: 16px 0;
+}
+/* 뷰포트: 확대/이동은 이 안에서 잘려 보인다(overflow hidden) */
+.mermaid-viewport {
+  position: relative;
+  overflow: hidden;
+  border: 1px solid var(--border);
+  border-radius: 8px;
+  cursor: grab;
+}
+.mermaid-viewport:active {
+  cursor: grabbing;
+}
+/* VS Code 배경색(테마별) — 다이어그램 팔레트와 일치 */
+.theme-light .mermaid-viewport {
+  background: #ffffff;
+}
+.theme-dark .mermaid-viewport {
+  background: #1e1e1e;
+}
+.mermaid-canvas {
   display: flex;
   justify-content: center;
-  margin: 16px 0;
-  overflow-x: auto;
+  padding: 16px;
+  transform-origin: 50% 50%;
+  transition: transform 0.08s ease-out;
 }
-.mermaid-block svg {
+.mermaid-canvas svg {
   max-width: 100%;
   height: auto;
+}
+.mermaid-toolbar {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  z-index: 2;
+  display: flex;
+  gap: 2px;
+  background: var(--bg-elev);
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  padding: 2px;
+}
+.mermaid-toolbar button {
+  border: none;
+  background: none;
+  color: var(--text-dim);
+  cursor: pointer;
+  padding: 4px;
+  border-radius: 4px;
+  display: flex;
+}
+.mermaid-toolbar button:hover {
+  color: var(--text);
+  background: var(--selected);
 }
 .mermaid-loading {
   color: var(--text-dim);

@@ -43,6 +43,9 @@ export function HistoryBar() {
   const reload = useViewer((s) => s.reload);
   const viewMode = useViewer((s) => s.viewMode);
   const setViewMode = useViewer((s) => s.setViewMode);
+  const zoomPct = useViewer((s) => s.zoomPct);
+  const setZoom = useViewer((s) => s.setZoom);
+  const adjustZoom = useViewer((s) => s.adjustZoom);
   const [open, setOpen] = useState(false);
 
   // 전체 기록을 "파일별 그룹"으로 (최초 등장 순서 유지)
@@ -119,6 +122,24 @@ export function HistoryBar() {
             title="원문(일반 텍스트) 보기"
           >
             TX
+          </button>
+        </div>
+      )}
+
+      {docPath && isMarkdownName(docPath) && viewMode === "md" && (
+        <div className="zoom-group" role="group" aria-label="확대/축소">
+          <button className="zoom-btn" onClick={() => adjustZoom(-10)} title="축소 (Ctrl −)">
+            −
+          </button>
+          <button
+            className="zoom-btn zoom-label"
+            onClick={() => setZoom(100)}
+            title="100%로 재설정 (Ctrl 0)"
+          >
+            {zoomPct}%
+          </button>
+          <button className="zoom-btn" onClick={() => adjustZoom(10)} title="확대 (Ctrl +)">
+            +
           </button>
         </div>
       )}

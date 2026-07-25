@@ -56,6 +56,9 @@ export default function App() {
   const checkForUpdate = useViewer((s) => s.checkForUpdate);
   const openExternalTarget = useViewer((s) => s.openExternalTarget);
   const viewMode = useViewer((s) => s.viewMode);
+  const zoomPct = useViewer((s) => s.zoomPct);
+  const setZoom = useViewer((s) => s.setZoom);
+  const adjustZoom = useViewer((s) => s.adjustZoom);
 
   const bodyRef = useRef<HTMLDivElement>(null);
   const contentRef = useRef<HTMLElement>(null);
@@ -167,26 +170,45 @@ export default function App() {
     return () => window.removeEventListener("focus", onFocus);
   }, [checkForUpdate]);
 
-  // 원문(plain) 보기에서 Ctrl/⌘ +/- 로 글꼴 크기 조절 (비마크다운 또는 TX 모드)
+  // Ctrl/⌘ +/-/0 — MD 렌더링: 줌(%) 조절, 원문(plain) 보기: 글꼴 크기 조절
   useEffect(() => {
-    const isPlain = !!docPath && !renderAsMarkdown;
-    if (!isPlain) return;
+    if (!docPath) return;
     const onKey = (e: KeyboardEvent) => {
       if (!(e.ctrlKey || e.metaKey)) return;
-      if (e.key === "=" || e.key === "+") {
-        e.preventDefault();
-        adjustPlainFontSize(1);
-      } else if (e.key === "-") {
-        e.preventDefault();
-        adjustPlainFontSize(-1);
-      } else if (e.key === "0") {
-        e.preventDefault();
-        setPlainFontSize(14);
+      const plus = e.key === "=" || e.key === "+";
+      const minus = e.key === "-";
+      const zero = e.key === "0";
+      if (!plus && !minus && !zero) return;
+      e.preventDefault();
+      if (renderAsMarkdown) {
+        if (plus) adjustZoom(10);
+        else if (minus) adjustZoom(-10);
+        else setZoom(100);
+      } else {
+        if (plus) adjustPlainFontSize(1);
+        else if (minus) adjustPlainFontSize(-1);
+        else setPlainFontSize(14);
       }
     };
     window.addEventListener("keydown", onKey);
     return () => window.removeEventListener("keydown", onKey);
-  }, [docPath, renderAsMarkdown, adjustPlainFontSize, setPlainFontSize]);
+  }, [docPath, renderAsMarkdown, adjustZoom, setZoom, adjustPlainFontSize, setPlainFontSize]);
+
+  // Ctrl/⌘ + 휠 — MD 렌더링 본문 줌(다이어그램 위에서는 다이어그램 자체 줌이 우선)
+  useEffect(() => {
+    const el = contentRef.current;
+    if (!el) return;
+    const onWheel = (e: WheelEvent) => {
+      if (!(e.ctrlKey || e.metaKey)) return;
+      if ((e.target as HTMLElement).closest?.(".mermaid-viewport")) return;
+      const s = useViewer.getState();
+      if (!s.docPath || !isMarkdownName(s.docPath) || s.viewMode !== "md") return;
+      e.preventDefault();
+      s.adjustZoom(e.deltaY < 0 ? 10 : -10);
+    };
+    el.addEventListener("wheel", onWheel, { passive: false });
+    return () => el.removeEventListener("wheel", onWheel);
+  }, []);
 
   // 드래그 선택 중 본문 가장자리에 닿으면 자동 스크롤 (TX/MD 공통)
   useEffect(() => {
@@ -201,6 +223,8 @@ export default function App() {
     };
     const onDown = (e: MouseEvent) => {
       if (e.button !== 0) return;
+      // 다이어그램 위에서는 팬(이동) 드래그이므로 선택 자동 스크롤 제외
+      if ((e.target as HTMLElement).closest?.(".mermaid-viewport")) return;
       selecting = true;
       if (!raf) raf = requestAnimationFrame(tick);
     };
@@ -292,15 +316,17 @@ export default function App() {
                 <div className="placeholder error">{error}</div>
               ) : docPath && source ? (
                 renderAsMarkdown ? (
-                  <MarkdownView
-                    markdown={markdown}
-                    source={source}
-                    docPath={docPath}
-                    profileId={profileId}
-                    onNavigateDoc={handleNavigateDoc}
-                    onNavigateAnchor={handleNavigateAnchor}
-                    bodyRef={bodyRef}
-                  />
+                  <div className="zoom-wrap" style={{ zoom: zoomPct / 100 }}>
+                    <MarkdownView
+                      markdown={markdown}
+                      source={source}
+                      docPath={docPath}
+                      profileId={profileId}
+                      onNavigateDoc={handleNavigateDoc}
+                      onNavigateAnchor={handleNavigateAnchor}
+                      bodyRef={bodyRef}
+                    />
+                  </div>
                 ) : (
                   <PlainTextView text={markdown} />
                 )

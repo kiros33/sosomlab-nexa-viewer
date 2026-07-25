@@ -51,6 +51,8 @@ interface PersistedPrefs {
   plainFontFamily: string;
   /** 일반텍스트/코드 파일 기본 글꼴 크기(px) */
   plainFontSize: number;
+  /** 본문(MD 렌더링) 확대/축소 비율(%) — 글씨·이미지·표 일관 스케일 */
+  zoomPct: number;
 }
 
 const PREFS_KEY = "viewer.prefs.v1";
@@ -77,6 +79,7 @@ function loadPrefs(): PersistedPrefs {
     filterOverrides: {},
     plainFontFamily: DEFAULT_PLAIN_FONT,
     plainFontSize: 14,
+    zoomPct: 100,
     ...LAYOUT_DEFAULTS,
   };
   try {
@@ -221,6 +224,10 @@ interface ViewerState {
   setPlainFontFamily: (family: string) => void;
   setPlainFontSize: (size: number) => void;
   adjustPlainFontSize: (delta: number) => void;
+  /** 본문(MD) 확대/축소 비율(%) — 50~300, 기본 100 */
+  zoomPct: number;
+  setZoom: (pct: number) => void;
+  adjustZoom: (deltaPct: number) => void;
   /** 드래그 중 증분(dx)으로 너비 조절 */
   resizeSidebar: (dx: number) => void;
   resizeToc: (dx: number) => void;
@@ -439,6 +446,15 @@ export const useViewer = create<ViewerState>((set, get) => {
       set((s) => ({ plainFontSize: clamp(s.plainFontSize + delta, 8, 48) }));
       persist(get);
     },
+    zoomPct: prefs.zoomPct,
+    setZoom: (pct) => {
+      set({ zoomPct: clamp(Math.round(pct), 50, 300) });
+      persist(get);
+    },
+    adjustZoom: (deltaPct) => {
+      set((s) => ({ zoomPct: clamp(s.zoomPct + deltaPct, 50, 300) }));
+      persist(get);
+    },
     resizeSidebar: (dx) =>
       set((s) => ({ sidebarWidth: clamp(s.sidebarWidth + dx, SIDEBAR_MIN, SIDEBAR_MAX) })),
     resizeToc: (dx) =>
@@ -610,6 +626,7 @@ function persist(get: () => ViewerState) {
     filterOverrides,
     plainFontFamily,
     plainFontSize,
+    zoomPct,
   } = get();
   savePrefs({
     theme,
@@ -623,5 +640,6 @@ function persist(get: () => ViewerState) {
     filterOverrides,
     plainFontFamily,
     plainFontSize,
+    zoomPct,
   });
 }
