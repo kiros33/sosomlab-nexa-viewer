@@ -7,6 +7,18 @@
 
 ---
 
+## 2026-07-25 — v0.3.1 패치 릴리스(brew·winget 갱신 포함)
+
+- **요청**: brew 업데이트 + winget 최신버전 push → Mermaid 크기 보정을 포함한
+  **v0.3.1 패치 릴리스**로 진행.
+- **변경내역**: 버전 상향(package/tauri.conf/Cargo+lock), CHANGELOG [0.3.1]
+  (Fixed: Mermaid 폭 맞춤·svg 실폭 줌·폰트 16px / Docs: README 설치 재구성).
+  태그 push → 3-OS CI → Release 게시 후 Homebrew tap 0.3.1 갱신(dmg SHA256),
+  winget 수동 dispatch로 버전 PR 생성(GITHUB_TOKEN 릴리스는 자동 트리거 안 됨).
+  choco는 CHOCO_PUSH 미설정 유지(0.2.1 검수 대기).
+
+---
+
 ## 2026-07-25 — Mermaid 크기 보정: VS Code와 유사하게(폭 맞춤 + 폰트 고정)
 
 - **요청**: 앱/VS Code 캡처의 배율을 1차 보정해 크기·폰트 차이를 측정하고, 앱의 Mermaid를

@@ -3,6 +3,17 @@
 이 프로젝트의 주요 변경사항을 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/),
 버전은 [SemVer](https://semver.org/)를 따릅니다.
 
+## [0.3.1] - 2026-07-25
+
+### Fixed
+- **Mermaid 다이어그램 크기 보정(VS Code 유사)** — 처음부터 컨테이너 폭에 맞춰 전체 표시
+  (fit-to-width, 넓은 다이어그램 잘림 해소), 확대/축소를 svg 실폭으로 제어(축소 시 여백/잘림
+  없음), "원래대로"=폭 맞춤 복귀, 노드 폰트 16px 고정(본문과 비율 일치)
+
+### Docs
+- README **설치 방법 재구성** — 패키지 매니저(macOS Homebrew · Windows winget) 안내 추가,
+  직접 내려받기 표에 Linux(deb/rpm/AppImage) 추가
+
 ## [0.3.0] - 2026-07-25
 
 렌더러 확장(M2 일부) + 보기/복사 UX + GitHub 조직 저장소 보강.
