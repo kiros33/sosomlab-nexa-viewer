@@ -3,6 +3,12 @@
 이 프로젝트의 주요 변경사항을 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/),
 버전은 [SemVer](https://semver.org/)를 따릅니다.
 
+## [Unreleased]
+
+### Changed
+- **이동 기록 바 버튼 배치** — 확대/축소(−/%/＋)를 MD/TX 토글 **왼쪽**으로 이동. TX 전환 시
+  줌 컨트롤이 사라져도 MD/TX 버튼 위치가 그대로 유지됨(왕복 전환 시 클릭 지점 고정)
+
 ## [0.3.1] - 2026-07-25
 
 ### Fixed
