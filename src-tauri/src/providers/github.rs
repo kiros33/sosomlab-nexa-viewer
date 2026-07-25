@@ -178,19 +178,19 @@ pub struct RepoInfo {
 
 pub async fn list_user_repos(token: &str) -> ProviderResult<Vec<RepoInfo>> {
     let p = GithubProvider::new(Some(token.to_string()));
-    let mut out = Vec::new();
-    // 최대 3페이지(300개)까지
-    for page in 1..=3 {
-        let url = format!(
-            "{API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner,collaborator,organization_member"
-        );
-        let v = p.get_json(&url).await?;
-        let arr = match v.as_array() {
-            Some(a) if !a.is_empty() => a.clone(),
-            _ => break,
-        };
-        for r in &arr {
+    let mut out: Vec<RepoInfo> = Vec::new();
+    let mut seen = std::collections::HashSet::new();
+
+    fn push_repos(
+        arr: &[serde_json::Value],
+        out: &mut Vec<RepoInfo>,
+        seen: &mut std::collections::HashSet<String>,
+    ) {
+        for r in arr {
             if let Some(full_name) = r.get("full_name").and_then(|s| s.as_str()) {
+                if !seen.insert(full_name.to_string()) {
+                    continue; // 중복(소속 목록과 조직 목록 겹침) 제거
+                }
                 out.push(RepoInfo {
                     full_name: full_name.to_string(),
                     is_private: r.get("private").and_then(|b| b.as_bool()).unwrap_or(false),
@@ -202,10 +202,50 @@ pub async fn list_user_repos(token: &str) -> ProviderResult<Vec<RepoInfo>> {
                 });
             }
         }
+    }
+
+    // 1) 소속(affiliation) 기준 — 최대 3페이지(300개)
+    for page in 1..=3 {
+        let url = format!(
+            "{API}/user/repos?per_page=100&page={page}&sort=updated&affiliation=owner,collaborator,organization_member"
+        );
+        let v = p.get_json(&url).await?;
+        let arr = match v.as_array() {
+            Some(a) if !a.is_empty() => a.clone(),
+            _ => break,
+        };
+        push_repos(&arr, &mut out, &mut seen);
         if arr.len() < 100 {
             break;
         }
     }
+
+    // 2) 조직 저장소 보강 — fine-grained PAT(개인 Resource owner)나 SSO 미승인 등으로
+    //    /user/repos 의 affiliation 목록에 조직 저장소가 빠지는 경우를 커버한다.
+    //    실패(권한 없음 등)는 무시하고 1)의 결과만 사용.
+    if let Ok(orgs) = p.get_json(&format!("{API}/user/orgs?per_page=100")).await {
+        if let Some(org_arr) = orgs.as_array() {
+            for org in org_arr {
+                let Some(login) = org.get("login").and_then(|s| s.as_str()) else {
+                    continue;
+                };
+                for page in 1..=2 {
+                    let url =
+                        format!("{API}/orgs/{login}/repos?per_page=100&page={page}&sort=updated");
+                    let Ok(v) = p.get_json(&url).await else { break };
+                    let arr = match v.as_array() {
+                        Some(a) if !a.is_empty() => a.clone(),
+                        _ => break,
+                    };
+                    push_repos(&arr, &mut out, &mut seen);
+                    if arr.len() < 100 {
+                        break;
+                    }
+                }
+            }
+        }
+    }
+
     Ok(out)
 }
 

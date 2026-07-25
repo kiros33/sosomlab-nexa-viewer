@@ -226,11 +226,17 @@ export function GithubPanel() {
             </button>
             <a
               className="gh-hint"
-              href="https://github.com/settings/tokens?type=beta"
+              href="https://github.com/settings/tokens"
               target="_blank"
               rel="noreferrer"
+              title={
+                "개인 저장소만: fine-grained(Contents: Read)로 충분.\n" +
+                "조직(Organization) 저장소 포함:\n" +
+                " · classic PAT(repo 스코프) — SSO 조직은 토큰의 'Configure SSO' 승인 필요\n" +
+                " · 또는 fine-grained의 Resource owner를 해당 조직으로 선택(조직 정책 허용 필요)"
+              }
             >
-              토큰 발급 (fine-grained, Contents: Read) · 공개 저장소엔 불필요
+              토큰 발급 · 공개 저장소엔 불필요 · 조직 저장소는 ⓘ 참고
             </a>
           </form>
         )}
