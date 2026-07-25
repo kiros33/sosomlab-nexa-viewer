@@ -7,6 +7,28 @@
 
 ---
 
+## 2026-07-25 — 문서화(조직 PAT) + v0.3.0 릴리스
+
+- **요청**: ① 조직 저장소 안내를 메뉴얼/위키에 문서화 ② 새 버전 배포 진행 ③ 내용 정리·진행사항
+  최신화 후 commit/push ④ brew 업데이트 + winget 최신버전 push ⑤ 리눅스 배포 가능 여부 점검.
+- **변경내역**
+  1. **위키 문서화**: `docs/wiki/GitHub-Integration.md` PAT 섹션 전면 개편 — 범위별 권장 토큰
+     표(개인=fine-grained / 개인+조직=classic repo(권장) / 조직만=조직 Resource owner),
+     방법 A/B 단계, SSO Authorize 필수 경고, 문제 해결 순서(멤버십/curl 검증/직접 등록 우회),
+     목록 상한(소속 300 + 조직당 200) 안내. `FAQ.md`에 "조직 저장소가 안 보여요" 항목 추가.
+     **GitHub Wiki 저장소에 push 완료**(clone → 동기화 → push, 저장소 `docs/wiki/`와 동기).
+  2. **v0.3.0 버전 상향**: package.json / tauri.conf.json / Cargo.toml(+Cargo.lock).
+     CHANGELOG [Unreleased] → **[0.3.0] - 2026-07-25** 확정(Added: MD/TX·서식 복사·우클릭
+     메뉴·Mermaid·본문 줌·Mermaid VS Code 스타일/줌팬, Fixed: 조직 저장소, CI: choco 스위치).
+     README 주요 특징/최근 변경 요약/로드맵(M2 Mermaid·줌 ✅) 갱신.
+  3. **배포**: `v0.3.0` 태그 push → release.yml 3-OS 빌드·Release 자동 게시.
+     choco는 CHOCO_PUSH 미설정으로 **pack까지만**(의도된 미게시). winget은 release published
+     이벤트로 자동 PR. Homebrew tap은 CI 완료 후 dmg SHA256으로 Cask 갱신.
+- **소스 위치**: `docs/wiki/{GitHub-Integration,FAQ}.md`, `package.json`,
+  `src-tauri/{tauri.conf.json,Cargo.toml,Cargo.lock}`, `CHANGELOG.md`, `README.md`.
+
+---
+
 ## 2026-07-25 — 배포: choco 미게시 릴리스 스위치(nexa-dir2 규약 이식)
 
 - **요청**: choco에는 게시되지 않도록 release 하는 방법 구현 → nexa-dir2 저장소에 이미

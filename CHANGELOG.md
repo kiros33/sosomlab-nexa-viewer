@@ -3,7 +3,9 @@
 이 프로젝트의 주요 변경사항을 기록합니다. 형식은 [Keep a Changelog](https://keepachangelog.com/),
 버전은 [SemVer](https://semver.org/)를 따릅니다.
 
-## [Unreleased]
+## [0.3.0] - 2026-07-25
+
+렌더러 확장(M2 일부) + 보기/복사 UX + GitHub 조직 저장소 보강.
 
 ### Added
 - **MD/TX 보기 모드 토글** — 새로고침 왼쪽 세그먼트 버튼(기본 MD). TX는 마크다운 원문을
@@ -32,6 +34,8 @@
 - **Homebrew Tap(Cask) 설치 안내** 추가 — macOS에서 `brew install --cask kiros33/tap/nexa-markdown-viewer`
   한 줄 설치 지원. 탭 저장소: [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap).
   README "다운로드 & 설치" + 위키 Installation 페이지 반영
+- **위키 GitHub 연동 페이지 개편** — PAT 종류별 안내(개인/조직), 조직(Organization) 저장소가
+  안 보일 때 문제 해결 순서(SSO 승인 포함), FAQ 항목 추가
 
 ## [0.2.1] - 2026-06-28
 
