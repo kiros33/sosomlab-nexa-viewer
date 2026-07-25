@@ -18,6 +18,11 @@ on:
 
 jobs:
   publish:
+    # 프리릴리스(태그에 '-' 포함, 예: v0.3.0-beta.1)는 winget PR 생성 안 함
+    # (수동 실행은 항상 진행)
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.release.prerelease == false
     runs-on: ubuntu-latest
     steps:
       - name: winget-pkgs에 버전 PR 생성

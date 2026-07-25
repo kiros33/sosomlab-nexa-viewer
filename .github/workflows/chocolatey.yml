@@ -3,6 +3,12 @@
 # - windows-latest 러너에서 choco pack/push → 물리 Windows PC 불필요
 # 사전 준비: 저장소 Settings > Secrets > Actions 에 CHOCO_API_KEY 등록
 #   (https://community.chocolatey.org/account 의 API Key)
+#
+# choco push 스위치(nexa-dir2와 동일 규약): 저장소 변수 CHOCO_PUSH='true'일 때만 게시.
+#  - 미설정(기본) = GitHub Release까지만 — pack·검증은 수행하고 nupkg는 아티팩트로 보존.
+#    (모더레이션 승인 대기 중 이중 큐 회피)
+#  - 게시 재개: Settings > Secrets and variables > Actions > Variables 에 CHOCO_PUSH=true 등록(코드 무변).
+#  - 프리릴리스(태그에 '-' 포함, 예: v0.3.0-beta.1)는 워크플로 자체를 건너뜀.
 name: chocolatey
 on:
   release:
@@ -15,6 +21,10 @@ on:
 
 jobs:
   publish:
+    # 프리릴리스는 건너뜀(수동 실행은 항상 진행). push 여부는 아래 CHOCO_PUSH 스위치가 결정.
+    if: >-
+      github.event_name == 'workflow_dispatch' ||
+      github.event.release.prerelease == false
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -60,7 +70,16 @@ jobs:
             --version ${{ steps.meta.outputs.version }} `
             --out packaging/chocolatey
 
-      - name: choco push (community repo)
+      # pack 결과는 항상 아티팩트로 보존(수동 검토/추후 게시용)
+      - uses: actions/upload-artifact@v4
+        with:
+          name: choco-nupkg
+          path: packaging/chocolatey/*.nupkg
+
+      # choco push 스위치(nexa-dir2 규약): CHOCO_PUSH='true'일 때만 게시.
+      # 미설정(기본) = GitHub Release까지만. 승인 후 변수 등록으로 재개(코드 무변).
+      - name: choco push (community repo — CHOCO_PUSH 변수 있을 때만)
+        if: vars.CHOCO_PUSH == 'true'
         shell: pwsh
         env:
           CHOCO_API_KEY: ${{ secrets.CHOCO_API_KEY }}

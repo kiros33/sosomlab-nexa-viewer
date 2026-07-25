@@ -68,5 +68,7 @@ jobs:
 
             변경사항은 [CHANGELOG.md](https://github.com/kiros33/sosomlab-nexa-viewer/blob/main/CHANGELOG.md) 참고.
           releaseDraft: false      # 자동 게시 → published 이벤트로 chocolatey.yml 자동 트리거
-          prerelease: false
+          # 태그에 '-'가 있으면(예: v0.3.0-beta.1) 프리릴리스로 게시
+          # → chocolatey/winget 워크플로가 게시를 건너뛴다(각 워크플로의 if 조건 참고)
+          prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}
