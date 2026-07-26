@@ -1187,6 +1187,10 @@ body {
 .mermaid-canvas svg {
   flex-shrink: 0;
 }
+/* innerHTML 호스트는 박스를 만들지 않아 svg가 직접 flex item이 된다(중앙 정렬 유지) */
+.mermaid-svg-host {
+  display: contents;
+}
 .mermaid-toolbar {
   position: absolute;
   top: 8px;

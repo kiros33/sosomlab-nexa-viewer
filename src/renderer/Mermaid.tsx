@@ -7,7 +7,7 @@
  *  - 문법 오류 시 원본 코드를 오류 표시와 함께 보여준다
  * 라이선스: mermaid MIT.
  */
-import { useEffect, useLayoutEffect, useRef, useState } from "react";
+import { useEffect, useLayoutEffect, useMemo, useRef, useState } from "react";
 import type { MermaidConfig } from "mermaid";
 
 import { useViewer } from "../store/viewer";
@@ -87,6 +87,10 @@ export function MermaidBlock({ code }: { code: string }) {
   const fitScale = useRef(1);
   /** 뷰포트 고정 높이(px) — fit 상태 기준. 확대해도 문서 레이아웃이 밀리지 않는다. */
   const [vpHeight, setVpHeight] = useState<number | null>(null);
+  // React 19는 dangerouslySetInnerHTML을 __html 문자열이 아닌 객체 참조로 비교한다.
+  // 렌더마다 새 객체를 넘기면 팬(setPan) 리렌더마다 svg가 통째로 재생성되어
+  // 명령형으로 주입한 width 스타일이 사라진다 → svg가 바뀔 때만 새 객체를 만든다.
+  const htmlObj = useMemo(() => ({ __html: svg ?? "" }), [svg]);
 
   useEffect(() => {
     let cancelled = false;
@@ -242,12 +246,14 @@ export function MermaidBlock({ code }: { code: string }) {
             <Icon name="fit_screen" size={16} />
           </button>
         </div>
+        {/* transform(팬) 갱신은 바깥 div가 받고, innerHTML 요소에는 변하는 prop을 두지 않는다 */}
         <div
           className="mermaid-canvas"
           ref={canvasRef}
           style={{ transform: `translate(${pan.x}px, ${pan.y}px)` }}
-          dangerouslySetInnerHTML={{ __html: svg }}
-        />
+        >
+          <div className="mermaid-svg-host" dangerouslySetInnerHTML={htmlObj} />
+        </div>
       </div>
     </div>
   );
