@@ -7,6 +7,31 @@
 
 ---
 
+## 2026-07-26 — Mermaid 팬 드래그 시 확대 배율 리셋 버그 수정
+
+- **요청**: 다이어그램을 100%(1:1)로 확대한 상태에서 드래그하면 배율 표시는 100% 그대로인데
+  화면은 처음(fit) 크기로 돌아간 뒤 이동됨 — 원인 분석 및 수정.
+- **원인(headless Edge 자동화 실측으로 검증)**: **React 19는 `dangerouslySetInnerHTML`을
+  `__html` 문자열 값이 아닌 객체 참조로 비교**(React 18과 다름, 19.2.7 실측). 렌더마다
+  `{ __html: svg }` 새 객체를 만들던 구조라, 팬(`setPan`) 리렌더마다(=mousemove마다) svg가
+  통째로 재생성됨. 확대는 layout effect(`[scale, svg]`)가 `svg.style.width`를 명령형 주입하는
+  방식인데 드래그는 `pan`만 바꿔 effect가 재실행되지 않음 → 새 svg는 mermaid 기본값
+  (`width="100%"`)으로 fit처럼 보이고, `scale` state는 1 그대로라 배율 표시는 100% 유지.
+  확대(±) 버튼은 `scale`이 바뀌며 effect가 재스타일해줘서 정상처럼 보였던 것.
+- **변경내역**
+  - `src/renderer/Mermaid.tsx`
+    - `useMemo(() => ({ __html: svg }), [svg])`로 `__html` 객체 참조 고정(근본 수정).
+    - 팬 transform은 바깥 `.mermaid-canvas`가 받고, innerHTML은 내부 `.mermaid-svg-host`로
+      분리 — innerHTML 요소에 변하는 prop을 두지 않아 재주입 트리거 원천 차단.
+  - `src/App.css`: `.mermaid-svg-host { display: contents }` — 호스트가 박스를 만들지 않아
+    svg가 기존처럼 직접 flex item(중앙 정렬·`flex-shrink: 0`)으로 동작.
+- **검증**: `pnpm build` 통과. 실제 컴포넌트를 esbuild로 번들해 headless Edge에서
+  1:1 → 드래그 → 화면 맞춤 시퀀스 자동 실행 + MutationObserver 관측 — 수정 전 mousemove당
+  svg 교체 1회(스타일 소실) → 수정 후 교체 0회, 드래그 후에도 실폭 유지(개발/프로덕션 모두).
+  부수 효과: 드래그 중 매 프레임 대형 SVG 재파싱하던 성능 낭비 제거.
+
+---
+
 ## 2026-07-26 — Mermaid 확대 버그 수정 + 보기 모드(1:1·화면 맞춤) 추가
 
 - **요청**: 돋보기(+)를 눌러도 다이어그램이 커지지 않음. ① 기본 크기(1:1) 보기 버튼(드래그 이동),
