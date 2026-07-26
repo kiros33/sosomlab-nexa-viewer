@@ -7,6 +7,28 @@
 
 ---
 
+## 2026-07-26 — v0.3.2 패치 릴리스(choco 미게시 확인 포함)
+
+- **요청**: choco 배포가 제외되었는지 확인하고 릴리스.
+- **choco 제외 확인**: `.github/workflows/chocolatey.yml`의 push 단계가
+  `if: vars.CHOCO_PUSH == 'true'` 게이트이고, `gh variable list` 결과 저장소 변수가
+  **비어 있음**(CHOCO_PUSH 미설정) → pack·검증 후 nupkg 아티팩트만 보존하고 게시하지 않음.
+  Chocolatey 0.2.1은 여전히 사람 검수 대기("Ready", 자동 검증/설치 테스트 통과,
+  VirusTotal 1~5건은 승인 차단 수준 아님) — 이중 큐 회피 위해 미게시 유지.
+- **버전**: 0.3.1 → **0.3.2**(patch). v0.3.1 이후 커밋이 모두 Mermaid 확대/이동 버그 수정과
+  UI 배치 보정이라 patch로 판정.
+- **변경내역**: `package.json` · `src-tauri/{tauri.conf.json,Cargo.toml,Cargo.lock}` 버전 범프,
+  `CHANGELOG.md` `[Unreleased]` → `[0.3.2]` 확정(+0.3.0~0.3.2 링크 정의 추가),
+  `README.md` 최근 변경 요약에 v0.3.2 추가.
+- **배포 경로**: `v0.3.2` 태그 push → release.yml 3-OS 빌드 → GitHub Release 게시.
+  release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 winget/choco를
+  자동 트리거하지 않으므로 **winget은 수동 dispatch**(`gh workflow run winget.yml -f tag=v0.3.2`),
+  Homebrew tap Cask는 dmg SHA256으로 수동 갱신.
+- **소스 위치**: `.github/workflows/{release,winget,chocolatey}.yml`,
+  `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`.
+
+---
+
 ## 2026-07-26 — Mermaid 팬 드래그 시 확대 배율 리셋 버그 수정
 
 - **요청**: 다이어그램을 100%(1:1)로 확대한 상태에서 드래그하면 배율 표시는 100% 그대로인데

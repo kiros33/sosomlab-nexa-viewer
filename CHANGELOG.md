@@ -5,6 +5,22 @@
 
 ## [Unreleased]
 
+## [0.3.2] - 2026-07-26
+
+Mermaid 다이어그램 확대/이동 관련 버그 수정 패치.
+
+### Added
+- **다이어그램 보기 모드** — 툴바 `[−][배율%][+][1:1][화면 맞춤]`. 1:1은 자연 크기로 보며
+  드래그로 이동, 화면 맞춤은 전체가 보이는 폭으로 복귀. 배율% 클릭 시 100%
+
+### Fixed
+- **다이어그램 확대(+) 미동작** — `.mermaid-canvas`가 flex 컨테이너라 svg 실폭을 키워도
+  flex-shrink가 컨테이너 폭으로 되돌리던 문제(`svg { flex-shrink: 0 }`). 화면 맞춤은
+  자연 크기를 넘겨 확대하지 않으며, 뷰포트 높이를 고정해 확대 시 본문이 밀리지 않음
+- **드래그 이동 시 확대 배율이 리셋되던 문제** — React 19가 `dangerouslySetInnerHTML`을
+  객체 참조로 비교해 팬 리렌더마다 svg가 재생성되던 문제(`useMemo`로 참조 고정 +
+  팬 transform을 별도 요소로 분리). 드래그 중 SVG 재파싱이 사라져 성능도 개선
+
 ### Changed
 - **이동 기록 바 버튼 배치** — 확대/축소(−/%/＋)를 MD/TX 토글 **왼쪽**으로 이동. TX 전환 시
   줌 컨트롤이 사라져도 MD/TX 버튼 위치가 그대로 유지됨(왕복 전환 시 클릭 지점 고정)
@@ -133,6 +149,9 @@ GitHub 원격 연동(M3) + 탐색기/설정/내보내기 UX 대폭 보강.
 - `NexaMarkdownViewer_0.1.0_universal.dmg` (macOS)
 - `NexaMarkdownViewer_0.1.0_x64-setup.exe` (Windows)
 
+[0.3.2]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.3.2
+[0.3.1]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.3.1
+[0.3.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.3.0
 [0.2.1]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.2.1
 [0.2.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.2.0
 [0.1.0]: https://github.com/kiros33/sosomlab-nexa-viewer/releases/tag/v0.1.0
