@@ -94,15 +94,21 @@
 - [ ] 내보내기 고도화(서버사이드 PDF, 다크 테마 내보내기 옵션)
 - [ ] 번들 크기 최적화(highlight.js 언어 선별/코드 스플리팅)
 
-### 배포 채널 — 패키지 매니저 등록 — *요청 반영(설계)*
-- [ ] **Windows — WinGet**: `winget` manifest(YAML) 작성 → microsoft/winget-pkgs PR (또는
-      `vedantmgoyal/winget-releaser` 액션으로 릴리스 시 자동 제출). 설치 파일 SHA256 필요.
-- [ ] **Windows — Chocolatey**: `.nuspec` + install 스크립트 패키지 → `choco push`(API 키),
-      커뮤니티 저장소 심사.
-- [ ] **macOS — Homebrew**: Cask(`Casks/nexa-markdown-viewer.rb`, dmg URL+sha256) →
-      탭(tap) 저장소(`homebrew-tap`) 운영 또는 homebrew-cask PR.
-- 선행 조건: **코드 서명/공증**(미서명 시 다수 매니저 심사·사용자 신뢰 문제), 안정 버전 태깅,
-  릴리스 자산 체크섬 자동화.
+### 배포 채널 — 패키지 매니저 등록
+- [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
+      0.2.1(#394582)·0.3.1(#407658) 게시 완료, 0.3.2(#407907) 검증 중.
+      `winget install SosomLab.NexaMarkdownViewer`.
+      ⚠️ release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 자동 트리거되지
+      않으므로 릴리스 후 `gh workflow run winget.yml -f tag=vX.Y.Z` 수동 dispatch 필요.
+- [x] **macOS — Homebrew**: 탭 저장소 [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap)
+      Cask 운영(dmg URL+sha256). 릴리스마다 버전·SHA256 수동 갱신.
+      `brew install --cask kiros33/tap/nexa-markdown-viewer`.
+- [ ] **Windows — Chocolatey**: `packaging/chocolatey/` nuspec + install 스크립트 완료,
+      0.2.1 제출 후 **커뮤니티 저장소 사람 검수 대기**(자동 검증·설치 테스트 통과).
+      승인 전까지 이중 큐 회피를 위해 저장소 변수 `CHOCO_PUSH` 미설정(= pack까지만).
+      승인 후 할 일: nuspec `iconUrl` 추가 · `projectSourceUrl` 정정, `CHOCO_PUSH=true` 등록.
+- 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
+      SignPath Foundation 신청 진행 중.
 - [ ] **포터블 배포(Windows zip)** — 설치 없이 단일 폴더 실행, 데이터(`./data`)를 앱 옆에 보관.
       설계: [PORTABLE.md](PORTABLE.md). (포터블 모드 판별 + 데이터/WebView 경로 분기 + CI zip)
 
@@ -139,7 +145,8 @@
 | 패널 크기조절 + VSCode/Eclipse 토글 | M1 | ✅ 완료 |
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
-| WinGet / Chocolatey / Homebrew 등록 | 배포 채널 | 설계 |
+| WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) |
+| Chocolatey 등록 | 배포 채널 | ⏳ 커뮤니티 검수 대기(0.2.1) |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |
 | 외부 인자 재열기 중복 등록·재열림 개선 | M5 | 🐞 이슈 등록 |
