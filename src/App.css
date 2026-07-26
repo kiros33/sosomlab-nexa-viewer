@@ -1176,9 +1176,16 @@ body {
 .mermaid-canvas {
   display: flex;
   justify-content: center;
+  align-items: center;
+  height: 100%;
+  box-sizing: border-box;
   padding: 16px;
-  /* 확대/축소는 svg 실폭(width)으로 제어 — 레이아웃 높이도 함께 변한다.
-     transform은 팬(이동)에만 사용. */
+  /* 확대/축소는 svg 실폭(width)으로 제어, transform은 팬(이동)에만 사용.
+     뷰포트 높이는 fit 기준으로 고정되며 넘치는 부분은 팬으로 본다. */
+}
+/* flex item 기본 shrink가 svg를 컨테이너 폭으로 강제 축소 → 확대(+)가 안 먹던 원인 */
+.mermaid-canvas svg {
+  flex-shrink: 0;
 }
 .mermaid-toolbar {
   position: absolute;
@@ -1204,6 +1211,14 @@ body {
 .mermaid-toolbar button:hover {
   color: var(--text);
   background: var(--selected);
+}
+/* 배율 %·1:1 텍스트 버튼 — 아이콘 버튼과 높이 정렬 */
+.mermaid-toolbar .mermaid-zoom-label {
+  font-size: 11px;
+  font-variant-numeric: tabular-nums;
+  min-width: 34px;
+  justify-content: center;
+  align-items: center;
 }
 .mermaid-loading {
   color: var(--text-dim);
