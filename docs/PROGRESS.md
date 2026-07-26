@@ -20,11 +20,25 @@
 - **변경내역**: `package.json` · `src-tauri/{tauri.conf.json,Cargo.toml,Cargo.lock}` 버전 범프,
   `CHANGELOG.md` `[Unreleased]` → `[0.3.2]` 확정(+0.3.0~0.3.2 링크 정의 추가),
   `README.md` 최근 변경 요약에 v0.3.2 추가.
-- **배포 경로**: `v0.3.2` 태그 push → release.yml 3-OS 빌드 → GitHub Release 게시.
-  release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 winget/choco를
-  자동 트리거하지 않으므로 **winget은 수동 dispatch**(`gh workflow run winget.yml -f tag=v0.3.2`),
-  Homebrew tap Cask는 dmg SHA256으로 수동 갱신.
+- **배포 결과**
+  - **GitHub Release**: `v0.3.2` 태그 push → release.yml **3-OS 빌드 전부 성공**,
+    자산 5종(universal.dmg · x64-setup.exe · amd64.deb · x86_64.rpm · amd64.AppImage) 정식 게시
+    (draft/prerelease 아님).
+  - **Homebrew tap**: Cask `version 0.3.2` + dmg SHA256 `945df78c…bbeffce9`로 갱신·push.
+    `brew info --cask kiros33/tap/nexa-markdown-viewer`에서 0.3.2 인식 확인.
+  - **winget**: `release: published` 이벤트가 자동 트리거되지 않는 제약(GITHUB_TOKEN 재귀 방지)
+    때문에 `gh workflow run winget.yml -f tag=v0.3.2` 수동 dispatch → 워크플로 success,
+    PR [microsoft/winget-pkgs#407907](https://github.com/microsoft/winget-pkgs/pull/407907) 생성.
+    2026-07-26 기준 **OPEN**(MS 검증 파이프라인 진행 중, CLA 통과) — 머지는 MS 측 자동 검증
+    통과 후 진행되며 공식 manifest에는 아직 0.2.1·0.3.1만 존재. 직전 0.3.1도 제출 당일 머지됨.
+  - **choco**: 이번 태그로 chocolatey 워크플로가 **아예 트리거되지 않음**(최근 실행 이력이
+    6월 28일 건 그대로) — 의도대로 미게시.
+- **버전별 채널 현황**: Homebrew 0.3.2 ✅ / winget 0.3.1 게시·0.3.2 PR 대기 / Chocolatey 0.2.1 검수 대기.
+- **후속(다음 choco 제출 시)**: 모더레이터 Guideline 지적 반영 — nuspec에 `iconUrl` 추가,
+  `projectSourceUrl`을 소스 코드 주소로 정정(또는 제거). 승인 후 저장소 변수 `CHOCO_PUSH=true`
+  등록 시 다음 릴리스부터 자동 게시 재개.
 - **소스 위치**: `.github/workflows/{release,winget,chocolatey}.yml`,
+  `packaging/chocolatey/nexa-markdown-viewer.nuspec`,
   `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`.
 
 ---
