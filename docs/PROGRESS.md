@@ -7,6 +7,32 @@
 
 ---
 
+## 2026-07-28 — v0.3.3 패치 릴리스(choco 제외, brew·winget 배포)
+
+- **요청**: choco를 제외하고 릴리스 후 brew·winget에 배포.
+- **버전**: 0.3.2 → **0.3.3**(patch). 변경이 본문 전체 가로 폭 사용(레이아웃 개선) 단건이라 patch로 판정.
+- **변경내역**: `package.json` · `src-tauri/{tauri.conf.json,Cargo.toml,Cargo.lock}` 버전 범프,
+  `CHANGELOG.md` `[Unreleased]` → `[0.3.3]` 확정(+링크 정의), `README.md` 최근 변경 요약에 v0.3.3 추가.
+- **배포 결과**
+  - **GitHub Release**: `v0.3.3` 태그 push → release.yml **3-OS 빌드 전부 성공**(run 30281800862),
+    자산 5종(universal.dmg · x64-setup.exe · amd64.deb · x86_64.rpm · amd64.AppImage) 정식 게시
+    (draft/prerelease 아님).
+  - **Homebrew tap**: Cask `version 0.3.3` + dmg SHA256 `4bc3ecbb…b304b7fe`로 갱신·push(`b2932b2`).
+    `brew info --cask kiros33/tap/nexa-markdown-viewer`에서 0.3.3 인식 확인.
+  - **winget**: `gh workflow run winget.yml -f tag=v0.3.3` 수동 dispatch(GITHUB_TOKEN 재귀 방지
+    제약) → 워크플로 success, PR
+    [microsoft/winget-pkgs#408379](https://github.com/microsoft/winget-pkgs/pull/408379) 생성
+    (2026-07-28 기준 OPEN, MS 자동 검증 대기). 직전 **0.3.2 PR #407907은 7/26 머지 완료** →
+    공식 manifest에 0.3.2 게시됨.
+  - **choco**: 요청대로 **제외** — `CHOCO_PUSH` 변수 미설정 + GITHUB_TOKEN 릴리스는 published
+    이벤트를 트리거하지 않아 chocolatey.yml 미실행(최근 실행 이력 6/28 그대로), 수동 dispatch도 안 함.
+    Chocolatey 0.2.1은 여전히 사람 검수 대기.
+- **버전별 채널 현황**: Homebrew 0.3.3 ✅ / winget 0.3.2 게시·0.3.3 PR 대기 / Chocolatey 0.2.1 검수 대기.
+- **소스 위치**: `.github/workflows/{release,winget,chocolatey}.yml`,
+  `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`.
+
+---
+
 ## 2026-07-28 — 본문 콘텐츠 전체 가로 폭 사용
 
 - **요청**: 창이 넓을 때 본문 우측에 큰 여백이 남음(VS Code 프리뷰는 전체 폭 사용) —
