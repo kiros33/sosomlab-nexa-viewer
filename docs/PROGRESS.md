@@ -7,6 +7,23 @@
 
 ---
 
+## 2026-07-28 — 본문 콘텐츠 전체 가로 폭 사용
+
+- **요청**: 창이 넓을 때 본문 우측에 큰 여백이 남음(VS Code 프리뷰는 전체 폭 사용) —
+  여백이 있으면 가로로 확장되도록 수정.
+- **원인**: `.markdown-body`에 `max-width: 920px; margin: 0 auto`(중앙 정렬 고정 폭)가
+  걸려 있어, 콘텐츠 영역(`.content`, flex 전체 폭)이 아무리 넓어도 본문이 920px로 제한됨.
+- **변경내역**: `src/App.css` — `.markdown-body`를 `max-width: none; width: 100%; margin: 0`으로
+  변경(패딩 32px 28px은 유지해 가장자리 여백 보존).
+- **영향 범위 확인**
+  - TXT 뷰(`.plain-view`)는 원래 폭 제한 없음 → 변경 불필요.
+  - 줌은 CSS `zoom` 속성 기반이라 폭 확장과 충돌 없음.
+  - 인쇄/PDF 규칙(`@media print`)은 이미 `max-width: none` → 영향 없음.
+  - 시작 화면(`.welcome`, 720px 중앙 정렬)은 문서 뷰가 아니므로 유지.
+- **소스 위치**: `src/App.css`(`.markdown-body`).
+
+---
+
 ## 2026-07-26 — v0.3.2 패치 릴리스(choco 미게시 확인 포함)
 
 - **요청**: choco 배포가 제외되었는지 확인하고 릴리스.
