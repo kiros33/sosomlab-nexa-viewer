@@ -49,7 +49,10 @@
       뷰포트 높이는 fit 기준 고정(확대 시 문서 밀림 없음). flex-shrink로 확대가 막히던 버그 수정
 - [x] **본문 확대/축소(줌 %)** — CSS zoom으로 글씨·이미지·표 일관 스케일(50~300%, 기본 100).
       HistoryBar −/%/＋ 컨트롤, Ctrl +/-/0, Ctrl+휠. 영속화. (TX/일반텍스트는 기존 글꼴 크기 유지)
-- [ ] 라이트/다크 정교화, 본문 폭/글꼴 크기 설정
+- [x] **본문 전체 가로 폭 사용** — `.markdown-body`의 920px 중앙 정렬 제한 해제
+      (`max-width: none` + `width: 100%`). 넓은 창에서 표·다이어그램이 전체 폭으로 펼쳐짐
+      (VS Code 프리뷰와 동일). 좌우 패딩 28px은 유지
+- [ ] 라이트/다크 정교화, **본문 폭 사용자 설정**(고정 폭/전체 폭 선택)·글꼴 크기 설정
 
 ### M3 — GitHub 원격 소스
 - [x] PAT 인증 + **암호화된 로컬 토큰 저장** (AES-256-GCM)
@@ -96,7 +99,7 @@
 
 ### 배포 채널 — 패키지 매니저 등록
 - [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
-      0.2.1(#394582)·0.3.1(#407658) 게시 완료, 0.3.2(#407907) 검증 중.
+      0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907) 게시 완료, 0.3.3(#408379) 검증 중.
       `winget install SosomLab.NexaMarkdownViewer`.
       ⚠️ release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 자동 트리거되지
       않으므로 릴리스 후 `gh workflow run winget.yml -f tag=vX.Y.Z` 수동 dispatch 필요.

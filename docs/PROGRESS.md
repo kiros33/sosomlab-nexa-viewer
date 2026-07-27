@@ -28,8 +28,12 @@
     이벤트를 트리거하지 않아 chocolatey.yml 미실행(최근 실행 이력 6/28 그대로), 수동 dispatch도 안 함.
     Chocolatey 0.2.1은 여전히 사람 검수 대기.
 - **버전별 채널 현황**: Homebrew 0.3.3 ✅ / winget 0.3.2 게시·0.3.3 PR 대기 / Chocolatey 0.2.1 검수 대기.
+- **문서 동기화**: `docs/ROADMAP.md` — 배포 채널 항목의 winget 현황을
+  "0.2.1·0.3.1·0.3.2 게시 완료, 0.3.3 검증 중"으로 정정(직전 기록은 0.3.2를 '검증 중'으로 표기),
+  M2 테마 항목에 **본문 전체 가로 폭 사용** 완료 반영. 남은 항목은 폭을 사용자가 고르는
+  **설정 기능**(고정 폭/전체 폭)으로 범위를 명확히 함 — 이번 변경은 기본값을 전체 폭으로 바꾼 것.
 - **소스 위치**: `.github/workflows/{release,winget,chocolatey}.yml`,
-  `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`.
+  `kiros33/homebrew-tap Casks/nexa-markdown-viewer.rb`, `docs/ROADMAP.md`.
 
 ---
 
