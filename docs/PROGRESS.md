@@ -7,41 +7,73 @@
 
 ---
 
-## 2026-07-30 — 배포 채널 3종(choco·winget·brew) 상태 점검
+## 2026-07-30 — 배포 채널 3종 점검 + Chocolatey 게시 재개(v0.3.3 제출)
 
-- **요청**: choco, winget, brew 배포 상태 확인 → 확인 결과 반영 진행.
-- **점검 방법**: 문서 기재값이 아닌 **각 채널 실제 조회**로 검증.
-  - winget: `gh pr list --repo microsoft/winget-pkgs --search SosomLab.NexaMarkdownViewer` +
-    `manifests/s/SosomLab/NexaMarkdownViewer` 디렉터리 조회.
-  - Homebrew: `kiros33/homebrew-tap` Casks/nexa-markdown-viewer.rb 원문 조회.
-  - Chocolatey: community OData 피드(`/api/v2/Packages()?$filter=…`) + 패키지 페이지.
-- **확인 결과**
-  - **winget** ✅ 0.3.3까지 정상. PR #408379 **MERGED**(직전 기록의 "검증 중"은 이미 지난 상태),
-    공식 manifest에 0.2.1·0.3.1·0.3.2·0.3.3 4종 존재. 수동 dispatch 4건 모두 success
-    (0.3.0 #407655만 CLOSED).
-  - **Homebrew** ✅ Cask `version 0.3.3` + dmg sha256 `4bc3ecbb…b304b7fe`. 최신 상태.
-  - **Chocolatey** 🎉 **0.2.1 승인 완료** — `PackageStatus: Approved`, `IsLatestVersion: true`,
-    패키지 페이지 HTTP 200, VersionDownloadCount 31, "approved by moderator **flcdrg** on
-    30 Jul 2026". 즉 6/28 제출분이 **약 한 달 만에 사람 검수 통과**.
+- **요청**: choco·winget·brew 배포 상태 확인 → 확인 결과 반영까지 진행.
+- **목적**: 문서에 적힌 채널 현황이 실제와 어긋난 채 누적되는 것을 끊고, 승인 대기로 멈춰 있던
+  Chocolatey 게시 파이프라인을 재개.
+
+### 점검 — 문서 기재값 대신 각 채널 실제 조회로 검증
+
+| 채널 | 조회 방법 | 결과 |
+|---|---|---|
+| winget | `gh pr list --repo microsoft/winget-pkgs --search SosomLab.NexaMarkdownViewer`, `manifests/s/SosomLab/NexaMarkdownViewer` | ✅ 0.3.3까지 정상 |
+| Homebrew | `kiros33/homebrew-tap` Casks/nexa-markdown-viewer.rb 원문 | ✅ 0.3.3 최신 |
+| Chocolatey | community OData 피드 + 패키지/버전 페이지 | 🎉 0.2.1 **승인 완료** |
+
+- **winget**: PR #408379 **MERGED** — 직전 기록의 "0.3.3 검증 중"은 이미 지난 상태였음.
+  공식 manifest에 0.2.1·0.3.1·0.3.2·0.3.3 4종 존재. 수동 dispatch 4건 모두 success
+  (0.3.0 #407655만 CLOSED).
+- **Homebrew**: Cask `version 0.3.3` + dmg sha256 `4bc3ecbb…b304b7fe`.
+- **Chocolatey**: `PackageStatus: Approved`, `IsLatestVersion: true`, VersionDownloadCount 31,
+  "approved by moderator **flcdrg** on 30 Jul 2026" — 6/28 제출분이 **약 한 달 만에 사람 검수 통과**.
+
+### 조치 — Chocolatey 게시 재개
+
 - **승인 후 할 일 재확인**: ROADMAP에 적힌 3건 중 nuspec `iconUrl` 추가·`projectSourceUrl` 정정은
-  **이미 51eab50에서 반영 완료**(현재 nuspec 두 필드 모두 정상). 남은 것은 `CHOCO_PUSH=true` 등록뿐.
-- **CHOCO_PUSH 등록**: `gh variable set CHOCO_PUSH true`가 권한 분류기에 차단되어 사용자가 직접 실행.
-  이때 `gh variable set CHOCO_PUSH true`(위치 인자 2개)는 CLI 문법 오류 → **`--body` 플래그 필수**:
-  `gh variable set CHOCO_PUSH --body true`. 등록 확인(`gh variable list` → `CHOCO_PUSH true`).
-- **v0.3.3 Chocolatey 제출**(사용자 결정: 서명 대기 없이 지금 제출)
-  - `gh workflow run chocolatey.yml -f tag=v0.3.3` → run **30541856712 success(21s)**,
-    `choco push` 스텝이 **스킵되지 않고 실제 실행·성공**(CHOCO_PUSH 게이트 통과 확인).
-  - 제출 검증: 버전 페이지 `/packages/nexa-markdown-viewer/0.3.3` **HTTP 200**,
-    본문에 "not yet been approved" → **모더레이션 대기 중**.
-  - ⚠️ OData 피드(`Packages()`·`FindPackagesById()`)는 **미승인 버전을 반환하지 않음** —
-    두 엔드포인트 모두 0.2.1만 응답. 제출 여부는 피드가 아니라 **버전 페이지로 확인**해야 함.
-    (다음 점검 시 같은 함정 반복 주의)
-- **코드 서명**: SignPath 미확보 상태 유지 — 별도 선행 조건 항목으로 계속 추적.
-  0.3.3도 미서명이라 SmartScreen 경고 조건 동일.
-- **문서 동기화**: `docs/ROADMAP.md` — Chocolatey 항목 `[ ]`→`[x]`(승인일·모더레이터 명기,
-  최신 버전 미제출 경고 추가), winget 0.3.3 머지 완료 반영, 요청 추적 표 Chocolatey 행 갱신.
-  `README.md` — 검수 대기 안내문을 **Chocolatey 설치 섹션**으로 교체(게시 버전 0.2.1 주의 포함).
-- **소스 위치**: `docs/ROADMAP.md`, `README.md`, `docs/PROGRESS.md`,
+  **이미 51eab50에서 반영 완료**(두 필드 모두 정상) → 실제 남은 것은 `CHOCO_PUSH` 등록뿐이었음.
+- **`CHOCO_PUSH=true` 등록**(사용자 직접 실행 — `gh variable set`이 권한 분류기에 차단됨).
+  ⚠️ `gh variable set CHOCO_PUSH true`는 위치 인자 2개로 CLI 오류 → **`--body` 플래그 필수**:
+  `gh variable set CHOCO_PUSH --body true`. 이후 chocolatey.yml push 스텝(84행 게이트) 활성.
+- **v0.3.3 제출**(사용자 결정: 코드 서명 확보를 기다리지 않고 지금 제출).
+  `gh workflow run chocolatey.yml -f tag=v0.3.3` → run **30541856712 success(21s)**,
+  `choco push` 스텝이 스킵되지 않고 실제 실행·성공.
+- **제출 검증**: 버전 페이지 `/packages/nexa-markdown-viewer/0.3.3` **HTTP 200** +
+  본문 "not yet been approved" → **모더레이션 대기**. 승인 시 최신 버전 0.2.1 → 0.3.3.
+- ⚠️ **점검 함정**: OData 피드(`Packages()`·`FindPackagesById()`)는 **미승인 버전을 반환하지 않음**
+  — 두 엔드포인트 모두 0.2.1만 응답해 제출 실패로 오인할 수 있음.
+  **제출 여부는 피드가 아니라 버전 페이지로 확인**할 것.
+
+### 채널 현황(이 시점)
+
+| 채널 | 게시 버전 | 상태 |
+|---|---|---|
+| winget | 0.3.3 | ✅ 정상 운영 |
+| Homebrew | 0.3.3 | ✅ 정상 운영 |
+| Chocolatey | 0.2.1(승인) | ⏳ 0.3.3 제출·검수 대기 |
+
+- **남은 선행 조건**: **코드 서명 미확보**(SignPath 신청 중) — 0.3.3도 미서명이라 SmartScreen
+  경고·VirusTotal 오탐 조건 동일. 별도 항목으로 계속 추적.
+- **후속**: Chocolatey 0.3.3 승인되면 ROADMAP·README의 "게시 0.2.1 / 0.3.3 대기" 표기를 정리.
+  다음 릴리스부터는 `CHOCO_PUSH`가 켜져 있어 `gh workflow run chocolatey.yml -f tag=vX.Y.Z`
+  한 번으로 초코까지 제출됨(release published는 GITHUB_TOKEN 재귀 방지로 자동 트리거 안 됨).
+
+### 문서 동기화
+
+- `docs/ROADMAP.md` — Chocolatey 항목 `[ ]`→`[x]`(승인일·모더레이터·`CHOCO_PUSH` 등록·0.3.3
+  제출/검수 대기 명기), winget 0.3.3 머지 완료 반영, 요청 추적 표 Chocolatey 행 갱신.
+- `README.md` — "검수 승인 후 안내 예정" 안내문을 **Chocolatey 설치 섹션**으로 교체
+  (게시 0.2.1 / 0.3.3 검수 대기 주의 포함).
+- **사실과 다른 서술 정정**(점검 중 발견 — 이번 작업과 직접 관련된 오류):
+  - `docs/wiki/Building-and-Release.md` — "릴리스가 게시되면 패키지 매니저 워크플로가 **이어서
+    자동 실행**"은 **거짓**. `release: published` 트리거가 있어도 release.yml이 `GITHUB_TOKEN`으로
+    릴리스를 만들어 재귀 방지 정책에 걸려 이벤트가 발생하지 않음 → 경고 박스 + 수동 dispatch
+    명령(4·5단계)으로 교체. 채널 표의 "release 시 자동" → "수동 dispatch"로 정정하고
+    `CHOCO_PUSH` 스위치·OData 피드 함정·버전별 페이지 확인법을 상태 확인 절에 추가.
+  - `docs/ARCHITECTURE.md` §5 — 동일한 "자동 트리거" 서술 정정.
+- 커밋: `4221639`(점검 결과) → `646c6c0`(merge) → `baed09d`(제출 결과) → `6e55b6d`(merge),
+  이후 본 기록 정리 커밋. 전부 origin/main 반영.
+- **소스 위치**: `docs/{ROADMAP,PROGRESS}.md`, `README.md`,
   `.github/workflows/chocolatey.yml`(변수 게이트 84행), `packaging/chocolatey/nexa-markdown-viewer.nuspec`.
 
 ---

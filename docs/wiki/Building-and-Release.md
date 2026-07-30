@@ -27,14 +27,23 @@ pnpm tauri build
 
 ## CI 자동 배포 (GitHub Actions)
 `v*` 태그를 push하면 macOS·Linux·Windows 3-OS에서 빌드 후 **Release가 자동 게시**됩니다.
-릴리스가 게시되면(`release: published`) 패키지 매니저 워크플로(Chocolatey·winget)가 **이어서 자동 실행**됩니다.
+
+> ⚠️ **패키지 매니저 워크플로는 자동 실행되지 않습니다.** 두 워크플로에 `release: published`
+> 트리거가 걸려 있지만, release.yml이 `GITHUB_TOKEN`으로 릴리스를 만들기 때문에 GitHub의
+> **재귀 실행 방지 정책**으로 이벤트가 발생하지 않습니다. 릴리스 후 **수동 dispatch가 필요**합니다.
 
 ```bash
 # 1) 버전 올리기: tauri.conf.json + package.json (+ Cargo.toml)
 # 2) CHANGELOG.md 의 [Unreleased] → [버전] 으로 확정
-# 3) 태그 push → 빌드 → 자동 게시 → choco/winget PR 자동
+# 3) 태그 push → 3-OS 빌드 → Release 자동 게시
 git tag v0.2.2
 git push origin v0.2.2
+
+# 4) 패키지 매니저 제출은 수동 dispatch (자동 안 됨)
+gh workflow run winget.yml     -f tag=v0.2.2
+gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=true 일 때만 실제 게시
+
+# 5) Homebrew 탭은 별도 저장소에서 version + dmg sha256 수동 갱신
 ```
 
 - 빌드/릴리스: `.github/workflows/release.yml` (`tauri-apps/tauri-action`, `releaseDraft: false`)
@@ -48,8 +57,8 @@ git push origin v0.2.2
 | 채널 | 설치 명령 | 자동화 | 상태 확인 위치 |
 |------|-----------|--------|----------------|
 | **Homebrew** | `brew install --cask kiros33/tap/nexa-markdown-viewer` | 수동(탭 cask 갱신) | 탭 저장소 + 로컬 `brew` 명령 |
-| **Chocolatey** | `choco install nexa-markdown-viewer` | release 시 자동(`CHOCO_API_KEY`) | Actions 실행 + 패키지 페이지(검수) |
-| **winget** | `winget install SosomLab.NexaMarkdownViewer` | release 시 자동(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
+| **Chocolatey** | `choco install nexa-markdown-viewer` | 수동 dispatch(`CHOCO_API_KEY` + 변수 `CHOCO_PUSH=true`) | Actions 실행 + **버전 페이지**(검수) |
+| **winget** | `winget install SosomLab.NexaMarkdownViewer` | 수동 dispatch(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
 
 ### 🍺 Homebrew
 내가 직접 운영하는 탭이라 **중앙 검수가 없고 push 즉시 반영**됩니다.
@@ -68,7 +77,13 @@ git push origin v0.2.2
 2. **검수(moderation) 상태**: push 후 패키지 페이지에서 확인 — 중앙 저장소라 즉시 노출 아님.
    - 패키지 페이지: <https://community.chocolatey.org/packages/nexa-markdown-viewer>
      (상태: *Submitted → Under Review/Verifying → Approved*)
+   - **버전별 페이지**: `…/packages/nexa-markdown-viewer/<버전>` — 방금 올린 버전 확인은 여기서.
    - 내 패키지 목록: <https://community.chocolatey.org/account> (로그인)
+3. ⚠️ **OData 피드로 제출 여부를 판단하지 말 것.** `api/v2/Packages()`·`FindPackagesById()`는
+   **승인된 버전만** 반환하므로, 방금 push한 미승인 버전은 응답에 없습니다(제출 실패로 오인 주의).
+   피드는 "현재 공개 게시 버전" 확인용, 제출 확인은 **버전별 페이지**로.
+- 게시 스위치: 저장소 변수 **`CHOCO_PUSH=true`** 일 때만 `choco push` 실행(미설정 = pack까지만,
+  nupkg는 아티팩트로 보존). 검수 대기 중 이중 큐를 피하려는 장치.
 - 미설정 시: `CHOCO_API_KEY` Secret 없으면 push 단계 실패.
 
 ### 📦 winget
