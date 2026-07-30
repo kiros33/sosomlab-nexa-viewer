@@ -196,6 +196,7 @@ main.tsx → <App/>
 
 - 개발: `pnpm tauri dev` (Vite devUrl + Rust 디버그 빌드).
 - 배포 빌드: `pnpm tauri build` → `src-tauri/target/release/bundle/`.
-- CI: `v*` 태그 push → GitHub Actions가 3-OS 빌드 → Release 자동 게시 →
-  `release: published`로 chocolatey/winget 워크플로 트리거. (Homebrew Tap은 수동 갱신)
+- CI: `v*` 태그 push → GitHub Actions가 3-OS 빌드 → Release 자동 게시.
+  패키지 매니저(chocolatey/winget) 워크플로는 `release: published` 트리거가 있어도
+  **GITHUB_TOKEN 재귀 방지로 자동 실행되지 않아 수동 dispatch 필요**. (Homebrew Tap은 수동 갱신)
 - 자세한 배포 채널 현황은 [PROGRESS.md](PROGRESS.md), 포터블 빌드는 [PORTABLE.md](PORTABLE.md) 참고.
