@@ -7,6 +7,36 @@
 
 ---
 
+## 2026-07-30 — 배포 채널 3종(choco·winget·brew) 상태 점검
+
+- **요청**: choco, winget, brew 배포 상태 확인 → 확인 결과 반영 진행.
+- **점검 방법**: 문서 기재값이 아닌 **각 채널 실제 조회**로 검증.
+  - winget: `gh pr list --repo microsoft/winget-pkgs --search SosomLab.NexaMarkdownViewer` +
+    `manifests/s/SosomLab/NexaMarkdownViewer` 디렉터리 조회.
+  - Homebrew: `kiros33/homebrew-tap` Casks/nexa-markdown-viewer.rb 원문 조회.
+  - Chocolatey: community OData 피드(`/api/v2/Packages()?$filter=…`) + 패키지 페이지.
+- **확인 결과**
+  - **winget** ✅ 0.3.3까지 정상. PR #408379 **MERGED**(직전 기록의 "검증 중"은 이미 지난 상태),
+    공식 manifest에 0.2.1·0.3.1·0.3.2·0.3.3 4종 존재. 수동 dispatch 4건 모두 success
+    (0.3.0 #407655만 CLOSED).
+  - **Homebrew** ✅ Cask `version 0.3.3` + dmg sha256 `4bc3ecbb…b304b7fe`. 최신 상태.
+  - **Chocolatey** 🎉 **0.2.1 승인 완료** — `PackageStatus: Approved`, `IsLatestVersion: true`,
+    패키지 페이지 HTTP 200, VersionDownloadCount 31, "approved by moderator **flcdrg** on
+    30 Jul 2026". 즉 6/28 제출분이 **약 한 달 만에 사람 검수 통과**.
+- **승인 후 할 일 재확인**: ROADMAP에 적힌 3건 중 nuspec `iconUrl` 추가·`projectSourceUrl` 정정은
+  **이미 51eab50에서 반영 완료**(현재 nuspec 두 필드 모두 정상). 남은 것은 `CHOCO_PUSH=true` 등록뿐.
+- **미완료(권한 차단)**: `gh variable set CHOCO_PUSH true`가 **권한 분류기에 차단**되어 미적용.
+  변수 미설정이라 chocolatey.yml은 여전히 pack까지만 수행 → **0.3.1~0.3.3 초코 미제출 상태 유지**.
+  사용자 승인 후 변수 등록 → `gh workflow run chocolatey.yml -f tag=v0.3.3` 필요.
+  (`CHOCO_API_KEY` Secret·v0.3.3 `x64-setup.exe` 자산은 모두 준비됨 — 다른 선행 조건 없음)
+- **문서 동기화**: `docs/ROADMAP.md` — Chocolatey 항목 `[ ]`→`[x]`(승인일·모더레이터 명기,
+  최신 버전 미제출 경고 추가), winget 0.3.3 머지 완료 반영, 요청 추적 표 Chocolatey 행 갱신.
+  `README.md` — 검수 대기 안내문을 **Chocolatey 설치 섹션**으로 교체(게시 버전 0.2.1 주의 포함).
+- **소스 위치**: `docs/ROADMAP.md`, `README.md`, `docs/PROGRESS.md`,
+  `.github/workflows/chocolatey.yml`(변수 게이트 84행), `packaging/chocolatey/nexa-markdown-viewer.nuspec`.
+
+---
+
 ## 2026-07-28 — v0.3.3 패치 릴리스(choco 제외, brew·winget 배포)
 
 - **요청**: choco를 제외하고 릴리스 후 brew·winget에 배포.
