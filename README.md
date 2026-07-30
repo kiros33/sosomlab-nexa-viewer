@@ -108,8 +108,8 @@ choco install nexa-markdown-viewer
 
 업그레이드는 `choco upgrade nexa-markdown-viewer`, 제거는 `choco uninstall nexa-markdown-viewer`.
 
-> Chocolatey는 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이며
-> 최신 버전 제출 전까지는 winget 또는 아래 직접 내려받기를 권장합니다.
+> Chocolatey는 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고
+> **0.3.3은 검수 대기 중**이라, 최신 버전이 필요하면 winget 또는 아래 직접 내려받기를 권장합니다.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
 
 ### 직접 내려받기

@@ -109,9 +109,10 @@
 - [x] **Windows — Chocolatey**: 0.2.1이 **2026-07-30 커뮤니티 저장소 승인 완료**
       (moderator `flcdrg`, `PackageStatus: Approved`).
       `choco install nexa-markdown-viewer`.
-      ⚠️ 게시 버전이 0.2.1에 머물러 있어 **0.3.1~0.3.3 미제출** 상태.
-      남은 할 일: 저장소 변수 `CHOCO_PUSH=true` 등록(현재 미설정 = pack까지만) →
-      `gh workflow run chocolatey.yml -f tag=v0.3.3`로 최신 버전 제출.
+      저장소 변수 `CHOCO_PUSH=true` 등록 완료(2026-07-30) → push 스텝 활성.
+      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — 현재 모더레이션 대기
+      ("not yet been approved"). 승인 시 최신 버전이 0.2.1 → 0.3.3으로 갱신됨.
+      ⚠️ 승인까지는 게시 버전이 0.2.1이므로 최신 버전은 winget/직접 내려받기 안내.
       (nuspec `iconUrl`·`projectSourceUrl`은 51eab50에서 이미 반영됨)
 - 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
       SignPath Foundation 신청 진행 중.
@@ -152,7 +153,7 @@
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) |
-| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 최신 버전 제출 대기 |
+| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 제출·검수 대기 |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |
 | 외부 인자 재열기 중복 등록·재열림 개선 | M5 | 🐞 이슈 등록 |
