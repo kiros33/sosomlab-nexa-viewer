@@ -99,17 +99,20 @@
 
 ### 배포 채널 — 패키지 매니저 등록
 - [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
-      0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907) 게시 완료, 0.3.3(#408379) 검증 중.
+      0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907)·0.3.3(#408379) 게시 완료(머지됨).
       `winget install SosomLab.NexaMarkdownViewer`.
       ⚠️ release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 자동 트리거되지
       않으므로 릴리스 후 `gh workflow run winget.yml -f tag=vX.Y.Z` 수동 dispatch 필요.
 - [x] **macOS — Homebrew**: 탭 저장소 [kiros33/homebrew-tap](https://github.com/kiros33/homebrew-tap)
-      Cask 운영(dmg URL+sha256). 릴리스마다 버전·SHA256 수동 갱신.
+      Cask 운영(dmg URL+sha256). 릴리스마다 버전·SHA256 수동 갱신. 0.3.3 반영 완료.
       `brew install --cask kiros33/tap/nexa-markdown-viewer`.
-- [ ] **Windows — Chocolatey**: `packaging/chocolatey/` nuspec + install 스크립트 완료,
-      0.2.1 제출 후 **커뮤니티 저장소 사람 검수 대기**(자동 검증·설치 테스트 통과).
-      승인 전까지 이중 큐 회피를 위해 저장소 변수 `CHOCO_PUSH` 미설정(= pack까지만).
-      승인 후 할 일: nuspec `iconUrl` 추가 · `projectSourceUrl` 정정, `CHOCO_PUSH=true` 등록.
+- [x] **Windows — Chocolatey**: 0.2.1이 **2026-07-30 커뮤니티 저장소 승인 완료**
+      (moderator `flcdrg`, `PackageStatus: Approved`).
+      `choco install nexa-markdown-viewer`.
+      ⚠️ 게시 버전이 0.2.1에 머물러 있어 **0.3.1~0.3.3 미제출** 상태.
+      남은 할 일: 저장소 변수 `CHOCO_PUSH=true` 등록(현재 미설정 = pack까지만) →
+      `gh workflow run chocolatey.yml -f tag=v0.3.3`로 최신 버전 제출.
+      (nuspec `iconUrl`·`projectSourceUrl`은 51eab50에서 이미 반영됨)
 - 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
       SignPath Foundation 신청 진행 중.
 - [ ] **포터블 배포(Windows zip)** — 설치 없이 단일 폴더 실행, 데이터(`./data`)를 앱 옆에 보관.
@@ -149,7 +152,7 @@
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) |
-| Chocolatey 등록 | 배포 채널 | ⏳ 커뮤니티 검수 대기(0.2.1) |
+| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 최신 버전 제출 대기 |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |
 | 외부 인자 재열기 중복 등록·재열림 개선 | M5 | 🐞 이슈 등록 |
