@@ -25,10 +25,19 @@
     30 Jul 2026". 즉 6/28 제출분이 **약 한 달 만에 사람 검수 통과**.
 - **승인 후 할 일 재확인**: ROADMAP에 적힌 3건 중 nuspec `iconUrl` 추가·`projectSourceUrl` 정정은
   **이미 51eab50에서 반영 완료**(현재 nuspec 두 필드 모두 정상). 남은 것은 `CHOCO_PUSH=true` 등록뿐.
-- **미완료(권한 차단)**: `gh variable set CHOCO_PUSH true`가 **권한 분류기에 차단**되어 미적용.
-  변수 미설정이라 chocolatey.yml은 여전히 pack까지만 수행 → **0.3.1~0.3.3 초코 미제출 상태 유지**.
-  사용자 승인 후 변수 등록 → `gh workflow run chocolatey.yml -f tag=v0.3.3` 필요.
-  (`CHOCO_API_KEY` Secret·v0.3.3 `x64-setup.exe` 자산은 모두 준비됨 — 다른 선행 조건 없음)
+- **CHOCO_PUSH 등록**: `gh variable set CHOCO_PUSH true`가 권한 분류기에 차단되어 사용자가 직접 실행.
+  이때 `gh variable set CHOCO_PUSH true`(위치 인자 2개)는 CLI 문법 오류 → **`--body` 플래그 필수**:
+  `gh variable set CHOCO_PUSH --body true`. 등록 확인(`gh variable list` → `CHOCO_PUSH true`).
+- **v0.3.3 Chocolatey 제출**(사용자 결정: 서명 대기 없이 지금 제출)
+  - `gh workflow run chocolatey.yml -f tag=v0.3.3` → run **30541856712 success(21s)**,
+    `choco push` 스텝이 **스킵되지 않고 실제 실행·성공**(CHOCO_PUSH 게이트 통과 확인).
+  - 제출 검증: 버전 페이지 `/packages/nexa-markdown-viewer/0.3.3` **HTTP 200**,
+    본문에 "not yet been approved" → **모더레이션 대기 중**.
+  - ⚠️ OData 피드(`Packages()`·`FindPackagesById()`)는 **미승인 버전을 반환하지 않음** —
+    두 엔드포인트 모두 0.2.1만 응답. 제출 여부는 피드가 아니라 **버전 페이지로 확인**해야 함.
+    (다음 점검 시 같은 함정 반복 주의)
+- **코드 서명**: SignPath 미확보 상태 유지 — 별도 선행 조건 항목으로 계속 추적.
+  0.3.3도 미서명이라 SmartScreen 경고 조건 동일.
 - **문서 동기화**: `docs/ROADMAP.md` — Chocolatey 항목 `[ ]`→`[x]`(승인일·모더레이터 명기,
   최신 버전 미제출 경고 추가), winget 0.3.3 머지 완료 반영, 요청 추적 표 Chocolatey 행 갱신.
   `README.md` — 검수 대기 안내문을 **Chocolatey 설치 섹션**으로 교체(게시 버전 0.2.1 주의 포함).
