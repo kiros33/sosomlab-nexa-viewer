@@ -46,8 +46,27 @@
 - `docs/ROADMAP.md` — 배포 채널 절 머리에 실측 현황 표, Chocolatey 항목에 검사 3종 결과·
   "서명 전까지 지연 상수" 판단 기록, 요청 추적 표 기준일 갱신.
 - `packaging/winget/README.md` — "이후 버전 — 자동" 오기 정정(수동 dispatch + 등록 이력 4건).
+- `docs/ARCHITECTURE.md` §5 — "배포 채널 현황은 PROGRESS 참고" 링크를 현황 표가 있는
+  ROADMAP(현황) + PROGRESS(점검 이력)로 분리.
 - **위키 게시**: `docs/wiki` → `sosomlab-nexa-viewer.wiki.git` push
   (로컬이 원격보다 앞서 있던 7/30자 Building-and-Release 수정분도 이번에 함께 반영됨).
+  raw 조회로 원격 반영 확인.
+
+### 정리 — 저장소/위키 동기화 상태
+
+- **커밋**: `099516f`(문서 반영) → `93b6e47`(merge) → 본 기록 정리 커밋. origin/main 반영.
+  위키는 별도 저장소라 `5be5e11`로 push.
+- **위키 드리프트 해소**: 원격 위키에만 남아 있던 `images/README.md`("스크린샷을 이 폴더에
+  추가하세요") placeholder 제거 — 스크린샷 9종이 이미 채워져 무의미해졌고, `docs/wiki`가
+  단일 원본(source of truth)인데 원격에만 있는 파일이라 대조 시 잡음이 됨.
+- **병합 완료 브랜치 정리**: `docs/channel-status-0.3.3`·`docs/choco-0.3.3-submit`·
+  `docs/progress-cleanup-0730`·`docs/channel-status-0802` 로컬 삭제(모두 main 병합 완료).
+- **문서 간 서술 일관성 점검**: README·ROADMAP·위키 3면의 채널/버전 표기를 대조해
+  "Homebrew 0.3.3 / winget 0.3.3 / Chocolatey 0.2.1(0.3.3 대기)"로 모순 없음 확인.
+- **소스 위치**: `README.md`, `docs/{ROADMAP,PROGRESS,ARCHITECTURE}.md`,
+  `docs/wiki/{Installation,Building-and-Release}.md`, `packaging/winget/README.md`.
+- **다음 확인 시점**: Chocolatey 0.3.3 승인 여부(버전 페이지). 승인되면 README·ROADMAP·위키
+  3면의 "게시 0.2.1 / 0.3.3 대기" 표기를 0.3.3 최신으로 일괄 정리.
 
 ---
 
