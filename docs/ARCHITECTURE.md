@@ -199,4 +199,5 @@ main.tsx → <App/>
 - CI: `v*` 태그 push → GitHub Actions가 3-OS 빌드 → Release 자동 게시.
   패키지 매니저(chocolatey/winget) 워크플로는 `release: published` 트리거가 있어도
   **GITHUB_TOKEN 재귀 방지로 자동 실행되지 않아 수동 dispatch 필요**. (Homebrew Tap은 수동 갱신)
-- 자세한 배포 채널 현황은 [PROGRESS.md](PROGRESS.md), 포터블 빌드는 [PORTABLE.md](PORTABLE.md) 참고.
+- 배포 채널별 게시 버전/상태는 [ROADMAP.md](ROADMAP.md#배포-채널--패키지-매니저-등록)의 현황 표,
+  점검 이력은 [PROGRESS.md](PROGRESS.md), 포터블 빌드는 [PORTABLE.md](PORTABLE.md) 참고.

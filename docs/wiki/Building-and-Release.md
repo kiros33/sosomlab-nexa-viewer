@@ -48,7 +48,8 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
 
 - 빌드/릴리스: `.github/workflows/release.yml` (`tauri-apps/tauri-action`, `releaseDraft: false`)
 - Chocolatey: `.github/workflows/chocolatey.yml` (Secret `CHOCO_API_KEY` 필요)
-- winget: `.github/workflows/winget.yml` (Secret `WINGET_TOKEN` 필요 · 최초 PR 머지 후부터 자동)
+- winget: `.github/workflows/winget.yml` (Secret `WINGET_TOKEN` 필요 · 최초 PR 머지 후부터
+  새 버전 제출 가능 — 단 실행은 위 경고대로 **수동 dispatch**)
 - pnpm 버전은 `package.json`의 `packageManager` 필드를 따릅니다.
 
 ## 배포 채널 & 상태 확인
@@ -59,6 +60,16 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
 | **Homebrew** | `brew install --cask kiros33/tap/nexa-markdown-viewer` | 수동(탭 cask 갱신) | 탭 저장소 + 로컬 `brew` 명령 |
 | **Chocolatey** | `choco install nexa-markdown-viewer` | 수동 dispatch(`CHOCO_API_KEY` + 변수 `CHOCO_PUSH=true`) | Actions 실행 + **버전 페이지**(검수) |
 | **winget** | `winget install SosomLab.NexaMarkdownViewer` | 수동 dispatch(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
+
+### 현재 게시 현황 (2026-08-02 확인)
+
+| 채널 | 게시 버전 | 상태 |
+|------|-----------|------|
+| Homebrew | 0.3.3 | ✅ 최신 (cask `version 0.3.3`, sha256 `4bc3ecbb…b304b7fe`) |
+| winget | 0.3.3 | ✅ 최신 (manifests 0.2.1·0.3.1·0.3.2·0.3.3, PR #408379 머지) |
+| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
+
+앱 릴리스 버전은 **v0.3.3**(2026-07-27)로, 새 릴리스 없이 채널 상태만 추적 중인 구간입니다.
 
 ### 🍺 Homebrew
 내가 직접 운영하는 탭이라 **중앙 검수가 없고 push 즉시 반영**됩니다.
@@ -79,7 +90,16 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
      (상태: *Submitted → Under Review/Verifying → Approved*)
    - **버전별 페이지**: `…/packages/nexa-markdown-viewer/<버전>` — 방금 올린 버전 확인은 여기서.
    - 내 패키지 목록: <https://community.chocolatey.org/account> (로그인)
-3. ⚠️ **OData 피드로 제출 여부를 판단하지 말 것.** `api/v2/Packages()`·`FindPackagesById()`는
+3. **검수 체크 3종 읽는 법**: 버전 페이지 상단에 자동 검사 결과가 1·2·3으로 표시됩니다.
+   - **Validation**(nuspec 메타데이터 규칙) / **Verification**(샌드박스 실제 설치 테스트)
+     — 둘 다 *Passing*이면 패키지 자체에는 문제가 없다는 뜻.
+   - **Scan**(VirusTotal 계열 다중 엔진) — 미서명 바이너리는 *Flagged as a Warning:
+     at least one file has between 5 and 10 detections* 로 뜨기 쉽습니다. 자동 실패는 아니지만
+     **사람(moderator) 검수를 반드시 거치게 되어 승인이 늦어집니다.**
+     → 근본 해결은 코드 서명(SignPath) 확보. 0.2.1도 이 경로로 약 한 달 만에 승인됐습니다.
+   - 세 검사 중 하나라도 미완/경고면 페이지에 "Some Checks Have Failed or Are Not Yet Complete"가
+     표시되고, 본문에 "This version is in moderation and has not yet been approved"가 남습니다.
+4. ⚠️ **OData 피드로 제출 여부를 판단하지 말 것.** `api/v2/Packages()`·`FindPackagesById()`는
    **승인된 버전만** 반환하므로, 방금 push한 미승인 버전은 응답에 없습니다(제출 실패로 오인 주의).
    피드는 "현재 공개 게시 버전" 확인용, 제출 확인은 **버전별 페이지**로.
 - 게시 스위치: 저장소 변수 **`CHOCO_PUSH=true`** 일 때만 `choco push` 실행(미설정 = pack까지만,

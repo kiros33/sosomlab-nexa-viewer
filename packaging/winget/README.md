@@ -24,9 +24,18 @@ winget은 중앙 저장소 [microsoft/winget-pkgs](https://github.com/microsoft/
 
 제출 전 검증: `winget validate .\0.2.1` (Windows) 또는 komac의 검증 기능.
 
-## 이후 버전 — 자동
-`.github/workflows/winget.yml` 가 릴리스 publish 시 자동으로 버전 PR을 생성합니다.
-(`WINGET_TOKEN` 필요)
+## 이후 버전 — 워크플로 (수동 dispatch)
+`.github/workflows/winget.yml` 가 버전 PR을 생성합니다(`WINGET_TOKEN` 필요).
+
+⚠️ `release: published` 트리거가 걸려 있지만 **자동 실행되지 않습니다.** release.yml이
+`GITHUB_TOKEN`으로 릴리스를 만들어 GitHub 재귀 실행 방지 정책에 걸리기 때문입니다.
+릴리스 후 아래처럼 수동 실행하세요.
+
+```sh
+gh workflow run winget.yml -f tag=vX.Y.Z
+```
+
+등록 이력: 0.2.1(#394582) · 0.3.1(#407658) · 0.3.2(#407907) · 0.3.3(#408379) 머지 완료.
 
 ## 참고
 - 설치파일은 Tauri NSIS → `InstallerType: nullsoft`, 무인설치 자동 인식.
