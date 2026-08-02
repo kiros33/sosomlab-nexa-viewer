@@ -98,6 +98,15 @@
 - [ ] 번들 크기 최적화(highlight.js 언어 선별/코드 스플리팅)
 
 ### 배포 채널 — 패키지 매니저 등록
+
+**현황 요약 (2026-08-02 실측)** — 앱 최신 릴리스는 v0.3.3(2026-07-27).
+
+| 채널 | 게시 버전 | 상태 |
+|---|---|---|
+| Homebrew (macOS) | 0.3.3 | ✅ 최신 |
+| winget (Windows) | 0.3.3 | ✅ 최신 |
+| Chocolatey (Windows) | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 2026-07-30, 3일 경과) |
+
 - [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
       0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907)·0.3.3(#408379) 게시 완료(머지됨).
       `winget install SosomLab.NexaMarkdownViewer`.
@@ -110,8 +119,12 @@
       (moderator `flcdrg`, `PackageStatus: Approved`).
       `choco install nexa-markdown-viewer`.
       저장소 변수 `CHOCO_PUSH=true` 등록 완료(2026-07-30) → push 스텝 활성.
-      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — 현재 모더레이션 대기
-      ("not yet been approved"). 승인 시 최신 버전이 0.2.1 → 0.3.3으로 갱신됨.
+      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — **2026-08-02 기준 여전히
+      모더레이션 대기**("This version is in moderation and has not yet been approved").
+      자동 검사 3종 중 **Validation·Verification은 Passing**, **Scan은 Flagged Warning**
+      (파일 1개 이상에서 탐지 5~10건 — 미서명 바이너리 오탐) → 사람 검수 필수 경로.
+      0.2.1도 같은 조건에서 약 한 달 걸려 승인됐으므로 **코드 서명 확보 전까지 지연은 상수**로 볼 것.
+      승인 시 최신 버전이 0.2.1 → 0.3.3으로 갱신됨.
       ⚠️ 승인까지는 게시 버전이 0.2.1이므로 최신 버전은 winget/직접 내려받기 안내.
       (nuspec `iconUrl`·`projectSourceUrl`은 51eab50에서 이미 반영됨)
 - 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
@@ -153,7 +166,7 @@
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) |
-| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 제출·검수 대기 |
+| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 검수 대기(2026-08-02 확인) |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |
 | 외부 인자 재열기 중복 등록·재열림 개선 | M5 | 🐞 이슈 등록 |

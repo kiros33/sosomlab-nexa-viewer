@@ -7,6 +7,50 @@
 
 ---
 
+## 2026-08-02 — 배포 채널 3종 재점검 + 위키 설치 문서 보강
+
+- **요청**: brew·winget·choco 배포 상황 확인 → 전체 문서 반영 → 정리한 내용을 **위키에도 반영**.
+- **목적**: 7/30 조치(초코 0.3.3 제출) 이후 실제 진행 여부를 확인하고, 사용자용 문서(위키)가
+  Homebrew만 안내하던 공백을 메움.
+
+### 점검 결과 — 실측(문서 기재값 미신뢰)
+
+| 채널 | 조회 | 결과 |
+|---|---|---|
+| Homebrew | `kiros33/homebrew-tap` Casks 원문 | ✅ 0.3.3 (sha256 `4bc3ecbb…b304b7fe`) |
+| winget | `manifests/s/SosomLab/NexaMarkdownViewer` | ✅ 0.2.1·0.3.1·0.3.2·0.3.3 |
+| Chocolatey | 버전 페이지 `/0.3.3` | ⏳ 여전히 모더레이션 대기 |
+
+- **변화 없음이 결론**: 7/30 대비 게시 버전 이동 없음. 앱도 v0.3.3(7/27) 이후 새 릴리스 없음.
+- **새로 확인한 사실 — 초코 지연 원인**: 버전 페이지의 자동 검사 3종을 뜯어보니
+  **Validation Passing · Verification Passing · Scan = Flagged Warning**
+  ("at least one file within this package has between 5 and 10 detections").
+  패키지 품질 문제가 아니라 **미서명 바이너리 오탐**이고, 이 경우 사람 검수 경로로 넘어가
+  승인이 늦어짐. 0.2.1도 동일 조건에서 약 한 달 소요(6/28 제출 → 7/30 승인).
+  → **코드 서명(SignPath) 확보 전까지 초코 지연은 상수**로 취급하고 기다리는 게 맞다는 판단.
+  다운로드 카운트 3(제출 후 검수 트래픽), `CHOCO_PUSH=true` 변수는 계속 활성 상태.
+- **추가 dispatch 하지 않음**: 같은 버전 재푸시는 이중 큐만 만들고 검수를 되돌림.
+
+### 문서 반영
+
+- `docs/wiki/Installation.md` — **가장 큰 공백을 메움**. 기존에 Homebrew만 있어 Windows 사용자는
+  위키만 보면 패키지 매니저 설치 경로를 알 수 없었음.
+  → 상단에 **채널 현황 표(게시 버전/상태)** + **winget 절**·**Chocolatey 절** 신설,
+  "Windows 최신 버전은 winget" 안내 명시. 코드 서명 절에 "미서명 → 초코 스캔 경고 → 승인 지연"
+  인과를 한 줄로 연결.
+- `docs/wiki/Building-and-Release.md` — `현재 게시 현황(2026-08-02 확인)` 표 추가,
+  Chocolatey 절에 **검수 체크 3종(Validation/Verification/Scan) 읽는 법** 신설,
+  winget 자동화 설명에 남아 있던 "머지 후부터 자동" 표현을 수동 dispatch로 정정.
+- `README.md` — 패키지 매니저 절 머리에 채널 현황 표 추가, Chocolatey 주의문에 기준일(2026-08-02)과
+  대기 사유(스캔 경고) 반영.
+- `docs/ROADMAP.md` — 배포 채널 절 머리에 실측 현황 표, Chocolatey 항목에 검사 3종 결과·
+  "서명 전까지 지연 상수" 판단 기록, 요청 추적 표 기준일 갱신.
+- `packaging/winget/README.md` — "이후 버전 — 자동" 오기 정정(수동 dispatch + 등록 이력 4건).
+- **위키 게시**: `docs/wiki` → `sosomlab-nexa-viewer.wiki.git` push
+  (로컬이 원격보다 앞서 있던 7/30자 Building-and-Release 수정분도 이번에 함께 반영됨).
+
+---
+
 ## 2026-07-30 — 배포 채널 3종 점검 + Chocolatey 게시 재개(v0.3.3 제출)
 
 - **요청**: choco·winget·brew 배포 상태 확인 → 확인 결과 반영까지 진행.

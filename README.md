@@ -82,6 +82,12 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 ### 패키지 매니저로 설치 (권장)
 
+| 채널 | OS | 게시 버전 | 상태 (2026-08-02 기준) |
+|------|----|-----------|------------------------|
+| Homebrew | macOS | **0.3.3** | ✅ 최신 |
+| winget | Windows | **0.3.3** | ✅ 최신 |
+| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기 |
+
 **🍺 macOS — Homebrew**
 
 ```sh
@@ -108,8 +114,10 @@ choco install nexa-markdown-viewer
 
 업그레이드는 `choco upgrade nexa-markdown-viewer`, 제거는 `choco uninstall nexa-markdown-viewer`.
 
-> Chocolatey는 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고
-> **0.3.3은 검수 대기 중**이라, 최신 버전이 필요하면 winget 또는 아래 직접 내려받기를 권장합니다.
+> Chocolatey 0.2.1은 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고,
+> 같은 날 제출한 **0.3.3은 2026-08-02 기준 아직 검수 대기 중**입니다
+> (설치 테스트·메타데이터 검증은 통과했고, 미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수 대기).
+> 최신 버전이 필요하면 winget 또는 아래 직접 내려받기를 권장합니다.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
 
 ### 직접 내려받기
