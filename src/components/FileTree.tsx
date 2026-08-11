@@ -13,37 +13,46 @@ type ContextHandler = (e: React.MouseEvent) => void;
 function TreeNode({
   entry,
   source,
+  wsKey,
   depth,
   filters,
   onContext,
 }: {
   entry: TreeEntry;
   source: ContentSource;
+  wsKey: string;
   depth: number;
   filters: FileFilters;
   onContext?: ContextHandler;
 }) {
-  const [open, setOpen] = useState(false);
+  // 펼침 상태는 스토어 영속화 → 트리 갱신(remount) 후에도 유지
+  const open = useViewer((s) => (s.expandedDirs[wsKey] ?? []).includes(entry.path));
+  const toggleDir = useViewer((s) => s.toggleDir);
   const [children, setChildren] = useState<TreeEntry[] | null>(null);
   const [loading, setLoading] = useState(false);
   const openInSource = useViewer((s) => s.openInSource);
   const activeSource = useViewer((s) => s.source);
   const currentPath = useViewer((s) => s.docPath);
 
-  const onClick = async () => {
+  // 펼쳐진 폴더의 하위 목록 지연 로딩(갱신 remount 시 자동 재로딩)
+  useEffect(() => {
+    if (!entry.isDir || !open || children !== null) return;
+    let active = true;
+    setLoading(true);
+    source
+      .listDir(entry.path)
+      .then((r) => active && setChildren(r))
+      .catch(() => active && setChildren([]))
+      .finally(() => active && setLoading(false));
+    return () => {
+      active = false;
+    };
+  }, [open, children, entry.isDir, entry.path, source]);
+
+  const onClick = () => {
     if (entry.isDir) {
       // 폴더: 목록만 펼침/접힘 (우측 열린 문서는 그대로 유지)
-      if (!open && children === null) {
-        setLoading(true);
-        try {
-          setChildren(await source.listDir(entry.path));
-        } catch {
-          setChildren([]);
-        } finally {
-          setLoading(false);
-        }
-      }
-      setOpen(!open);
+      toggleDir(wsKey, entry.path);
     } else {
       void openInSource(source, entry.path);
     }
@@ -85,6 +94,7 @@ function TreeNode({
                 key={c.path}
                 entry={c}
                 source={source}
+                wsKey={wsKey}
                 depth={depth + 1}
                 filters={filters}
                 onContext={onContext}
@@ -108,6 +118,7 @@ export function FileTree({
 }) {
   const [roots, setRoots] = useState<TreeEntry[] | null>(null);
   const [error, setError] = useState<string | null>(null);
+  const wsKey = sourceKey(source.ref);
 
   useEffect(() => {
     let active = true;
@@ -134,6 +145,7 @@ export function FileTree({
             key={entry.path}
             entry={entry}
             source={source}
+            wsKey={wsKey}
             depth={0}
             filters={filters}
             onContext={onContext}
