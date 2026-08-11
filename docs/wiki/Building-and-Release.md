@@ -61,13 +61,13 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
 | **Chocolatey** | `choco install nexa-markdown-viewer` | 수동 dispatch(`CHOCO_API_KEY` + 변수 `CHOCO_PUSH=true`) | Actions 실행 + **버전 페이지**(검수) |
 | **winget** | `winget install SosomLab.NexaMarkdownViewer` | 수동 dispatch(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
 
-### 현재 게시 현황 (2026-08-02 확인)
+### 현재 게시 현황 (2026-08-11 확인)
 
 | 채널 | 게시 버전 | 상태 |
 |------|-----------|------|
 | Homebrew | 0.3.3 | ✅ 최신 (cask `version 0.3.3`, sha256 `4bc3ecbb…b304b7fe`) |
 | winget | 0.3.3 | ✅ 최신 (manifests 0.2.1·0.3.1·0.3.2·0.3.3, PR #408379 머지) |
-| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
+| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30, 12일 경과) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
 
 앱 릴리스 버전은 **v0.3.3**(2026-07-27)로, 새 릴리스 없이 채널 상태만 추적 중인 구간입니다.
 

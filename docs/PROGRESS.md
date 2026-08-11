@@ -7,6 +7,59 @@
 
 ---
 
+## 2026-08-11 — 저장소 최신화 + Chocolatey 진행 재점검(변화 없음)
+
+- **요청**: 저장소 최신화 및 choco 진행사항 확인 → 정리 후 진행 기록 최신화.
+- **목적**: 8/2 점검 이후 9일 경과 시점에서 초코 검수가 움직였는지 실측하고, 로컬 작업 트리를
+  origin/main과 맞춤.
+
+### 저장소 최신화
+
+- 로컬 `main`이 origin보다 **21 커밋 뒤** → `git pull --ff-only`로 `6e61983` → `1e28392`
+  fast-forward. 신규 태그 `v0.3.2`·`v0.3.3` 수신.
+- 받은 내용은 대부분 문서/패키징이고 앱 코드 변경은 `src/App.css`(본문 전체 폭) 1건.
+- ⚠️ **팬텀 수정 표시 해소**: `src-tauri/Cargo.toml`이 `M`으로 보였으나 `git diff`는 빈 출력,
+  `cmp` 결과 HEAD와 **바이트 동일**(1213B), blob 해시도 워킹/인덱스/HEAD 모두 `ee12a60`으로 일치.
+  원인은 내용 변경이 아니라 **`core.autocrlf=true`인데 워킹 파일이 LF**(`git ls-files --eol` → `w/lf`)
+  라 stat 캐시가 계속 dirty로 남은 것. pull로 해당 파일이 재기록(0.3.1 → 0.3.3)되며 자연 해소됨.
+  → 같은 증상 재발 시 `git diff`가 비어 있으면 내용 변경 아님. `.gitattributes`가 없는 상태라
+  줄바꿈 정책을 고정하면 근본 차단 가능(미적용, 별도 판단 사항).
+
+### 점검 결과 — 실측(2026-08-11)
+
+| 확인 대상 | 조회 | 결과 |
+|---|---|---|
+| 승인 최신 버전 | community OData `FindPackagesById()` | **0.2.1** (`Approved`, `IsLatestVersion=true`) |
+| 0.3.3 상태 | 버전 페이지 `/0.3.3` | HTTP 200 + "not yet been approved" → **모더레이션 대기** |
+| 자동 검사 3종 | 버전 페이지 | Validation ✅ Passing / Verification ✅ Passing / **Scan ⚠️ Flagged**("between 5 and 10 detections") |
+| Last Update | 버전 페이지 | **30 Jul 2026** — 제출일에서 이동 없음(모더레이터 액션 없음) |
+| 0.3.3 다운로드 | 버전 페이지 | 3 → **14** (검수 트래픽) |
+| `CHOCO_PUSH` | `gh variable list` | `true` (2026-07-30 등록) 유지 |
+| chocolatey.yml | `gh run list` | 최근 run `30541856712`(07-30 success) 이후 실행 없음 |
+
+- **결론: 8/2 대비 변화 없음.** 게시 버전·검사 결과·Last Update 모두 동일하고 다운로드 수만 증가.
+  앱도 v0.3.3(7/27) 이후 새 릴리스 없음 → 채널 상태만 추적하는 구간 지속.
+- **정상 범위로 판단**: 제출(7/30) 후 **12일차**. 0.2.1이 동일 조건(Scan Flagged)에서
+  6/28 제출 → 7/30 승인으로 약 한 달 걸렸으므로 아직 그 범위 안. 8/2에 세운
+  "**코드 서명 확보 전까지 초코 지연은 상수**" 판단을 그대로 유지.
+- **이번에도 재 dispatch 하지 않음**: 같은 버전 재푸시는 이중 큐를 만들고 검수 순번을 되돌림.
+- **재확인된 점검 함정**: OData 피드는 미승인 버전을 반환하지 않아 이번에도 0.2.1만 응답.
+  제출/검수 여부는 **버전 페이지로만** 확인할 것.
+
+### 문서 반영
+
+- 상태값 자체는 8/2와 동일하므로 **현황 서술은 유지하고 기준일만 2026-08-11로 갱신**:
+  `README.md`(채널 현황 표·Chocolatey 주의문), `docs/ROADMAP.md`(현황 요약·Chocolatey 항목·
+  요청 추적 표), `docs/wiki/{Installation,Building-and-Release}.md`(현황 표 머리).
+- Chocolatey 항목에 **경과일(제출 후 12일)·Last Update 미이동** 근거를 추가해, 다음 점검 때
+  "얼마나 기다린 상태인지"를 문서만 보고 판단할 수 있게 함.
+- **소스 위치**: `README.md`, `docs/{ROADMAP,PROGRESS}.md`,
+  `docs/wiki/{Installation,Building-and-Release}.md`.
+- **다음 확인 시점**: 2026-08-말~9월 초(제출 후 한 달 전후). 그 전에 SignPath 서명이 확보되면
+  재빌드·재제출로 Scan Flagged 자체를 없애는 경로가 우선.
+
+---
+
 ## 2026-08-02 — 배포 채널 3종 재점검 + 위키 설치 문서 보강
 
 - **요청**: brew·winget·choco 배포 상황 확인 → 전체 문서 반영 → 정리한 내용을 **위키에도 반영**.
