@@ -162,6 +162,27 @@ function saveExpanded(keys: string[]) {
   }
 }
 
+// 워크스페이스별 펼쳐진 폴더 경로 목록(트리 갱신·재시작 후에도 유지)
+const EXPANDED_DIRS_KEY = "expandedDirs.v1";
+
+function loadExpandedDirs(): Record<string, string[]> {
+  try {
+    const raw = localStorage.getItem(EXPANDED_DIRS_KEY);
+    if (raw) return JSON.parse(raw);
+  } catch {
+    /* ignore */
+  }
+  return {};
+}
+
+function saveExpandedDirs(map: Record<string, string[]>) {
+  try {
+    localStorage.setItem(EXPANDED_DIRS_KEY, JSON.stringify(map));
+  } catch {
+    /* ignore */
+  }
+}
+
 interface ViewerState {
   source: ContentSource | null;
   docPath: string | null;
@@ -244,6 +265,9 @@ interface ViewerState {
   /** 탐색기에서 펼쳐진 워크스페이스 key (접힘이 기본) */
   expandedKeys: string[];
   toggleExpanded: (key: string) => void;
+  /** 워크스페이스별 펼쳐진 폴더 경로 목록(트리 갱신 후에도 유지) */
+  expandedDirs: Record<string, string[]>;
+  toggleDir: (key: string, path: string) => void;
   /** 워크스페이스별 트리 갱신 카운터(증가 시 해당 트리 재로딩) */
   refreshTicks: Record<string, number>;
   bumpRefresh: (key: string) => void;
@@ -476,9 +500,12 @@ export const useViewer = create<ViewerState>((set, get) => {
       saveWorkspaces(ws);
       const expandedKeys = get().expandedKeys.filter((k) => k !== key);
       const hiddenKeys = get().hiddenKeys.filter((k) => k !== key);
+      const expandedDirs = { ...get().expandedDirs };
+      delete expandedDirs[key];
       saveExpanded(expandedKeys);
       saveHidden(hiddenKeys);
-      set({ workspaces: ws, expandedKeys, hiddenKeys });
+      saveExpandedDirs(expandedDirs);
+      set({ workspaces: ws, expandedKeys, hiddenKeys, expandedDirs });
     },
 
     hiddenKeys: loadHidden(),
@@ -497,6 +524,17 @@ export const useViewer = create<ViewerState>((set, get) => {
       const next = cur.includes(key) ? cur.filter((k) => k !== key) : [...cur, key];
       saveExpanded(next);
       set({ expandedKeys: next });
+    },
+
+    expandedDirs: loadExpandedDirs(),
+
+    toggleDir: (key, path) => {
+      const map = get().expandedDirs;
+      const cur = map[key] ?? [];
+      const list = cur.includes(path) ? cur.filter((p) => p !== path) : [...cur, path];
+      const next = { ...map, [key]: list };
+      saveExpandedDirs(next);
+      set({ expandedDirs: next });
     },
 
     refreshTicks: {},
