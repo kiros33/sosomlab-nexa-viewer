@@ -82,11 +82,13 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 ### 패키지 매니저로 설치 (권장)
 
+최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
+
 | 채널 | OS | 게시 버전 | 상태 (2026-08-11 기준) |
 |------|----|-----------|------------------------|
-| Homebrew | macOS | **0.3.3** | ✅ 최신 |
-| winget | Windows | **0.3.3** | ✅ 최신 |
-| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기 |
+| Homebrew | macOS | **0.3.4** | ✅ 최신 |
+| winget | Windows | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 |
+| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기(0.3.4는 제출 보류) |
 
 **🍺 macOS — Homebrew**
 
@@ -106,6 +108,9 @@ winget install SosomLab.NexaMarkdownViewer
 
 업그레이드는 `winget upgrade SosomLab.NexaMarkdownViewer`, 제거는 `winget uninstall SosomLab.NexaMarkdownViewer`.
 
+> 0.3.4는 [winget-pkgs PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385) 검증 대기 중이라
+> 머지 전까지 `winget install`은 0.3.3을 설치합니다. 지금 0.3.4가 필요하면 아래 직접 내려받기를 이용하세요.
+
 **🪟 Windows — Chocolatey**
 
 ```powershell
@@ -117,7 +122,8 @@ choco install nexa-markdown-viewer
 > Chocolatey 0.2.1은 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고,
 > 같은 날 제출한 **0.3.3은 2026-08-11 기준 아직 검수 대기 중**입니다(제출 후 12일 경과)
 > (설치 테스트·메타데이터 검증은 통과했고, 미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수 대기).
-> 최신 버전이 필요하면 winget 또는 아래 직접 내려받기를 권장합니다.
+> **0.3.4는 이중 큐를 피하려고 제출을 보류**했습니다 — 0.3.3 승인 후 따라잡습니다.
+> 최신 버전이 필요하면 아래 직접 내려받기를 권장합니다.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
 
 ### 직접 내려받기
@@ -167,6 +173,8 @@ src-tauri/
 ## 📝 변경 이력 / 릴리스 노트
 
 최근 변경 요약(자세한 내용은 아래 링크):
+- **v0.3.4** — 탐색기 **갱신 시 펼쳐둔 폴더가 유지**되도록 수정. 펼침 상태를 하위 폴더까지
+  저장·복원(재실행 후에도 유지)
 - **v0.3.3** — 본문 **전체 가로 폭 사용** — 920px 중앙 정렬 제한 해제, 넓은 창에서
   표·다이어그램이 전체 폭으로 펼쳐짐(VS Code 프리뷰와 동일)
 - **v0.3.2** — Mermaid **확대(+) 미동작·드래그 시 배율 리셋** 수정, 다이어그램 보기 모드

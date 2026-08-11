@@ -7,6 +7,75 @@
 
 ---
 
+## 2026-08-11 — 탐색기 갱신 시 폴더 펼침 유지 수정 + v0.3.4 릴리스
+
+- **요청**: 폴더/GitHub 저장소를 펼쳐 놓은 상태에서 **갱신 버튼을 누르면 펼침이 초기화되는**
+  문제를 보완 → 빌드·실행 확인 → 릴리스 배포(초코 제외, winget·brew 포함) → 문서 최신화.
+- **목적**: 갱신 후에도 작업 중이던 트리 위치를 잃지 않게 해 문서 탐색 흐름이 끊기지 않도록 함.
+
+### 원인
+
+루트 갱신 버튼은 `bumpRefresh(key)`로 `refreshTicks`를 올리고, `Explorer`가
+`<FileTree key={`${key}:${tick}`}>`로 **트리를 remount**해 새로고침하는 구조다.
+그런데 폴더 펼침 상태가 `TreeNode`의 로컬 `useState(open)`에만 있어 remount와 함께 전부 사라졌다.
+즉 "새로고침 = 전부 접힘"이 구조상 필연이었고, 루트 펼침(`expandedKeys`)만 스토어에
+영속화되어 있어 **루트는 유지되고 하위 폴더만 접히는** 비대칭 동작이었다.
+
+### 변경내역
+
+- `src/store/viewer.ts` — 워크스페이스별 펼쳐진 폴더 경로를 담는 `expandedDirs:
+  Record<string, string[]>` + `toggleDir(key, path)` 추가. `localStorage`(`expandedDirs.v1`)에
+  영속화(기존 `expanded.v1`/`hidden.v1`과 동일 패턴). `removeWorkspace`에서 해당 키의
+  펼침 기록도 함께 정리.
+- `src/components/FileTree.tsx` — `TreeNode`의 `open`을 로컬 state 대신 스토어에서 읽고,
+  하위 목록 로딩을 **클릭 핸들러 → `useEffect`로 이동**. remount 시 펼쳐진 노드만 자동으로
+  다시 `listDir` → 펼침 유지 + 내용은 최신. `wsKey`를 트리 전체에 전달.
+- 부수 효과: 펼침이 **앱 재실행 후에도 복원**된다(로컬 폴더·GitHub 저장소 공통).
+  `FileTree`/`TreeNode`가 `ContentSource` 인터페이스만 쓰고 상태를 `sourceKey` 기준으로
+  저장하므로 소스 종류와 무관하게 같은 경로를 탄다.
+
+### 검증
+
+- `pnpm build`(tsc + vite) 통과, `pnpm tauri dev` 콜드 빌드 성공(448 크레이트, 3m58s).
+- 실제 앱 조작으로 확인: GitHub 루트에서 `docs` → `docs/journal` 2단계 펼침 후 갱신 →
+  **두 단계 모두 유지된 채 목록만 재조회**. 폴더 재클릭 접힘도 정상. 앱 재시작 후 복원 확인.
+
+### 릴리스 v0.3.4
+
+- 버전 0.3.3 → 0.3.4: `package.json`·`tauri.conf.json`·`Cargo.toml`·`Cargo.lock` + CHANGELOG.
+- `v0.3.4` 태그 push → release.yml 3-OS 빌드 성공 → **정식 게시**(draft/prerelease 아님).
+  산출물 5종(dmg·x64-setup.exe·deb·rpm·AppImage).
+- **Homebrew**: `kiros33/homebrew-tap` cask를 `version 0.3.4` +
+  sha256 `0088ad80…e80f80d1`로 갱신·push(`af24047`). 중앙 검수 없어 즉시 반영.
+- **winget**: `gh workflow run winget.yml -f tag=v0.3.4` 성공 →
+  winget-pkgs **PR #415385** 생성(검증·머지 대기).
+- **Chocolatey**: 0.3.3이 아직 모더레이션 대기라 **의도적으로 제외**(이중 큐 회피).
+  0.3.3 승인 후 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡을 것.
+
+### 문서 반영
+
+- `docs/wiki/Explorer.md` — 펼침이 하위 폴더까지 저장되고 **갱신해도 유지**됨을 명시(0.3.4~).
+- `docs/wiki/Preferences.md` — 자동 저장 항목에 "탐색기 트리 펼침" 추가(각주로 갱신 시 유지).
+- `docs/wiki/Installation.md` — 채널 현황 표 갱신. winget 절의 "릴리스마다 최신 버전이
+  반영됩니다"가 실제와 달라(제출 후 검증·머지 시차) **정정**. 지금 0.3.4가 필요하면
+  직접 내려받기 안내.
+- `docs/wiki/Building-and-Release.md` — 게시 현황 표 + 초코 보류 사유·따라잡기 명령 기록.
+- **위키 게시**: `docs/wiki` → `sosomlab-nexa-viewer.wiki.git` push(`7e814aa`).
+  raw 조회로 4개 문서 원격 반영 확인.
+- `README.md` — 채널 현황 표, winget 대기 주의문, 초코 보류 문구, 변경 이력에 v0.3.4 추가.
+- `docs/ROADMAP.md` — 현황 요약/표를 v0.3.4 기준으로, winget #415385·Homebrew 0.3.4 반영,
+  초코 항목에 "0.3.4 건너뜀" 근거 추가, 요청 추적 표에 본 건 완료 등록.
+
+### 기능 및 반영 소스 위치
+
+- **소스**: `src/store/viewer.ts`(`expandedDirs`/`toggleDir`), `src/components/FileTree.tsx`.
+- **커밋**: `4044724`(수정+버전) → `01abf7d`(merge) → `d0bbc58`(릴리스 현황) →
+  `505b26a`(위키). 태그 `v0.3.4`. 위키는 별도 저장소 `7e814aa`, 탭은 `af24047`.
+- **다음 확인 시점**: winget PR #415385 머지 여부(수일 내). 머지되면 README·ROADMAP·위키
+  3면의 winget 행을 "0.3.4 ✅ 최신"으로 정리. 초코는 0.3.3 승인 시 0.3.4 제출과 함께 일괄 정리.
+
+---
+
 ## 2026-08-11 — 저장소 최신화 + Chocolatey 진행 재점검(변화 없음)
 
 - **요청**: 저장소 최신화 및 choco 진행사항 확인 → 정리 후 진행 기록 최신화.
