@@ -2,14 +2,17 @@
 
 ## 패키지 매니저 현황 (2026-08-11 기준)
 
+최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
+
 | 채널 | OS | 게시 버전 | 상태 |
 |------|----|-----------|------|
-| **Homebrew** | macOS | **0.3.3** | ✅ 최신 |
-| **winget** | Windows | **0.3.3** | ✅ 최신 |
+| **Homebrew** | macOS | **0.3.4** | ✅ 최신 |
+| **winget** | Windows | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 |
 | **Chocolatey** | Windows | 0.2.1 | ⏳ 0.3.3 검수(moderation) 대기 |
 
-> Windows에서 **최신 버전**이 필요하면 **winget**(또는 아래 직접 다운로드)을 사용하세요.
-> Chocolatey는 승인되기 전까지 `choco install`이 0.2.1을 설치합니다.
+> macOS는 **Homebrew**로 바로 최신(0.3.4)을 받을 수 있습니다.
+> Windows는 winget PR이 머지되기 전까지 `winget install`이 0.3.3을,
+> `choco install`이 0.2.1을 설치합니다. **지금 0.3.4가 필요하면 아래 직접 다운로드**를 이용하세요.
 
 ## 🍺 Homebrew (macOS, 권장)
 Homebrew 탭으로 한 줄 설치/업그레이드가 가능합니다.
@@ -29,7 +32,8 @@ brew uninstall --cask nexa-markdown-viewer
 - Homebrew Cask는 설치 시 quarantine 속성을 자동 제거하므로, 아래의 **코드 서명 경고 없이** 바로 실행됩니다.
 
 ## 📦 winget (Windows, 권장)
-Windows 10/11에 기본 내장된 패키지 매니저입니다. 릴리스마다 최신 버전이 반영됩니다.
+Windows 10/11에 기본 내장된 패키지 매니저입니다. 릴리스마다 새 버전을 제출하며,
+microsoft/winget-pkgs 검증·머지를 거쳐 반영됩니다(제출 후 반영까지 시차가 있습니다).
 
 ```powershell
 # 설치
@@ -43,7 +47,7 @@ winget uninstall SosomLab.NexaMarkdownViewer
 ```
 
 - 공식 매니페스트: [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/tree/master/manifests/s/SosomLab/NexaMarkdownViewer)
-  (0.2.1 · 0.3.1 · 0.3.2 · 0.3.3 게시 완료)
+  (0.2.1 · 0.3.1 · 0.3.2 · 0.3.3 게시 완료 · 0.3.4 [PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385) 대기)
 - 설치 파일은 NSIS(`_x64-setup.exe`) — 무인 설치가 자동 인식됩니다.
 
 ## 🍫 Chocolatey (Windows)
