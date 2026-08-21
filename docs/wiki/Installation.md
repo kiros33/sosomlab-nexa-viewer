@@ -1,18 +1,18 @@
 # 설치 (Installation)
 
-## 패키지 매니저 현황 (2026-08-11 기준)
+## 패키지 매니저 현황 (2026-08-21 기준)
 
 최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
 
 | 채널 | OS | 게시 버전 | 상태 |
 |------|----|-----------|------|
 | **Homebrew** | macOS | **0.3.4** | ✅ 최신 |
-| **winget** | Windows | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 |
-| **Chocolatey** | Windows | 0.2.1 | ⏳ 0.3.3 검수(moderation) 대기 |
+| **winget** | Windows | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
+| **Chocolatey** | Windows | 0.2.1 | ⏳ 0.3.3 검수(moderation) 대기 — 제출 후 22일 |
 
-> macOS는 **Homebrew**로 바로 최신(0.3.4)을 받을 수 있습니다.
-> Windows는 winget PR이 머지되기 전까지 `winget install`이 0.3.3을,
-> `choco install`이 0.2.1을 설치합니다. **지금 0.3.4가 필요하면 아래 직접 다운로드**를 이용하세요.
+> macOS는 **Homebrew**, Windows는 **winget**으로 바로 최신(0.3.4)을 받을 수 있습니다.
+> Chocolatey만 아직 0.2.1이 게시 버전입니다(0.3.3 검수 대기).
+> **초코로 0.3.4가 필요하면 winget 또는 아래 직접 다운로드**를 이용하세요.
 
 ## 🍺 Homebrew (macOS, 권장)
 Homebrew 탭으로 한 줄 설치/업그레이드가 가능합니다.
@@ -47,7 +47,8 @@ winget uninstall SosomLab.NexaMarkdownViewer
 ```
 
 - 공식 매니페스트: [microsoft/winget-pkgs](https://github.com/microsoft/winget-pkgs/tree/master/manifests/s/SosomLab/NexaMarkdownViewer)
-  (0.2.1 · 0.3.1 · 0.3.2 · 0.3.3 게시 완료 · 0.3.4 [PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385) 대기)
+  (0.2.1 · 0.3.1 · 0.3.2 · 0.3.3 · **0.3.4** 게시 완료 —
+  0.3.4는 [PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385)가 2026-08-11 머지)
 - 설치 파일은 NSIS(`_x64-setup.exe`) — 무인 설치가 자동 인식됩니다.
 
 ## 🍫 Chocolatey (Windows)
@@ -65,9 +66,10 @@ choco uninstall nexa-markdown-viewer
 
 - 패키지 페이지: [community.chocolatey.org/packages/nexa-markdown-viewer](https://community.chocolatey.org/packages/nexa-markdown-viewer)
 - ⏳ **현재 게시(승인) 버전은 0.2.1입니다.** 0.3.3은 2026-07-30 제출 후 커뮤니티 저장소
-  검수 대기 중이라 아직 `choco install`로 받을 수 없습니다.
+  검수 대기 중이라(2026-08-21 기준 22일 경과) 아직 `choco install`로 받을 수 없습니다.
   (검수 진행 상황: 자동 검증·설치 테스트는 통과, 바이러스 스캔에서 미서명 바이너리로 인한
-  오탐 경고가 남아 사람 검수 대기 — 아래 **코드 서명 안내** 참고)
+  오탐 경고가 남아 사람 검수 대기 — 아래 **코드 서명 안내** 참고.
+  모더레이터 리뷰는 아직 시작 전이라 패키지 쪽에서 고칠 지적 사항은 없습니다.)
 - 최신 버전이 필요하면 **winget** 또는 직접 다운로드를 이용하세요.
 
 ## 다운로드

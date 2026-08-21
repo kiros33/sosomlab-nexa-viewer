@@ -61,18 +61,25 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
 | **Chocolatey** | `choco install nexa-markdown-viewer` | 수동 dispatch(`CHOCO_API_KEY` + 변수 `CHOCO_PUSH=true`) | Actions 실행 + **버전 페이지**(검수) |
 | **winget** | `winget install SosomLab.NexaMarkdownViewer` | 수동 dispatch(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
 
-### 현재 게시 현황 (2026-08-11 확인)
+### 현재 게시 현황 (2026-08-21 확인)
 
 | 채널 | 게시 버전 | 상태 |
 |------|-----------|------|
 | Homebrew | 0.3.4 | ✅ 최신 (cask `version 0.3.4`, sha256 `0088ad80…e80f80d1`) |
-| winget | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 — 머지 시 최신 |
-| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30, 12일 경과) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
+| winget | **0.3.4** | ✅ 최신 (PR #415385 2026-08-11 머지, 제출 43분 만에 게시) |
+| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30, 22일 경과) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
 
 앱 릴리스 버전은 **v0.3.4**(2026-08-11)입니다.
 
 > Chocolatey는 0.3.3이 아직 검수 대기 중이라 **0.3.4 제출을 의도적으로 보류**했습니다
 > (이중 큐 회피). 0.3.3이 승인되면 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡으면 됩니다.
+>
+> **피드백/조치 필요 여부(2026-08-21 확인): 두 채널 모두 없음.**
+> winget PR #415385에는 봇 코멘트와 승인만 있고 수정 요청이 없었습니다.
+> Chocolatey 0.3.3은 `PackageSubmittedStatus: Ready`, `PackageReviewedDate: null` —
+> 모더레이터가 아직 열어보지 않은 대기 상태라(“Waiting for Maintainer” 아님)
+> 유지보수자가 응답할 지적 사항이 없습니다. 상태 확인 방법:
+> `curl "https://community.chocolatey.org/api/v2/Packages(Id='nexa-markdown-viewer',Version='0.3.3')"`
 
 ### 🍺 Homebrew
 내가 직접 운영하는 탭이라 **중앙 검수가 없고 push 즉시 반영**됩니다.

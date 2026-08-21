@@ -84,11 +84,11 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
 
-| 채널 | OS | 게시 버전 | 상태 (2026-08-11 기준) |
+| 채널 | OS | 게시 버전 | 상태 (2026-08-21 기준) |
 |------|----|-----------|------------------------|
 | Homebrew | macOS | **0.3.4** | ✅ 최신 |
-| winget | Windows | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 |
-| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기(0.3.4는 제출 보류) |
+| winget | Windows | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
+| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 후 22일) · 0.3.4 제출 보류 |
 
 **🍺 macOS — Homebrew**
 
@@ -108,8 +108,8 @@ winget install SosomLab.NexaMarkdownViewer
 
 업그레이드는 `winget upgrade SosomLab.NexaMarkdownViewer`, 제거는 `winget uninstall SosomLab.NexaMarkdownViewer`.
 
-> 0.3.4는 [winget-pkgs PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385) 검증 대기 중이라
-> 머지 전까지 `winget install`은 0.3.3을 설치합니다. 지금 0.3.4가 필요하면 아래 직접 내려받기를 이용하세요.
+> 0.3.4는 [winget-pkgs PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385)가
+> **2026-08-11 머지**되어 게시 완료입니다 — `winget install`은 최신 0.3.4를 설치합니다.
 
 **🪟 Windows — Chocolatey**
 
@@ -120,10 +120,11 @@ choco install nexa-markdown-viewer
 업그레이드는 `choco upgrade nexa-markdown-viewer`, 제거는 `choco uninstall nexa-markdown-viewer`.
 
 > Chocolatey 0.2.1은 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고,
-> 같은 날 제출한 **0.3.3은 2026-08-11 기준 아직 검수 대기 중**입니다(제출 후 12일 경과)
-> (설치 테스트·메타데이터 검증은 통과했고, 미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수 대기).
+> 같은 날 제출한 **0.3.3은 2026-08-21 기준 아직 검수 대기 중**입니다(제출 후 22일 경과)
+> (설치 테스트·메타데이터 검증은 통과했고, 미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수 대기.
+> 모더레이터 리뷰는 아직 시작되지 않아 **유지보수자가 조치할 피드백은 없습니다**).
 > **0.3.4는 이중 큐를 피하려고 제출을 보류**했습니다 — 0.3.3 승인 후 따라잡습니다.
-> 최신 버전이 필요하면 아래 직접 내려받기를 권장합니다.
+> 최신 버전이 필요하면 **winget** 또는 아래 직접 내려받기를 권장합니다.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
 
 ### 직접 내려받기

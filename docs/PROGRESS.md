@@ -7,6 +7,51 @@
 
 ---
 
+## 2026-08-21 — 배포 채널(winget·Chocolatey) 피드백/조치 필요 여부 확인 + 문서 최신화
+
+- **요청**: choco·winget 배포 상태 확인 → 피드백이 있어 조치가 필요한지 확인 → 문서·위키 최신화.
+- **결론: 두 채널 모두 유지보수자가 조치할 피드백 없음.** winget은 이미 최신(0.3.4) 게시 완료였고,
+  Chocolatey는 모더레이터가 아직 리뷰를 시작하지 않은 순수 대기 상태였다.
+
+### winget — 0.3.4 게시 완료(문서가 10일간 실제와 어긋나 있었음)
+
+- PR [microsoft/winget-pkgs#415385](https://github.com/microsoft/winget-pkgs/pull/415385):
+  생성 2026-08-11 08:36Z → **머지 09:19Z**(43분). 라벨 `Validation-Completed` ·
+  `Moderator-Approved`(stephengillie) · `Publish-Pipeline-Succeeded`.
+- 코멘트는 wingetbot의 "Publish pipeline succeeded" 1건뿐 — **수정 요청 없음**.
+- `manifests/s/SosomLab/NexaMarkdownViewer/`에 0.2.1·0.3.1·0.3.2·0.3.3·**0.3.4** 존재 확인.
+  → `winget install SosomLab.NexaMarkdownViewer`가 지금 0.3.4를 설치한다.
+- 문서(README/ROADMAP/위키/packaging)는 여전히 "0.3.3 게시 · 0.3.4 PR 대기"로 남아 있었음 → 갱신.
+
+### Chocolatey — 0.3.3 여전히 검수 대기(22일), 조치 불필요
+
+- 패키지 페이지 버전 히스토리: 0.3.3 = `Ready`, 0.2.1 = `Approved`.
+  피드 API(`FindPackagesById`)에는 0.2.1만 노출 → 일반 설치는 아직 0.2.1.
+- OData 실측 `Packages(Id='nexa-markdown-viewer',Version='0.3.3')`:
+  `PackageStatus: Submitted` · `PackageSubmittedStatus: Ready` ·
+  `PackageValidationResultStatus: Passing`(07-30 12:50) ·
+  `PackageTestResultStatus: Passing`(07-30 19:48) ·
+  `PackageScanStatus: Flagged`(07-30 20:49, 미서명 오탐) ·
+  **`PackageReviewedDate` / `PackageApprovedDate` = null**.
+- 판정 근거: 초코 모더레이션에서 유지보수자 조치가 필요한 상태는 `Waiting for Maintainer`인데
+  현재는 `Ready`(모더레이터 큐 대기)이고 리뷰 일자도 비어 있다 → **응답할 지적 사항이 없음**.
+  모더레이터 리뷰 코멘트는 소유자 로그인 시에만 보이므로, 메일로 온 지적이 있다면 별도 확인 필요.
+- 선택지는 ① 계속 대기 ② 0.3.4를 제출해 roll-forward(`gh workflow run chocolatey.yml -f tag=v0.3.4`).
+  0.2.1도 같은 조건에서 약 한 달 걸렸으므로 **코드 서명 확보 전까지 지연은 상수**로 본다.
+
+### 문서 반영
+
+- `README.md` — 채널 표(2026-08-21 기준) winget **0.3.4 ✅ 최신**, 초코 22일 경과.
+  winget 절의 "PR 검증 대기" 주의문을 머지 완료 안내로 교체, 초코 절에 "조치할 피드백 없음" 명시.
+- `docs/ROADMAP.md` — 현황 요약표·winget/Chocolatey 항목·요청 반영 추적표 갱신,
+  "조치 필요 여부" 근거(OData 필드) 추가.
+- `docs/wiki/Installation.md` — 현황표/안내문/매니페스트 목록/초코 주석 갱신
+  (Windows 최신은 winget으로 안내).
+- `docs/wiki/Building-and-Release.md` — 게시 현황표 + 피드백 확인 방법(OData 조회 명령) 추가.
+- `packaging/winget/README.md` — 등록 이력에 0.3.4(#415385) 추가.
+
+---
+
 ## 2026-08-11 — 탐색기 갱신 시 폴더 펼침 유지 수정 + v0.3.4 릴리스
 
 - **요청**: 폴더/GitHub 저장소를 펼쳐 놓은 상태에서 **갱신 버튼을 누르면 펼침이 초기화되는**
