@@ -99,17 +99,25 @@
 
 ### 배포 채널 — 패키지 매니저 등록
 
-**현황 요약 (2026-08-11 실측)** — 앱 최신 릴리스는 **v0.3.4**(2026-08-11).
+**현황 요약 (2026-08-21 실측)** — 앱 최신 릴리스는 **v0.3.4**(2026-08-11).
 
 | 채널 | 게시 버전 | 상태 |
 |---|---|---|
 | Homebrew (macOS) | 0.3.4 | ✅ 최신 |
-| winget (Windows) | 0.3.3 | ⏳ 0.3.4 제출(PR #415385) 검증 대기 |
-| Chocolatey (Windows) | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 2026-07-30, 12일 경과) · 0.3.4 제출 보류 |
+| winget (Windows) | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
+| Chocolatey (Windows) | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 2026-07-30, 22일 경과) · 0.3.4 제출 보류 |
+
+**조치 필요 여부 (2026-08-21 확인): 양쪽 모두 없음.**
+winget PR #415385는 봇 코멘트(Publish pipeline succeeded)와 승인만 있고 수정 요청 없음.
+Chocolatey 0.3.3은 OData 실측상 `PackageSubmittedStatus: Ready`,
+`PackageReviewedDate: null` — **모더레이터가 아직 열어보지 않은 상태**라
+"Waiting for Maintainer"가 아니며 유지보수자가 응답할 피드백이 없다. 대기 또는 roll-forward만 선택지.
 
 - [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
       0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907)·0.3.3(#408379) 게시 완료(머지됨).
-      **0.3.4(#415385) 제출 완료(2026-08-11) — 검증/머지 대기.**
+      **0.3.4(#415385) 머지 완료(2026-08-11 09:19 UTC, 제출 43분 만에) — 게시 반영됨.**
+      라벨: Validation-Completed · Moderator-Approved(`stephengillie`) · Publish-Pipeline-Succeeded.
+      매니페스트 경로에 0.2.1/0.3.1/0.3.2/0.3.3/0.3.4 존재 확인. **수정 요청 코멘트 없음.**
       `winget install SosomLab.NexaMarkdownViewer`.
       ⚠️ release.yml이 GITHUB_TOKEN으로 릴리스를 만들어 `release: published`가 자동 트리거되지
       않으므로 릴리스 후 `gh workflow run winget.yml -f tag=vX.Y.Z` 수동 dispatch 필요.
@@ -121,17 +129,22 @@
       (moderator `flcdrg`, `PackageStatus: Approved`).
       `choco install nexa-markdown-viewer`.
       저장소 변수 `CHOCO_PUSH=true` 등록 완료(2026-07-30) → push 스텝 활성.
-      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — **2026-08-11 기준 여전히
-      모더레이션 대기**("This version is in moderation and has not yet been approved").
-      버전 페이지 Last Update가 제출일(30 Jul 2026)에서 이동하지 않아 **모더레이터 액션 없음**.
-      자동 검사 3종 중 **Validation·Verification은 Passing**, **Scan은 Flagged Warning**
-      (파일 1개 이상에서 탐지 5~10건 — 미서명 바이너리 오탐) → 사람 검수 필수 경로.
+      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — **2026-08-21 기준 여전히
+      모더레이션 대기**(제출 후 22일, 버전 히스토리 상태 `Ready`).
+      OData 실측(`Packages(Id='nexa-markdown-viewer',Version='0.3.3')`):
+      `PackageStatus: Submitted` · `PackageSubmittedStatus: Ready` ·
+      `PackageValidationResultStatus: Passing`(07-30 12:50) ·
+      `PackageTestResultStatus: Passing`(07-30 19:48,
+      [test gist](https://gist.github.com/choco-bot/6701ec6830506256b1a5e2b5c955ed19)) ·
+      `PackageScanStatus: Flagged`(07-30 20:49, 미서명 바이너리 오탐) ·
+      **`PackageReviewedDate`/`PackageApprovedDate` 모두 null** → 모더레이터 미착수.
+      상태가 `Waiting for Maintainer`가 아니므로 **유지보수자가 조치할 피드백은 없다**.
       0.2.1도 같은 조건에서 약 한 달 걸려 승인됐으므로 **코드 서명 확보 전까지 지연은 상수**로 볼 것.
       승인 시 최신 버전이 0.2.1 → 0.3.3으로 갱신됨.
       **v0.3.4 릴리스 시 초코는 의도적으로 건너뜀**(0.3.3 검수 중 이중 큐 회피) —
       0.3.3 승인 후 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡을 것.
-      ⚠️ 승인까지는 게시 버전이 0.2.1이므로 최신 버전은 직접 내려받기 안내
-      (winget도 0.3.4 머지 전까지는 0.3.3).
+      ⚠️ 승인까지 초코 게시 버전은 0.2.1이므로 Windows 최신 버전은 **winget(0.3.4)** 또는
+      직접 내려받기로 안내한다.
       (nuspec `iconUrl`·`projectSourceUrl`은 51eab50에서 이미 반영됨)
 - 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
       SignPath Foundation 신청 진행 중.
@@ -171,8 +184,8 @@
 | 패널 크기조절 + VSCode/Eclipse 토글 | M1 | ✅ 완료 |
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
-| WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) — Homebrew 0.3.4, winget 0.3.4 PR 대기 |
-| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 검수 대기(2026-08-11 확인) |
+| WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) — Homebrew 0.3.4, winget 0.3.4 게시 완료 |
+| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 검수 대기(2026-08-21 확인) |
 | 탐색기 갱신 시 폴더 펼침 유지 | M5 | ✅ 완료(v0.3.4) |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |
