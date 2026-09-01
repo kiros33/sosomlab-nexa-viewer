@@ -1,4 +1,4 @@
-$ErrorActionPreference = 'Stop'
+﻿$ErrorActionPreference = 'Stop'
 
 # __URL64__ / __CHECKSUM64__ 는 CI(.github/workflows/chocolatey.yml)에서
 # 해당 릴리스의 실제 다운로드 URL과 SHA256 값으로 치환됩니다.
