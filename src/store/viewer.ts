@@ -296,6 +296,9 @@ interface ViewerState {
 
 const prefs = loadPrefs();
 
+/** 문서 로드 요청 번호 — 늦게 도착한 이전 요청 결과가 최신 문서를 덮어쓰지 않게 한다. */
+let loadSeq = 0;
+
 export const useViewer = create<ViewerState>((set, get) => {
   async function load(
     source: ContentSource,
@@ -308,10 +311,11 @@ export const useViewer = create<ViewerState>((set, get) => {
     },
   ) {
     const hash = opts.hash ?? null;
+    const seq = ++loadSeq;
     set({ loading: true, error: null });
     try {
       // 같은 파일이면 재로딩 없이 앵커만 이동(force면 항상 재로딩)
-      const cur = get();
+      let cur = get();
       const sameFile =
         !opts.force &&
         cur.docPath === path &&
@@ -322,8 +326,10 @@ export const useViewer = create<ViewerState>((set, get) => {
       let version = cur.currentVersion;
       if (!sameFile) {
         const file = await source.readFile(path);
+        if (seq !== loadSeq) return; // 그사이 다른 문서를 열었다 — 이 결과는 버린다
         markdown = file.text;
         version = file.version ?? null;
+        cur = get(); // 대기 중 바뀐 기록·스크롤 위치 기준으로 계산
       }
       const title = path.split("/").pop() ?? path;
 
@@ -369,6 +375,7 @@ export const useViewer = create<ViewerState>((set, get) => {
       });
       persist(get);
     } catch (e) {
+      if (seq !== loadSeq) return;
       set({ loading: false, error: String(e) });
     }
   }
@@ -399,6 +406,8 @@ export const useViewer = create<ViewerState>((set, get) => {
       if (!source || !docPath || !currentVersion) return;
       try {
         const latest = await source.latestVersion(docPath);
+        // 대기 중 다른 문서로 이동했으면 표시하지 않는다
+        if (get().docPath !== docPath || get().source !== source) return;
         if (latest && latest !== currentVersion) set({ updateAvailable: true });
       } catch {
         /* 네트워크 오류 무시 */

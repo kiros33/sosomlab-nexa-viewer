@@ -12,7 +12,7 @@ import { openUrl } from "@tauri-apps/plugin-opener";
 
 import type { ContentSource } from "../sources/types";
 import { getProfile } from "./profiles";
-import { isExternalUrl, resolveRelative } from "../lib/paths";
+import { isExternalUrl, resolveRelative, safeDecode } from "../lib/paths";
 import { AsyncImage } from "./AsyncImage";
 import { MermaidBlock } from "./Mermaid";
 
@@ -33,7 +33,7 @@ interface Props {
 function splitHash(href: string): [string, string | null] {
   const i = href.indexOf("#");
   if (i < 0) return [href, null];
-  return [href.slice(0, i), href.slice(i + 1) || null];
+  return [href.slice(0, i), safeDecode(href.slice(i + 1)) || null];
 }
 
 /** React 노드 트리에서 텍스트만 추출(코드펜스 원문 복원용) */
@@ -70,7 +70,7 @@ function MarkdownViewImpl({
         if (href.startsWith("#")) {
           // 같은 문서 내 앵커 이동 → 기록에 #앵커로 남긴다
           e.preventDefault();
-          onNavigateAnchor(href.slice(1));
+          onNavigateAnchor(safeDecode(href.slice(1)));
           return;
         }
         e.preventDefault();
