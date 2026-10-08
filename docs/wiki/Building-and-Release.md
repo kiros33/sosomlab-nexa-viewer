@@ -28,9 +28,12 @@ pnpm tauri build
 ## CI 자동 배포 (GitHub Actions)
 `v*` 태그를 push하면 macOS·Linux·Windows 3-OS에서 빌드 후 **Release가 자동 게시**됩니다.
 
-> ⚠️ **패키지 매니저 워크플로는 자동 실행되지 않습니다.** 두 워크플로에 `release: published`
+> ⚠️ **winget·Chocolatey 워크플로는 자동 실행되지 않습니다.** 두 워크플로에 `release: published`
 > 트리거가 걸려 있지만, release.yml이 `GITHUB_TOKEN`으로 릴리스를 만들기 때문에 GitHub의
 > **재귀 실행 방지 정책**으로 이벤트가 발생하지 않습니다. 릴리스 후 **수동 dispatch가 필요**합니다.
+>
+> ✅ **Linux 저장소(pkg.sosomlab.com)는 자동**입니다 — `release.yml`의 `linux-repo` 잡이 3-OS 빌드가
+> 끝난 뒤 `linux-repo.yml`을 직접 호출(workflow_call)해 신호를 보냅니다(프리릴리스는 건너뜀).
 
 ```bash
 # 1) 버전 올리기: tauri.conf.json + package.json (+ Cargo.toml)
@@ -44,41 +47,44 @@ gh workflow run winget.yml     -f tag=v0.2.2
 gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=true 일 때만 실제 게시
 
 # 5) Homebrew 탭은 별도 저장소에서 version + dmg sha256 수동 갱신
+
+# (Linux APT/DNF는 4~5 불필요 — release.yml이 자동 신호. 재전송이 필요할 때만)
+gh workflow run linux-repo.yml -f tag=v0.2.2
 ```
 
 - 빌드/릴리스: `.github/workflows/release.yml` (`tauri-apps/tauri-action`, `releaseDraft: false`)
 - Chocolatey: `.github/workflows/chocolatey.yml` (Secret `CHOCO_API_KEY` 필요)
 - winget: `.github/workflows/winget.yml` (Secret `WINGET_TOKEN` 필요 · 최초 PR 머지 후부터
   새 버전 제출 가능 — 단 실행은 위 경고대로 **수동 dispatch**)
+- Linux 저장소: `.github/workflows/linux-repo.yml` (Secret `LINUX_REPO_DISPATCH_TOKEN` 필요 ·
+  `release.yml`이 호출 · 수동 dispatch도 가능) — 등록 파일은 SosomLab/linux-repo `apps/nexa-markdown-viewer.toml`
 - pnpm 버전은 `package.json`의 `packageManager` 필드를 따릅니다.
 
 ## 배포 채널 & 상태 확인
-세 채널의 등록 방식과 **진행 상태를 어디서 보는지**를 정리합니다.
+네 채널의 등록 방식과 **진행 상태를 어디서 보는지**를 정리합니다.
 
 | 채널 | 설치 명령 | 자동화 | 상태 확인 위치 |
 |------|-----------|--------|----------------|
 | **Homebrew** | `brew install --cask kiros33/tap/nexa-markdown-viewer` | 수동(탭 cask 갱신) | 탭 저장소 + 로컬 `brew` 명령 |
 | **Chocolatey** | `choco install nexa-markdown-viewer` | 수동 dispatch(`CHOCO_API_KEY` + 변수 `CHOCO_PUSH=true`) | Actions 실행 + **버전 페이지**(검수) |
 | **winget** | `winget install SosomLab.NexaMarkdownViewer` | 수동 dispatch(`WINGET_TOKEN`) | Actions 실행 + winget-pkgs PR(검증) |
+| **APT / DNF** | `sudo apt install nexa-markdown-viewer` / `sudo dnf install nexa-markdown-viewer` | **자동**(release.yml → linux-repo.yml → app-released) | linux-repo Actions `publish` 실행 + <https://pkg.sosomlab.com/> 패키지 표 |
 
-### 현재 게시 현황 (2026-08-21 확인)
+### 현재 게시 현황 (2026-10-09 확인)
 
 | 채널 | 게시 버전 | 상태 |
 |------|-----------|------|
 | Homebrew | 0.3.4 | ✅ 최신 (cask `version 0.3.4`, sha256 `0088ad80…e80f80d1`) |
 | winget | **0.3.4** | ✅ 최신 (PR #415385 2026-08-11 머지, 제출 43분 만에 게시) |
-| Chocolatey | 0.2.1 | ⏳ 0.3.3 제출(2026-07-30, 22일 경과) 후 검수 대기 — 스캔 경고로 사람 검수 계류 |
+| Chocolatey | **0.3.3** | ✅ 0.3.3 승인(2026-09-01, 제출 후 33일) · 0.3.4 제출 예정 |
+| APT / DNF | **0.3.4** | ✅ 최신 (2026-10-09 pkg.sosomlab.com 등록 · deb/rpm 302 연결 확인) |
 
 앱 릴리스 버전은 **v0.3.4**(2026-08-11)입니다.
 
-> Chocolatey는 0.3.3이 아직 검수 대기 중이라 **0.3.4 제출을 의도적으로 보류**했습니다
-> (이중 큐 회피). 0.3.3이 승인되면 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡으면 됩니다.
->
-> **피드백/조치 필요 여부(2026-08-21 확인): 두 채널 모두 없음.**
-> winget PR #415385에는 봇 코멘트와 승인만 있고 수정 요청이 없었습니다.
-> Chocolatey 0.3.3은 `PackageSubmittedStatus: Ready`, `PackageReviewedDate: null` —
-> 모더레이터가 아직 열어보지 않은 대기 상태라(“Waiting for Maintainer” 아님)
-> 유지보수자가 응답할 지적 사항이 없습니다. 상태 확인 방법:
+> Chocolatey 0.3.3은 **2026-09-01 승인**(OData `PackageStatus: Approved` ·
+> `PackageApprovedDate: 2026-09-01T11:22Z`)되어 게시 버전이 0.2.1 → 0.3.3으로 올라갔습니다.
+> 검수 중 보류했던 0.3.4는 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡으면 됩니다(미실행).
+> 상태 확인 방법:
 > `curl "https://community.chocolatey.org/api/v2/Packages(Id='nexa-markdown-viewer',Version='0.3.3')"`
 
 ### 🍺 Homebrew
@@ -129,6 +135,24 @@ gh workflow run chocolatey.yml -f tag=v0.2.2   # 저장소 변수 CHOCO_PUSH=tru
    ```
 - ⚠️ `winget-releaser`는 **이미 등록된 패키지의 새 버전**만 올림 → 최초 PR이 머지되기 전 릴리스는
   winget 단계가 실패함. 머지 후 최신 태그로 `winget` 워크플로를 1회 수동 실행해 따라잡으면 됨.
+
+### 🐧 APT / DNF (pkg.sosomlab.com)
+SosomLab 공용 Linux 저장소([SosomLab/linux-repo](https://github.com/SosomLab/linux-repo))에 등록 파일
+`apps/nexa-markdown-viewer.toml` 하나로 올라갑니다. 중앙 검수가 없고 **신호 후 수 분 내 반영**됩니다.
+1. **신호 전송**: 이 저장소 **Actions → `linux-repo`**(또는 `release` 실행의 `linux-repo` 잡) —
+   `.deb`가 릴리스에 없으면 실패, `.rpm`이 없으면 경고만.
+2. **발행**: SosomLab/linux-repo **Actions → `publish`** — 실행 이름에 `nexa-markdown-viewer vX.Y.Z`,
+   Summary의 진행 기록에 버전 변화(예 `(없음) → 0.3.4 🆕`).
+3. **게시 확인**:
+   ```bash
+   curl -s https://pkg.sosomlab.com/apt/dists/stable/main/binary-amd64/Packages | grep -A2 'Package: nexa-markdown-viewer'
+   curl -sI https://pkg.sosomlab.com/apt/pool/main/n/nexa-markdown-viewer/NexaMarkdownViewer_<버전>_amd64.deb   # 302 → GitHub Release
+   ```
+- 저장소는 **최신 정식 릴리스 하나만** 싣고, 패키지 파일은 Release 자산으로 302 연결합니다.
+  ⚠️ 서명 색인의 해시가 그 파일을 가리키므로 **공개한 Release 자산은 지우거나 다시 올리지 않습니다**.
+- 자산 이름(`NexaMarkdownViewer_{version}_amd64.deb` · `NexaMarkdownViewer-{version}-1.x86_64.rpm`)은
+  `productName`에서 나옵니다 — 바꾸면 linux-repo 등록 파일과 `linux-repo.yml`의 확인 줄을 함께 바꿉니다.
+- 신호가 없어도 linux-repo의 하루 1회 정기 실행이 최신 릴리스를 잡습니다.
 
 > 공통: Chocolatey·winget은 중앙 저장소+검수라 **게시 즉시 노출이 아니며 삭제가 어렵습니다**
 > (문제 시 상위 버전으로 roll-forward). Homebrew 탭만 즉시 반영/되돌리기가 자유롭습니다.

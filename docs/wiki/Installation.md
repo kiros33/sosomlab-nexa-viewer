@@ -1,6 +1,6 @@
 # 설치 (Installation)
 
-## 패키지 매니저 현황 (2026-08-21 기준)
+## 패키지 매니저 현황 (2026-10-09 기준)
 
 최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
 
@@ -8,10 +8,11 @@
 |------|----|-----------|------|
 | **Homebrew** | macOS | **0.3.4** | ✅ 최신 |
 | **winget** | Windows | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
-| **Chocolatey** | Windows | 0.2.1 | ⏳ 0.3.3 검수(moderation) 대기 — 제출 후 22일 |
+| **Chocolatey** | Windows | **0.3.3** | ✅ 0.3.3 승인(2026-09-01) · 0.3.4 제출 예정 |
+| **APT / DNF** (pkg.sosomlab.com) | Linux | **0.3.4** | ✅ 최신 (2026-10-09 등록) |
 
-> macOS는 **Homebrew**, Windows는 **winget**으로 바로 최신(0.3.4)을 받을 수 있습니다.
-> Chocolatey만 아직 0.2.1이 게시 버전입니다(0.3.3 검수 대기).
+> macOS는 **Homebrew**, Windows는 **winget**, Linux는 **APT/DNF**로 바로 최신(0.3.4)을 받을 수 있습니다.
+> Chocolatey는 0.3.3이 게시 버전입니다(0.3.4 따라잡기 제출 예정).
 > **초코로 0.3.4가 필요하면 winget 또는 아래 직접 다운로드**를 이용하세요.
 
 ## 🍺 Homebrew (macOS, 권장)
@@ -65,12 +66,36 @@ choco uninstall nexa-markdown-viewer
 ```
 
 - 패키지 페이지: [community.chocolatey.org/packages/nexa-markdown-viewer](https://community.chocolatey.org/packages/nexa-markdown-viewer)
-- ⏳ **현재 게시(승인) 버전은 0.2.1입니다.** 0.3.3은 2026-07-30 제출 후 커뮤니티 저장소
-  검수 대기 중이라(2026-08-21 기준 22일 경과) 아직 `choco install`로 받을 수 없습니다.
-  (검수 진행 상황: 자동 검증·설치 테스트는 통과, 바이러스 스캔에서 미서명 바이너리로 인한
-  오탐 경고가 남아 사람 검수 대기 — 아래 **코드 서명 안내** 참고.
-  모더레이터 리뷰는 아직 시작 전이라 패키지 쪽에서 고칠 지적 사항은 없습니다.)
-- 최신 버전이 필요하면 **winget** 또는 직접 다운로드를 이용하세요.
+- ✅ **현재 게시(승인) 버전은 0.3.3입니다** — 2026-07-30 제출, **2026-09-01 승인**
+  (미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수를 거치느라 약 한 달 소요 — 아래 **코드 서명 안내** 참고).
+- 0.3.4는 0.3.3 검수 중 이중 큐를 피하려고 제출을 보류했고, 이제 따라잡기 제출 예정입니다.
+  그 전까지 0.3.4가 필요하면 **winget** 또는 직접 다운로드를 이용하세요.
+
+## 🐧 APT / DNF (Linux)
+SosomLab 서명 패키지 저장소 [pkg.sosomlab.com](https://pkg.sosomlab.com/)로 설치·갱신합니다
+(패키지 이름 `nexa-markdown-viewer` · x86_64).
+
+**Debian/Ubuntu (APT)**
+
+```sh
+# 저장소 등록(최초 1회) — 서명 키 + 소스
+sudo curl -fsSLo /usr/share/keyrings/sosomlab-archive-keyring.gpg https://pkg.sosomlab.com/sosomlab-archive-keyring.gpg
+sudo curl -fsSLo /etc/apt/sources.list.d/sosomlab.sources https://pkg.sosomlab.com/apt/sosomlab.sources
+sudo apt update && sudo apt install nexa-markdown-viewer
+```
+
+- 업그레이드: `sudo apt update && sudo apt upgrade` · 제거: `sudo apt remove nexa-markdown-viewer`
+
+**Fedora/RHEL (DNF)**
+
+```sh
+sudo curl -fsSLo /etc/yum.repos.d/sosomlab.repo https://pkg.sosomlab.com/rpm/sosomlab.repo
+sudo dnf install nexa-markdown-viewer
+```
+
+- 업그레이드: `sudo dnf upgrade nexa-markdown-viewer` · 제거: `sudo dnf remove nexa-markdown-viewer`
+- 색인(`InRelease` · `repomd.xml`)은 GPG 서명되고, 패키지 파일은 GitHub Release 자산으로 연결(302)됩니다.
+- 다른 SosomLab 앱(Nexa SQL·Nexa Clip 등)과 같은 저장소라, 이미 등록했다면 설치 명령만 실행하면 됩니다.
 
 ## 다운로드
 [GitHub Releases](https://github.com/kiros33/sosomlab-nexa-viewer/releases) 에서 OS에 맞는 파일을 받습니다.

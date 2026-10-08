@@ -84,11 +84,12 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
 
-| 채널 | OS | 게시 버전 | 상태 (2026-08-21 기준) |
+| 채널 | OS | 게시 버전 | 상태 (2026-10-09 기준) |
 |------|----|-----------|------------------------|
 | Homebrew | macOS | **0.3.4** | ✅ 최신 |
 | winget | Windows | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
-| Chocolatey | Windows | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 후 22일) · 0.3.4 제출 보류 |
+| Chocolatey | Windows | **0.3.3** | ✅ 0.3.3 승인(2026-09-01) · 0.3.4 제출 예정 |
+| APT / DNF ([pkg.sosomlab.com](https://pkg.sosomlab.com/)) | Linux | **0.3.4** | ✅ 최신 (2026-10-09 등록) |
 
 **🍺 macOS — Homebrew**
 
@@ -119,13 +120,35 @@ choco install nexa-markdown-viewer
 
 업그레이드는 `choco upgrade nexa-markdown-viewer`, 제거는 `choco uninstall nexa-markdown-viewer`.
 
-> Chocolatey 0.2.1은 2026-07-30 커뮤니티 저장소 검수를 통과했습니다. 현재 게시 버전은 **0.2.1**이고,
-> 같은 날 제출한 **0.3.3은 2026-08-21 기준 아직 검수 대기 중**입니다(제출 후 22일 경과)
-> (설치 테스트·메타데이터 검증은 통과했고, 미서명 바이너리 오탐으로 스캔 경고가 붙어 사람 검수 대기.
-> 모더레이터 리뷰는 아직 시작되지 않아 **유지보수자가 조치할 피드백은 없습니다**).
-> **0.3.4는 이중 큐를 피하려고 제출을 보류**했습니다 — 0.3.3 승인 후 따라잡습니다.
-> 최신 버전이 필요하면 **winget** 또는 아래 직접 내려받기를 권장합니다.
+> Chocolatey는 **0.3.3이 2026-09-01 커뮤니티 저장소 검수를 통과**해 현재 게시 버전입니다
+> (2026-07-30 제출 · 미서명 바이너리 오탐으로 사람 검수를 거쳐 약 한 달 소요).
+> 0.3.4는 0.3.3 검수 중 이중 큐를 피하려고 제출을 보류했으며, 이제 따라잡기 제출 예정입니다.
+> 지금 0.3.4가 필요하면 **winget** 또는 아래 직접 내려받기를 이용하세요.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
+
+**🐧 Linux — APT (Debian/Ubuntu)**
+
+SosomLab 서명 패키지 저장소 [pkg.sosomlab.com](https://pkg.sosomlab.com/)에 등록되어 있습니다.
+저장소를 한 번 등록하면 이후 `sudo apt upgrade`로 새 버전을 받습니다.
+
+```sh
+# 저장소 등록(최초 1회) — 서명 키 + 소스
+sudo curl -fsSLo /usr/share/keyrings/sosomlab-archive-keyring.gpg https://pkg.sosomlab.com/sosomlab-archive-keyring.gpg
+sudo curl -fsSLo /etc/apt/sources.list.d/sosomlab.sources https://pkg.sosomlab.com/apt/sosomlab.sources
+sudo apt update && sudo apt install nexa-markdown-viewer
+```
+
+제거는 `sudo apt remove nexa-markdown-viewer`. (다른 SosomLab 앱 때문에 이미 저장소를 등록했다면 마지막 줄만 실행)
+
+**🐧 Linux — DNF (Fedora/RHEL)**
+
+```sh
+sudo curl -fsSLo /etc/yum.repos.d/sosomlab.repo https://pkg.sosomlab.com/rpm/sosomlab.repo
+sudo dnf install nexa-markdown-viewer
+```
+
+업그레이드는 `sudo dnf upgrade nexa-markdown-viewer`, 제거는 `sudo dnf remove nexa-markdown-viewer`.
+(색인은 GPG 서명되며, 패키지 파일 자체는 이 저장소의 GitHub Release에서 내려받습니다)
 
 ### 직접 내려받기
 
