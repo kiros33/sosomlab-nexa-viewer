@@ -23,6 +23,7 @@ import type { RecentItem, Theme } from "./store/viewer";
 import { isMarkdownName } from "./lib/filetypes";
 import { buildRichSelectionClip, consumePlainCopyOnce } from "./lib/richCopy";
 import "./App.css";
+import { findAnchor } from "./lib/anchors";
 
 function themeCss(theme: Theme): string {
   return theme === "dark" ? `${githubDark}\n${hlDark}` : `${githubLight}\n${hlLight}`;
@@ -151,9 +152,7 @@ export default function App() {
         if (pendingScroll != null) {
           contentRef.current?.scrollTo({ top: pendingScroll });
         } else if (pendingHash) {
-          document
-            .getElementById(pendingHash)
-            ?.scrollIntoView({ behavior: "smooth", block: "start" });
+          findAnchor(pendingHash)?.scrollIntoView({ behavior: "smooth", block: "start" });
         } else {
           contentRef.current?.scrollTo({ top: 0 });
         }

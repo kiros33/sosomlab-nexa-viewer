@@ -6,7 +6,6 @@
  * 추후 확장: 서버사이드 렌더 PDF, 이미지 임베드(현재는 data URL이라 자동 포함) 등.
  */
 import { invoke } from "@tauri-apps/api/core";
-import { save } from "@tauri-apps/plugin-dialog";
 // Vite raw 임포트로 CSS 텍스트를 인라인한다.
 import githubCss from "github-markdown-css/github-markdown.css?raw";
 import hlCss from "highlight.js/styles/github.css?raw";
@@ -46,13 +45,11 @@ ${bodyHtml}
 
 /** 현재 렌더된 본문 HTML을 단독 .html 파일로 저장. */
 export async function exportHtml(title: string, bodyHtml: string): Promise<void> {
-  const path = await save({
-    defaultPath: `${safeFileName(title)}.html`,
-    filters: [{ name: "HTML", extensions: ["html"] }],
-  });
-  if (!path) return;
-  await invoke("write_text_file", {
-    path,
+  // 저장 다이얼로그는 백엔드가 띄우고 고른 경로에만 쓴다(웹뷰가 임의 경로에 쓰지 못하게).
+  await invoke<boolean>("save_text_file", {
+    defaultName: `${safeFileName(title)}.html`,
+    filterName: "HTML",
+    extensions: ["html"],
     contents: buildStandaloneHtml(title, bodyHtml),
   });
 }

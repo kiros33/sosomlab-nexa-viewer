@@ -1,3 +1,4 @@
+mod access;
 mod commands;
 mod providers;
 mod secrets;
@@ -76,7 +77,8 @@ pub fn run() {
             commands::source_read_asset,
             commands::source_latest_version,
             commands::source_list_branches,
-            commands::write_text_file,
+            commands::save_text_file,
+            commands::migrate_local_roots,
             commands::github_login,
             commands::github_status,
             commands::github_logout,
@@ -97,6 +99,9 @@ pub fn run() {
                         .filter_map(|u| u.to_file_path().ok())
                         .filter_map(|p| commands::resolve_target(&p.to_string_lossy()))
                         .collect();
+                    for t in &targets {
+                        commands::grant_target(app_handle, t);
+                    }
                     if !targets.is_empty() {
                         // 콜드스타트(프론트 리스너 전): 전역 버퍼에 적재 → 마운트 시 drain.
                         commands::push_opened(targets.clone());

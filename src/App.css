@@ -719,6 +719,12 @@ body {
   margin: 4px 0;
   word-break: break-word;
 }
+.gh-notice {
+  color: #9a6700;
+  font-size: 12px;
+  margin: 4px 0;
+  word-break: break-word;
+}
 /* 계정 저장소 선택 */
 .gh-section-title {
   font-size: 11px;

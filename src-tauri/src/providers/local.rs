@@ -19,6 +19,12 @@ impl LocalProvider {
                 _ => return Err("잘못된 경로입니다".into()),
             }
         }
+        // 심볼릭 링크로 root 밖을 가리키는 경우 차단(존재하는 경로만 정규화해 비교)
+        if let (Ok(real), Ok(real_root)) = (std::fs::canonicalize(&out), std::fs::canonicalize(&root)) {
+            if !real.starts_with(&real_root) {
+                return Err("열린 폴더 밖을 가리키는 링크는 열 수 없습니다".into());
+            }
+        }
         Ok(out)
     }
 }
@@ -70,5 +76,34 @@ impl ContentProvider for LocalProvider {
     async fn read_asset(&self, ctx: &SourceRef, path: &str) -> ProviderResult<Vec<u8>> {
         let f = Self::resolve(ctx, path)?;
         std::fs::read(&f).map_err(|e| e.to_string())
+    }
+}
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    fn src(root: &Path) -> SourceRef {
+        SourceRef { kind: "local".into(), root: root.to_string_lossy().into(), git_ref: None }
+    }
+
+    #[test]
+    fn resolve_blocks_escape() {
+        let root = std::env::temp_dir().join(format!("nexa-local-{}", std::process::id()));
+        let _ = std::fs::remove_dir_all(&root);
+        std::fs::create_dir_all(root.join("docs")).unwrap();
+        std::fs::write(root.join("docs/a.md"), "# a").unwrap();
+        let ctx = src(&root);
+
+        assert!(LocalProvider::resolve(&ctx, "docs/a.md").is_ok());
+        assert!(LocalProvider::resolve(&ctx, "./docs/a.md").is_ok());
+        assert!(LocalProvider::resolve(&ctx, "../etc/passwd").is_err());
+        assert!(LocalProvider::resolve(&ctx, "/etc/passwd").is_err());
+
+        #[cfg(unix)]
+        {
+            std::os::unix::fs::symlink("/etc", root.join("out")).unwrap();
+            assert!(LocalProvider::resolve(&ctx, "out/hosts").is_err(), "root 밖 심볼릭 링크 차단");
+        }
     }
 }
