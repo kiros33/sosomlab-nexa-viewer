@@ -25,9 +25,12 @@ import { buildRichSelectionClip, consumePlainCopyOnce } from "./lib/richCopy";
 import "./App.css";
 import { findAnchor } from "./lib/anchors";
 
-function themeCss(theme: Theme): string {
-  return theme === "dark" ? `${githubDark}\n${hlDark}` : `${githubLight}\n${hlLight}`;
-}
+// 테마별 CSS 주입 객체를 미리 만들어 둔다 — 렌더마다 새 객체를 넘기면 React가 약 40KB <style>을
+// 다시 써서 전체 스타일을 재계산한다(패널 드래그 중 pointermove마다).
+const THEME_CSS: Record<Theme, { __html: string }> = {
+  light: { __html: `${githubLight}\n${hlLight}` },
+  dark: { __html: `${githubDark}\n${hlDark}` },
+};
 
 export default function App() {
   const theme = useViewer((s) => s.theme);
@@ -274,7 +277,7 @@ export default function App() {
   return (
     <div className={`app theme-${theme}`}>
       {/* 활성 테마 CSS만 주입 */}
-      <style dangerouslySetInnerHTML={{ __html: themeCss(theme) }} />
+      <style dangerouslySetInnerHTML={THEME_CSS[theme]} />
 
       <Toolbar bodyRef={bodyRef} />
 

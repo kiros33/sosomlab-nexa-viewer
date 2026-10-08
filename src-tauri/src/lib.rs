@@ -13,7 +13,6 @@ pub fn run() {
     tauri::Builder::default()
         .plugin(tauri_plugin_opener::init())
         .plugin(tauri_plugin_dialog::init())
-        .plugin(tauri_plugin_fs::init())
         .setup(|app| {
             // macOS: About 패널에 아이콘 + 요약 설명이 보이도록 커스텀 메뉴 구성
             #[cfg(target_os = "macos")]

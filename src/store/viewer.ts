@@ -196,8 +196,6 @@ interface ViewerState {
   pendingHash: string | null;
   /** 이동 후 복원할 스크롤 위치(px). null이면 앵커/처음 규칙 사용 */
   pendingScroll: number | null;
-  /** 현재 본문 스크롤 위치(네비게이션 시 떠나는 엔트리에 저장) */
-  currentScroll: number;
   /** 본문 스크롤 시 호출(현재 위치 갱신) */
   noteScroll: (top: number) => void;
   /** 이동 시퀀스 — 같은 앵커 재이동도 스크롤 트리거되게 하는 카운터 */
@@ -299,6 +297,12 @@ const prefs = loadPrefs();
 /** 문서 로드 요청 번호 — 늦게 도착한 이전 요청 결과가 최신 문서를 덮어쓰지 않게 한다. */
 let loadSeq = 0;
 
+/**
+ * 현재 본문 스크롤 위치 — 이동 시 떠나는 기록 항목에 저장한다.
+ * 스크롤 이벤트마다 store를 갱신하면 모든 구독 selector(트리 노드 등)가 다시 돌아서 store 밖에 둔다.
+ */
+let currentScroll = 0;
+
 export const useViewer = create<ViewerState>((set, get) => {
   async function load(
     source: ContentSource,
@@ -337,7 +341,7 @@ export const useViewer = create<ViewerState>((set, get) => {
       let historyIndex = cur.historyIndex;
       // 떠나는 현재 엔트리에 스크롤 위치 저장
       if (historyIndex >= 0 && history[historyIndex]) {
-        history[historyIndex] = { ...history[historyIndex], scroll: cur.currentScroll };
+        history[historyIndex] = { ...history[historyIndex], scroll: currentScroll };
       }
       let pendingScroll: number | null = null;
 
@@ -391,8 +395,9 @@ export const useViewer = create<ViewerState>((set, get) => {
     historyIndex: -1,
     pendingHash: null,
     pendingScroll: null,
-    currentScroll: 0,
-    noteScroll: (top) => set({ currentScroll: top }),
+    noteScroll: (top) => {
+      currentScroll = top;
+    },
     navSeq: 0,
     loading: false,
     error: null,

@@ -29,7 +29,6 @@ tauri-plugin-opener = "2"
 serde = { version = "1", features = ["derive"] }
 serde_json = "1"
 tauri-plugin-dialog = "2.7.1"
-tauri-plugin-fs = "2.5.1"
 async-trait = "0.1.89"
 base64 = "0.22.1"
 aes-gcm = "0.10.3"
@@ -37,3 +36,11 @@ sha2 = "0.10"
 reqwest = { version = "0.12", default-features = false, features = ["json", "rustls-tls", "gzip"] }
 keyring = "4.2"
 
+# 배포 빌드 크기 최적화 — 실행 파일 16.0MB → 6.2MB(aarch64 실측, 2026-10-09).
+# panic=abort: 사용자 데이터 경로에 unwrap이 없고, 앱은 패닉 시 어차피 종료된다.
+[profile.release]
+lto = true
+codegen-units = 1
+opt-level = "s"
+strip = true
+panic = "abort"
