@@ -99,19 +99,18 @@
 
 ### 배포 채널 — 패키지 매니저 등록
 
-**현황 요약 (2026-08-21 실측)** — 앱 최신 릴리스는 **v0.3.4**(2026-08-11).
+**현황 요약 (2026-10-09 실측)** — 앱 최신 릴리스는 **v0.3.4**(2026-08-11).
 
 | 채널 | 게시 버전 | 상태 |
 |---|---|---|
 | Homebrew (macOS) | 0.3.4 | ✅ 최신 |
 | winget (Windows) | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
-| Chocolatey (Windows) | 0.2.1 | ⏳ 0.3.3 검수 대기(제출 2026-07-30, 22일 경과) · 0.3.4 제출 보류 |
+| Chocolatey (Windows) | **0.3.3** | ✅ 0.3.3 승인(2026-09-01) · 0.3.4 따라잡기 제출 예정 |
+| APT / DNF (Linux · pkg.sosomlab.com) | **0.3.4** | ✅ 최신 (2026-10-09 등록) |
 
-**조치 필요 여부 (2026-08-21 확인): 양쪽 모두 없음.**
-winget PR #415385는 봇 코멘트(Publish pipeline succeeded)와 승인만 있고 수정 요청 없음.
-Chocolatey 0.3.3은 OData 실측상 `PackageSubmittedStatus: Ready`,
-`PackageReviewedDate: null` — **모더레이터가 아직 열어보지 않은 상태**라
-"Waiting for Maintainer"가 아니며 유지보수자가 응답할 피드백이 없다. 대기 또는 roll-forward만 선택지.
+**남은 조치 (2026-10-09 확인)**: Chocolatey 0.3.4 따라잡기 제출
+(`gh workflow run chocolatey.yml -f tag=v0.3.4` — 0.3.3 승인으로 이중 큐 우려 해소).
+winget·Homebrew·APT/DNF는 최신.
 
 - [x] **Windows — WinGet**: `.github/workflows/winget.yml`로 manifest 제출 자동화.
       0.2.1(#394582)·0.3.1(#407658)·0.3.2(#407907)·0.3.3(#408379) 게시 완료(머지됨).
@@ -129,9 +128,10 @@ Chocolatey 0.3.3은 OData 실측상 `PackageSubmittedStatus: Ready`,
       (moderator `flcdrg`, `PackageStatus: Approved`).
       `choco install nexa-markdown-viewer`.
       저장소 변수 `CHOCO_PUSH=true` 등록 완료(2026-07-30) → push 스텝 활성.
-      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) — **2026-08-21 기준 여전히
-      모더레이션 대기**(제출 후 22일, 버전 히스토리 상태 `Ready`).
-      OData 실측(`Packages(Id='nexa-markdown-viewer',Version='0.3.3')`):
+      **0.3.3 제출 완료**(run 30541856712, `choco push` 성공) → **2026-09-01 승인**
+      (제출 후 33일 · OData `PackageStatus: Approved` · `PackageApprovedDate: 2026-09-01T11:22Z`
+      — 2026-10-09 확인). 게시 버전 0.2.1 → **0.3.3**.
+      승인 전(2026-08-21) OData 실측(`Packages(Id='nexa-markdown-viewer',Version='0.3.3')`):
       `PackageStatus: Submitted` · `PackageSubmittedStatus: Ready` ·
       `PackageValidationResultStatus: Passing`(07-30 12:50) ·
       `PackageTestResultStatus: Passing`(07-30 19:48,
@@ -140,12 +140,21 @@ Chocolatey 0.3.3은 OData 실측상 `PackageSubmittedStatus: Ready`,
       **`PackageReviewedDate`/`PackageApprovedDate` 모두 null** → 모더레이터 미착수.
       상태가 `Waiting for Maintainer`가 아니므로 **유지보수자가 조치할 피드백은 없다**.
       0.2.1도 같은 조건에서 약 한 달 걸려 승인됐으므로 **코드 서명 확보 전까지 지연은 상수**로 볼 것.
-      승인 시 최신 버전이 0.2.1 → 0.3.3으로 갱신됨.
       **v0.3.4 릴리스 시 초코는 의도적으로 건너뜀**(0.3.3 검수 중 이중 큐 회피) —
-      0.3.3 승인 후 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡을 것.
-      ⚠️ 승인까지 초코 게시 버전은 0.2.1이므로 Windows 최신 버전은 **winget(0.3.4)** 또는
-      직접 내려받기로 안내한다.
+      0.3.3이 승인됐으므로 이제 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡을 것(미실행).
+      (ps1 UTF-8 BOM 수정 83bb254 이후 패키지로 제출된다)
+      그 전까지 Windows 최신 버전은 **winget(0.3.4)** 또는 직접 내려받기로 안내한다.
       (nuspec `iconUrl`·`projectSourceUrl`은 51eab50에서 이미 반영됨)
+- [x] **Linux — APT/DNF (pkg.sosomlab.com)**: SosomLab 공용 서명 저장소
+      [SosomLab/linux-repo](https://github.com/SosomLab/linux-repo)에 `apps/nexa-markdown-viewer.toml` 등록
+      (2026-10-09 · Nexa SQL과 같은 방식). 패키지 이름 `nexa-markdown-viewer`(deb `Package` · rpm `Name` 실측),
+      자산 `NexaMarkdownViewer_{version}_amd64.deb` · `NexaMarkdownViewer-{version}-1.x86_64.rpm`.
+      발행 신호 = `.github/workflows/linux-repo.yml`(자산 확인 → `app-released` dispatch) —
+      `release.yml`의 `linux-repo` 잡이 빌드 후 **직접 호출**(GITHUB_TOKEN 릴리스는 `published`를 깨우지
+      않으므로 winget처럼 수동 dispatch가 필요 없게 함). **0.3.4 게시 완료** — 사이트 표 · APT `Packages`
+      (SHA256 = 릴리스 .deb 일치) · rpm `primary.xml` · deb/rpm 302 연결 확인.
+      `sudo apt install nexa-markdown-viewer` / `sudo dnf install nexa-markdown-viewer`.
+      ⏳ 실기(Ubuntu·Fedora)에서 `apt`/`dnf` 설치 검증은 아직 안 함.
 - 남은 선행 조건: **코드 서명/공증**(미서명 시 SmartScreen/Gatekeeper 경고, VirusTotal 오탐).
       SignPath Foundation 신청 진행 중.
 - [ ] **포터블 배포(Windows zip)** — 설치 없이 단일 폴더 실행, 데이터(`./data`)를 앱 옆에 보관.
@@ -185,7 +194,8 @@ Chocolatey 0.3.3은 OData 실측상 `PackageSubmittedStatus: Ready`,
 | 앱 아이콘/파비콘(S 배경+M↓) | M1 | ✅ 완료 |
 | Linux 빌드(deb/rpm/AppImage) | 배포 | ✅ 완료(CI) |
 | WinGet / Homebrew 등록 | 배포 채널 | ✅ 완료(운영 중) — Homebrew 0.3.4, winget 0.3.4 게시 완료 |
-| Chocolatey 등록 | 배포 채널 | ✅ 승인 완료(0.2.1, 2026-07-30) — 0.3.3 검수 대기(2026-08-21 확인) |
+| Chocolatey 등록 | 배포 채널 | ✅ 운영 중 — 0.3.3 승인(2026-09-01) · 0.3.4 따라잡기 제출 예정 |
+| Linux 패키지 저장소(APT/DNF · pkg.sosomlab.com) | 배포 채널 | ✅ 완료(2026-10-09) — 0.3.4 게시 · 릴리스 시 자동 신호 |
 | 탐색기 갱신 시 폴더 펼침 유지 | M5 | ✅ 완료(v0.3.4) |
 | 외부 인자(파일/폴더)로 즉시 열기 | M5 | ✅ 완료(Windows argv) |
 | 외부 인자 열기 macOS(파일 연결·Opened 이벤트) | M5 | ✅ 완료(동작 확인) |

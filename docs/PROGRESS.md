@@ -7,6 +7,52 @@
 
 ---
 
+## 2026-10-09 — Linux 패키지 저장소(pkg.sosomlab.com · APT/DNF) 배포 + 채널 현황 최신화
+
+- **요청**: nexa-sql을 참고해 linux-repo 배포 진행 → 내용 정리 후 진행사항 최신화.
+- **목적**: Linux 사용자가 `apt`/`dnf`로 설치·갱신하게 하고, 릴리스 때 저장소가 자동으로 따라오게 한다.
+
+### linux-repo 등록 — 0.3.4 게시 완료
+
+- SosomLab/linux-repo `apps/nexa-markdown-viewer.toml` 추가(커밋 `d5e8b77`) — nexa-sql 등록 파일과 같은 꼴.
+  - 패키지 이름 `nexa-markdown-viewer` — v0.3.4 .deb `Package` · .rpm `Name` 실측(Tauri bundler가 productName을 kebab-case로).
+  - 자산 규칙 `NexaMarkdownViewer_{version}_amd64.deb` · `NexaMarkdownViewer-{version}-1.x86_64.rpm`.
+  - 원본 저장소 `kiros33/sosomlab-nexa-viewer`(공개) · summary "GitHub-style Markdown viewer".
+- 발행 결과(linux-repo `publish` run 37810296729, 외부 요청 `nexa-markdown-viewer v0.3.4`): 성공 · `(없음) → 0.3.4 🆕`.
+  - 사이트 패키지 표 노출, APT `Packages`의 SHA256 = 릴리스 .deb SHA256(`7525ec6f…a959c4`) 일치.
+  - rpm `primary.xml`에 `Packages/NexaMarkdownViewer-0.3.4-1.x86_64.rpm` 등재.
+  - deb·rpm 경로 모두 302 → `github.com/kiros33/sosomlab-nexa-viewer/releases/download/v0.3.4/…`.
+  - publish 로그의 Cloudflare 단계에 `npx canceled … wrangler` 오류 줄이 찍히지만 배포 자체는 성공(사이트 반영 확인).
+- ⏳ 미검증: 실기(Ubuntu·Fedora)에서 `apt install`/`dnf install`. Mac에 gpg·dpkg-deb가 없어 linux-repo
+  `test_apt_local.sh` 로컬 시험도 건너뜀.
+
+### 앱 쪽 발행 신호 — `.github/workflows/linux-repo.yml` (커밋 `da94d0a`)
+
+- nexa-sql `linux-repo.yml`을 옮겨 옴: 릴리스 자산 확인(.deb 없으면 실패 · .rpm 없으면 경고) →
+  `SosomLab/linux-repo`에 `repository_dispatch(app-released)` + `client_payload`(app·tag·repo·run_url).
+- 차이점: nexa-sql은 `release: published`로 깨우지만, 이 저장소는 release.yml이 **GITHUB_TOKEN**으로
+  릴리스를 만들어 그 이벤트가 다른 워크플로를 깨우지 않는다(winget이 수동 dispatch인 이유).
+  → `workflow_call`로 만들고 `release.yml`에 `linux-repo` 잡(`needs: build` · `secrets: inherit`)을 추가해
+  **3-OS 자산 업로드가 끝난 뒤 직접 호출**. 수동 재전송은 `gh workflow run linux-repo.yml -f tag=vX.Y.Z`.
+- 프리릴리스(태그에 `-`)는 신호를 보내지 않는다. `LINUX_REPO_DISPATCH_TOKEN` 시크릿은 이미 등록돼 있었음(2026-10-05).
+- 수동 실행 run 37810281511(v0.3.4) 성공 → 위 publish 실행을 깨움(전 구간 확인).
+
+### 다른 채널 실측(2026-10-09) — Chocolatey 0.3.3 승인 반영
+
+- Homebrew cask `version "0.3.4"` · winget 매니페스트 0.2.1~0.3.4 — 변동 없음(최신).
+- **Chocolatey 0.3.3이 2026-09-01 승인**(OData `PackageStatus: Approved` · `PackageApprovedDate: 2026-09-01T11:22Z`,
+  제출 후 33일) — 문서는 "검수 대기"로 남아 있었음 → 정정. 0.3.4 따라잡기 제출
+  (`gh workflow run chocolatey.yml -f tag=v0.3.4`)은 아직 안 함.
+
+### 문서 반영
+
+- `README.md` — 채널 표(2026-10-09 기준)에 APT/DNF 추가, Chocolatey 0.3.3 승인, Linux APT·DNF 설치 절 신설.
+- `docs/ROADMAP.md` — 현황 요약·남은 조치·Chocolatey 항목 갱신, Linux APT/DNF 항목 신설, 요청 추적표 행 추가.
+- `docs/wiki/Installation.md` — 현황표·Chocolatey 안내 갱신, APT/DNF 절 신설.
+- `docs/wiki/Building-and-Release.md` — CI 절(linux-repo 자동 신호), 채널 표·게시 현황, APT/DNF 상태 확인 절 신설.
+
+---
+
 ## 2026-08-21 — 배포 채널(winget·Chocolatey) 피드백/조치 필요 여부 확인 + 문서 최신화
 
 - **요청**: choco·winget 배포 상태 확인 → 피드백이 있어 조치가 필요한지 확인 → 문서·위키 최신화.
