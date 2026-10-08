@@ -14,6 +14,7 @@ import type { Components, Options } from "react-markdown";
 import remarkGfm from "remark-gfm";
 import remarkFrontmatter from "remark-frontmatter";
 import rehypeRaw from "rehype-raw";
+import rehypeSanitize, { defaultSchema } from "rehype-sanitize";
 import rehypeSlug from "rehype-slug";
 import rehypeAutolinkHeadings from "rehype-autolink-headings";
 import rehypeHighlight from "rehype-highlight";
@@ -31,6 +32,14 @@ export interface RenderProfile {
   components?: Partial<Components>;
 }
 
+/**
+ * 문서 속 HTML 허용 범위 = GitHub과 같은 기본 스키마(script·style·iframe·form·on* 속성·javascript: 링크 제거).
+ * 신뢰할 수 없는 원격 저장소 문서도 렌더하므로 rehype-raw 바로 뒤에서 거른다.
+ * id/name에는 `user-content-` 접두어가 붙는다(DOM clobbering 방지) — 앵커 이동은 lib/anchors가
+ * 접두어까지 찾는다. 헤딩 id는 sanitize 뒤의 rehype-slug가 만들므로 접두어가 없다.
+ */
+const sanitizeSchema = defaultSchema;
+
 /** GitHub 표준 프로파일 (M1 기본). */
 export const githubProfile: RenderProfile = {
   id: "github",
@@ -39,6 +48,7 @@ export const githubProfile: RenderProfile = {
   remarkPlugins: [remarkGfm, [remarkFrontmatter, ["yaml"]]],
   rehypePlugins: [
     rehypeRaw,
+    [rehypeSanitize, sanitizeSchema],
     rehypeSlug,
     [rehypeAutolinkHeadings, { behavior: "wrap" }],
     rehypeHighlight,

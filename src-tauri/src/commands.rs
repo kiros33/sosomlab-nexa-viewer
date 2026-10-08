@@ -11,7 +11,7 @@ use tauri_plugin_dialog::DialogExt;
 use crate::providers::github::{self, GithubProvider};
 use crate::providers::local::LocalProvider;
 use crate::providers::{ContentProvider, FileContent, SourceRef, TreeEntry};
-use crate::secrets;
+use crate::{access, secrets};
 
 /// 앱 로컬 데이터 디렉터리(자격 증명 저장 위치).
 fn data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
@@ -19,12 +19,19 @@ fn data_dir(app: &tauri::AppHandle) -> Result<PathBuf, String> {
 }
 
 /// 소스 종류에 맞는 provider 생성. github는 저장된 토큰을 주입한다.
+/// local은 사용자가 직접 연 폴더(허용 목록)인지 먼저 확인한다.
 fn provider_for(
     app: &tauri::AppHandle,
-    kind: &str,
+    source: &SourceRef,
 ) -> Result<Box<dyn ContentProvider>, String> {
-    match kind {
-        "local" => Ok(Box::new(LocalProvider)),
+    match source.kind.as_str() {
+        "local" => {
+            let dir = data_dir(app)?;
+            if !access::is_allowed(&dir, Path::new(&source.root)) {
+                return Err("이 폴더를 읽을 권한이 없습니다 — 폴더를 다시 열어 주세요".into());
+            }
+            Ok(Box::new(LocalProvider))
+        }
         "github" => {
             let token = data_dir(app).ok().and_then(|d| secrets::load_github_token(&d));
             Ok(Box::new(GithubProvider::new(token)))
@@ -41,6 +48,13 @@ fn provider_for(
 pub struct StartupTarget {
     pub root: String,
     pub file: Option<String>,
+}
+
+/// 시작 대상의 폴더를 접근 허용 목록에 넣는다(argv·`Opened`는 사용자가 직접 연 것).
+pub fn grant_target(app: &tauri::AppHandle, target: &StartupTarget) {
+    if let Ok(dir) = data_dir(app) {
+        access::grant(&dir, Path::new(&target.root));
+    }
 }
 
 /// macOS `Opened`(파일 열기 Apple Event)로 전달된 열기 대상을 보관하는 **전역** 버퍼.
@@ -90,11 +104,21 @@ pub fn resolve_target(path: &str) -> Option<StartupTarget> {
 /// (macOS Finder 더블클릭/"다음으로 열기"는 argv가 아니라 `Opened` 이벤트로 오므로
 /// 그쪽은 `take_opened_targets` + `open-targets` 이벤트로 처리한다.)
 #[tauri::command]
-pub fn startup_target() -> Option<StartupTarget> {
-    let arg = std::env::args()
+pub fn startup_target(app: tauri::AppHandle) -> Option<StartupTarget> {
+    // args_os: UTF-8이 아닌 인자(예: Latin-1 파일명)에서 panic하지 않도록
+    let arg = std::env::args_os()
         .skip(1)
-        .find(|a| !a.starts_with('-') && Path::new(a).exists())?;
-    resolve_target(&arg)
+        .map(PathBuf::from)
+        .find(|a| !a.to_string_lossy().starts_with('-') && a.exists())?;
+    let target = resolve_target(&arg.to_string_lossy())?;
+    grant_target(&app, &target);
+    Some(target)
+}
+
+/// 이전 버전에서 등록한 로컬 폴더를 허용 목록으로 들여온다 — 목록 파일이 없을 때 **한 번만** 동작.
+#[tauri::command]
+pub fn migrate_local_roots(app: tauri::AppHandle, roots: Vec<String>) -> Result<bool, String> {
+    Ok(access::migrate(&data_dir(&app)?, &roots))
 }
 
 /// macOS `Opened` 콜드스타트 버퍼를 비워서 반환한다(없으면 빈 배열).
@@ -110,20 +134,27 @@ pub fn take_opened_targets() -> Vec<StartupTarget> {
 /// 폴더 선택 다이얼로그.
 #[tauri::command]
 pub async fn pick_folder(app: tauri::AppHandle) -> Option<String> {
-    app.dialog()
-        .file()
-        .blocking_pick_folder()
-        .map(|p| p.to_string())
+    let picked = app.dialog().file().blocking_pick_folder()?.into_path().ok()?;
+    if let Ok(dir) = data_dir(&app) {
+        access::grant(&dir, &picked);
+    }
+    Some(picked.to_string_lossy().into_owned())
 }
 
 /// 단일 마크다운 파일 선택 다이얼로그.
 #[tauri::command]
 pub async fn pick_markdown_file(app: tauri::AppHandle) -> Option<String> {
-    app.dialog()
+    let picked = app
+        .dialog()
         .file()
         .add_filter("Markdown", &["md", "markdown", "mdx", "txt"])
-        .blocking_pick_file()
-        .map(|p| p.to_string())
+        .blocking_pick_file()?
+        .into_path()
+        .ok()?;
+    if let (Ok(dir), Some(parent)) = (data_dir(&app), picked.parent()) {
+        access::grant(&dir, parent);
+    }
+    Some(picked.to_string_lossy().into_owned())
 }
 
 /// 디렉터리 한 단계 나열.
@@ -133,7 +164,7 @@ pub async fn source_list_dir(
     source: SourceRef,
     path: String,
 ) -> Result<Vec<TreeEntry>, String> {
-    let provider = provider_for(&app, &source.kind)?;
+    let provider = provider_for(&app, &source)?;
     provider.list_dir(&source, &path).await
 }
 
@@ -144,7 +175,7 @@ pub async fn source_read_file(
     source: SourceRef,
     path: String,
 ) -> Result<FileContent, String> {
-    let provider = provider_for(&app, &source.kind)?;
+    let provider = provider_for(&app, &source)?;
     provider.read_file(&source, &path).await
 }
 
@@ -155,7 +186,7 @@ pub async fn source_read_asset(
     source: SourceRef,
     path: String,
 ) -> Result<String, String> {
-    let provider = provider_for(&app, &source.kind)?;
+    let provider = provider_for(&app, &source)?;
     let bytes = provider.read_asset(&source, &path).await?;
     let mime = mime_from_path(&path);
     let b64 = base64::engine::general_purpose::STANDARD.encode(&bytes);
@@ -169,7 +200,7 @@ pub async fn source_latest_version(
     source: SourceRef,
     path: String,
 ) -> Result<Option<String>, String> {
-    let provider = provider_for(&app, &source.kind)?;
+    let provider = provider_for(&app, &source)?;
     provider.latest_version(&source, &path).await
 }
 
@@ -179,25 +210,51 @@ pub async fn source_list_branches(
     app: tauri::AppHandle,
     source: SourceRef,
 ) -> Result<Vec<String>, String> {
-    let provider = provider_for(&app, &source.kind)?;
+    let provider = provider_for(&app, &source)?;
     provider.list_branches(&source).await
 }
 
-/// 내보내기 등으로 사용자가 선택한 임의 경로에 텍스트를 저장한다.
+/// 저장 다이얼로그를 **백엔드에서** 띄우고, 사용자가 고른 경로에만 텍스트를 쓴다.
+/// (웹뷰가 임의 경로를 지정해 쓰지 못하게) 반환 = 저장했는지(취소 시 false).
 #[tauri::command]
-pub async fn write_text_file(path: String, contents: String) -> Result<(), String> {
-    std::fs::write(&path, contents).map_err(|e| e.to_string())
+pub async fn save_text_file(
+    app: tauri::AppHandle,
+    default_name: String,
+    filter_name: String,
+    extensions: Vec<String>,
+    contents: String,
+) -> Result<bool, String> {
+    let exts: Vec<&str> = extensions.iter().map(String::as_str).collect();
+    let Some(picked) = app
+        .dialog()
+        .file()
+        .set_file_name(&default_name)
+        .add_filter(&filter_name, &exts)
+        .blocking_save_file()
+    else {
+        return Ok(false);
+    };
+    let path = picked.into_path().map_err(|e| e.to_string())?;
+    std::fs::write(&path, contents).map_err(|e| e.to_string())?;
+    Ok(true)
 }
 
 // ===== GitHub 인증 =====
 
-/// PAT로 로그인: 검증 → 로그인명 확인 → 암호화 저장. 로그인명 반환.
+/// 로그인 결과 — `persisted=false`면 OS 키체인을 쓸 수 없어 이번 실행 동안만 유지된다.
+#[derive(serde::Serialize)]
+pub struct LoginResult {
+    login: String,
+    persisted: bool,
+}
+
+/// PAT로 로그인: 검증 → 로그인명 확인 → OS 키체인 저장.
 #[tauri::command]
-pub async fn github_login(app: tauri::AppHandle, token: String) -> Result<String, String> {
+pub async fn github_login(app: tauri::AppHandle, token: String) -> Result<LoginResult, String> {
     let login = github::fetch_login(token.trim()).await?;
     let dir = data_dir(&app)?;
-    secrets::save_github(&dir, &login, token.trim())?;
-    Ok(login)
+    let persisted = secrets::save_github(&dir, &login, token.trim())?;
+    Ok(LoginResult { login, persisted })
 }
 
 /// 현재 로그인 상태(로그인명) 반환.

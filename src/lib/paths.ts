@@ -22,9 +22,28 @@ export function dirname(p: string): string {
   return i >= 0 ? norm.slice(0, i) : "";
 }
 
-/** 현재 문서(docPath) 기준 상대 참조 `ref`를 root 기준 경로로 해석. */
+/**
+ * 퍼센트 인코딩 해제(잘못된 인코딩이면 원문 유지).
+ * 렌더러(mdast-util-to-hast)가 href/src를 인코딩하므로 `가이드.md` → `%EA%B0%80…`로 온다.
+ */
+export function safeDecode(s: string): string {
+  try {
+    return decodeURIComponent(s);
+  } catch {
+    return s;
+  }
+}
+
+/**
+ * 현재 문서(docPath) 기준 참조 `ref`를 root 기준 경로로 해석.
+ * - 퍼센트 인코딩 해제(한글·공백 파일명)
+ * - `?쿼리`·`#앵커` 제거(예: `img.png?raw=true`)
+ * - `/`로 시작하면 저장소(root) 기준 — GitHub과 같은 해석
+ */
 export function resolveRelative(docPath: string, ref: string): string {
-  const cleaned = ref.replace(/^\.\//, "");
+  const path = safeDecode(ref.split(/[?#]/)[0]);
+  if (path.startsWith("/")) return normalizePath(path);
+  const cleaned = path.replace(/^\.\//, "");
   const dir = dirname(docPath);
   return normalizePath(dir ? `${dir}/${cleaned}` : cleaned);
 }

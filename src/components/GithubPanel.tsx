@@ -106,6 +106,7 @@ export function GithubPanel() {
     login,
     busy,
     error,
+    notice,
     available,
     loadingAvailable,
     init,
@@ -288,6 +289,7 @@ export function GithubPanel() {
         )}
       </div>
 
+      {notice && <div className="gh-notice">{notice}</div>}
       {error && <div className="gh-error">{error}</div>}
     </div>
   );

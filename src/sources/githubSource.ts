@@ -36,9 +36,15 @@ export class GithubSource implements ContentSource {
 
 // ===== 인증/유틸 (Rust 커맨드 래핑) =====
 
-/** PAT 로그인 → 로그인명 반환(검증·암호화 저장은 Rust). */
-export function githubLogin(token: string): Promise<string> {
-  return invoke<string>("github_login", { token });
+/** PAT 로그인 결과. persisted=false면 OS 키체인을 쓸 수 없어 이번 실행 동안만 유지된다. */
+export interface LoginResult {
+  login: string;
+  persisted: boolean;
+}
+
+/** PAT 로그인(검증·OS 키체인 저장은 Rust). */
+export function githubLogin(token: string): Promise<LoginResult> {
+  return invoke<LoginResult>("github_login", { token });
 }
 
 export function githubStatus(): Promise<string | null> {

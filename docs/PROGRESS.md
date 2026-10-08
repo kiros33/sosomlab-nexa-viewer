@@ -7,6 +7,57 @@
 
 ---
 
+## 2026-10-09 (2) — 전반 기능 검토 · 성능(속도·용량·UX) 검증 → 1차 반영
+
+- **요청**: 전반적인 기능 검토 및 성능(속도, 용량, UX) 검증 → "다음 진행"(제안 순서 ①~④ 반영) →
+  내용 정리 후 진행사항 최신화.
+- **목적**: 실측으로 병목·결함을 찾고, 위험도 높은 것부터 고친다.
+
+### 실측(v0.3.4 설치본 · macOS · 로컬 빌드)
+
+| 항목 | 결과 |
+|---|---|
+| 창 표시까지 | 0.6~0.7초(첫 실행 1.2초) |
+| 렌더 CPU — README 8KB / **500KB** | 0.77초 / **9.2초**(그동안 UI 멈춤) |
+| 메모리(footprint 합) — 8KB / 500KB | 200MB / 322MB(WebContent 131→261MB) |
+| 렌더 파이프라인(Node, 크기별) | 8KB 94ms · 50KB 1.1초 · 200KB 3.1초 · 1MB 13초 · 3MB 68초 — 크기에 거의 비례 |
+| 50KB 단계별 | remark 파싱 145ms · raw 71ms · autolink 46ms · highlight 51ms · slug 37ms(고른 분포) |
+| 설치본 | dmg 11.1MB · exe 4.1MB · deb/rpm 6.6MB · AppImage 80MB |
+| 실행 파일(아키텍처당) | 16.0MB → **6.2MB**(release 프로파일 적용 시) |
+| 프론트 메인 번들 | 857KB(gzip 256KB) — react-dom·highlight.js(common 37개)·parse5. Mermaid/KaTeX는 지연 청크 |
+
+검토는 프론트엔드·Rust 백엔드 두 갈래로 코드 리딩 후, 핵심 주장은 코드·재현으로 직접 확인했다
+(퍼센트 인코딩 재현, CSP null, 허용 목록 없는 읽기/쓰기, 고정 키 파생, 로드 경쟁). 전체 목록과 남은 일은
+[ROADMAP.md](ROADMAP.md) "품질 점검 후속".
+
+### 반영(브랜치 `feat/security-perf-hardening`, 기능 단위 커밋)
+
+1. `1599767` 보안 — rehype-sanitize + CSP, `access.rs` 로컬 허용 목록, `save_text_file`(백엔드 저장 다이얼로그),
+   토큰 OS 키체인(`keyring` 4), `args_os`, 단위 테스트 4개. 소스: `src-tauri/src/{access,secrets,commands,lib}.rs`,
+   `providers/local.rs`, `tauri.conf.json`, `capabilities/default.json`, `src/renderer/profiles.ts`, `src/lib/{anchors,migrateRoots,exporters}.ts`
+2. `c0b94ce` 한글·공백 링크 디코딩 + 쿼리·루트 링크(`src/lib/paths.ts`), 로드 요청 번호(`src/store/viewer.ts`)
+3. `0209d5f` release 프로파일(`Cargo.toml`), 테마 CSS 상수화·스크롤 위치 store 밖으로(`App.tsx`·`viewer.ts`), fs 플러그인 제거
+4. `f8baf31` 실기에서 발견: Finder 파일 열기로 시작하면 `Opened` grant가 허용 목록 파일을 먼저 만들어
+   기존 폴더 이전이 건너뛰어짐 → `migrated` 표시로 판단
+5. `77f6626` 큰 문서(30만 자 초과) 원문 우선 + "렌더링하기" 배너(`App.tsx`)
+
+### 검증
+
+- `cargo clippy --all-targets -D warnings` 0건, `cargo test` 4/4, `pnpm build`(tsc 포함) 통과
+- sanitize(Node): script·iframe·onerror·javascript:·style·form 제거 / details·kbd·align·체크박스·표 정렬·
+  Mermaid 클래스·하이라이트 유지, 각주 id는 `user-content-` 이중 접두어 → `findAnchor`가 탐색
+- 경로 해석(Node): `가이드.md`·`my doc.md`·`이미지.png?raw=true`·`/README.md`·잘못된 인코딩 6/6
+- **실기(macOS, release 번들)**: CSP 아래 렌더·Mermaid·하이라이트·한글 이미지 정상, 주입 스크립트 미실행,
+  기존 등록 폴더 10개 이전(재빌드 후), 토큰 키체인 이전(파일엔 로그인명만 · 0600), 435K자 문서 배너 표시
+- 미확인: Windows·Linux 실기(키체인·CSP), 한글 링크 **클릭** 동작(경로 해석만 단위 확인)
+
+### 참고
+
+- 이전 대상에 홈 폴더(`/Users/…`)처럼 넓은 폴더가 있으면 그 하위 전체가 허용된다(사용자가 예전에 직접 연 폴더).
+- 업데이트 후 v0.3.4로 되돌리면 토큰이 키체인으로 옮겨져 있어 v0.3.4에서는 로그아웃 상태로 보인다.
+
+---
+
 ## 2026-10-09 — Linux 패키지 저장소(pkg.sosomlab.com · APT/DNF) 배포 + 채널 현황 최신화
 
 - **요청**: nexa-sql을 참고해 linux-repo 배포 진행 → 내용 정리 후 진행사항 최신화.

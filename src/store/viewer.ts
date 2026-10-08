@@ -196,8 +196,6 @@ interface ViewerState {
   pendingHash: string | null;
   /** 이동 후 복원할 스크롤 위치(px). null이면 앵커/처음 규칙 사용 */
   pendingScroll: number | null;
-  /** 현재 본문 스크롤 위치(네비게이션 시 떠나는 엔트리에 저장) */
-  currentScroll: number;
   /** 본문 스크롤 시 호출(현재 위치 갱신) */
   noteScroll: (top: number) => void;
   /** 이동 시퀀스 — 같은 앵커 재이동도 스크롤 트리거되게 하는 카운터 */
@@ -296,6 +294,15 @@ interface ViewerState {
 
 const prefs = loadPrefs();
 
+/** 문서 로드 요청 번호 — 늦게 도착한 이전 요청 결과가 최신 문서를 덮어쓰지 않게 한다. */
+let loadSeq = 0;
+
+/**
+ * 현재 본문 스크롤 위치 — 이동 시 떠나는 기록 항목에 저장한다.
+ * 스크롤 이벤트마다 store를 갱신하면 모든 구독 selector(트리 노드 등)가 다시 돌아서 store 밖에 둔다.
+ */
+let currentScroll = 0;
+
 export const useViewer = create<ViewerState>((set, get) => {
   async function load(
     source: ContentSource,
@@ -308,10 +315,11 @@ export const useViewer = create<ViewerState>((set, get) => {
     },
   ) {
     const hash = opts.hash ?? null;
+    const seq = ++loadSeq;
     set({ loading: true, error: null });
     try {
       // 같은 파일이면 재로딩 없이 앵커만 이동(force면 항상 재로딩)
-      const cur = get();
+      let cur = get();
       const sameFile =
         !opts.force &&
         cur.docPath === path &&
@@ -322,8 +330,10 @@ export const useViewer = create<ViewerState>((set, get) => {
       let version = cur.currentVersion;
       if (!sameFile) {
         const file = await source.readFile(path);
+        if (seq !== loadSeq) return; // 그사이 다른 문서를 열었다 — 이 결과는 버린다
         markdown = file.text;
         version = file.version ?? null;
+        cur = get(); // 대기 중 바뀐 기록·스크롤 위치 기준으로 계산
       }
       const title = path.split("/").pop() ?? path;
 
@@ -331,7 +341,7 @@ export const useViewer = create<ViewerState>((set, get) => {
       let historyIndex = cur.historyIndex;
       // 떠나는 현재 엔트리에 스크롤 위치 저장
       if (historyIndex >= 0 && history[historyIndex]) {
-        history[historyIndex] = { ...history[historyIndex], scroll: cur.currentScroll };
+        history[historyIndex] = { ...history[historyIndex], scroll: currentScroll };
       }
       let pendingScroll: number | null = null;
 
@@ -369,6 +379,7 @@ export const useViewer = create<ViewerState>((set, get) => {
       });
       persist(get);
     } catch (e) {
+      if (seq !== loadSeq) return;
       set({ loading: false, error: String(e) });
     }
   }
@@ -384,8 +395,9 @@ export const useViewer = create<ViewerState>((set, get) => {
     historyIndex: -1,
     pendingHash: null,
     pendingScroll: null,
-    currentScroll: 0,
-    noteScroll: (top) => set({ currentScroll: top }),
+    noteScroll: (top) => {
+      currentScroll = top;
+    },
     navSeq: 0,
     loading: false,
     error: null,
@@ -399,6 +411,8 @@ export const useViewer = create<ViewerState>((set, get) => {
       if (!source || !docPath || !currentVersion) return;
       try {
         const latest = await source.latestVersion(docPath);
+        // 대기 중 다른 문서로 이동했으면 표시하지 않는다
+        if (get().docPath !== docPath || get().source !== source) return;
         if (latest && latest !== currentVersion) set({ updateAvailable: true });
       } catch {
         /* 네트워크 오류 무시 */

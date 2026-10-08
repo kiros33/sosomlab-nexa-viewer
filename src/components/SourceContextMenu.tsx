@@ -1,5 +1,5 @@
 /** 저장소(워크스페이스) 우클릭 컨텍스트 메뉴 — 제거/갱신/파일보기/온라인보기. */
-import { openUrl, openPath } from "@tauri-apps/plugin-opener";
+import { openUrl, revealItemInDir } from "@tauri-apps/plugin-opener";
 
 import type { SourceRef } from "../sources/types";
 import { sourceKey } from "../sources/registry";
@@ -30,7 +30,7 @@ export function SourceContextMenu({
       const url = `https://github.com/${wsRef.root}${wsRef.gitRef ? `/tree/${wsRef.gitRef}` : ""}`;
       void openUrl(url);
     } else {
-      void openPath(wsRef.root); // 로컬: 폴더 열기(파일 관리자)
+      void revealItemInDir(wsRef.root); // 로컬: 파일 관리자에서 폴더 표시
     }
     onClose();
   };
