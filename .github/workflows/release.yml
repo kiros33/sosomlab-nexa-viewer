@@ -72,3 +72,11 @@ jobs:
           # → chocolatey/winget 워크플로가 게시를 건너뛴다(각 워크플로의 if 조건 참고)
           prerelease: ${{ contains(github.ref_name, '-') }}
           args: ${{ matrix.args }}
+
+  # 모든 OS 자산이 올라간 뒤 pkg.sosomlab.com(APT·RPM) 갱신 신호 — 프리릴리스는 linux-repo.yml이 건너뛴다
+  linux-repo:
+    needs: build
+    uses: ./.github/workflows/linux-repo.yml
+    with:
+      tag: ${{ github.ref_name }}
+    secrets: inherit
