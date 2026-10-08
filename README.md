@@ -219,7 +219,7 @@ src-tauri/
 
 - **M1 ✅** 로컬 뷰어 · 파일트리 · ToC · 이동 기록 · 내보내기 · 테마
 - **M2** 수식(KaTeX) · GitHub Alerts — Mermaid 다이어그램 ✅ · 본문 줌 ✅
-- **M3** GitHub 원격 소스 · 토큰 암호화 저장 · 다중 저장소
+- **M3** GitHub 원격 소스 · 토큰 OS 키체인 저장 · 다중 저장소
 - **M4** Bitbucket/GitLab provider
 - **M5** 검색([SEARCH.md](docs/SEARCH.md)) · 파일 변경 갱신([AUTO-REFRESH.md](docs/AUTO-REFRESH.md)) ·
   탭 · 백링크/링크 그래프 · 태그 · 외부 인자 열기(✅ Windows·macOS)

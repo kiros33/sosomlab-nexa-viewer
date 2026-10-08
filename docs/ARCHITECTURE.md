@@ -25,7 +25,8 @@ Nexa Markdown Viewer의 **기술 구조(#3)** 와 **호출 구조·동작 흐름
 │    │              (ContentProvider 트레잇)                    │
 │    │                  ├─ LocalProvider (std::fs)             │
 │    │                  └─ GithubProvider (reqwest → GitHub API)│
-│    └─ secrets.rs (AES-256-GCM 토큰 암호화 저장)               │
+│    ├─ access.rs (로컬 폴더 접근 허용 목록)                    │
+│    └─ secrets.rs (토큰 → OS 키체인)                          │
 └──────────────────────────────────────────────────────────────┘
 ```
 
@@ -70,8 +71,9 @@ src-tauri/                   # 백엔드 (Rust + Tauri 2)
     mod.rs                   #   ContentProvider 트레잇 + 공용 타입(SourceRef 등)
     local.rs                 #   LocalProvider(경로 탈출 방지 포함)
     github.rs                #   GithubProvider(contents/branches API)
-  src/secrets.rs             # 토큰 AES-256-GCM 암호화 저장
-  capabilities/default.json  # 창 권한(core/opener/dialog)
+  src/access.rs              # 로컬 폴더 접근 허용 목록(사용자가 직접 연 폴더만 · 영속)
+  src/secrets.rs             # 토큰 OS 키체인 저장(+이전 파일 토큰 이전)
+  capabilities/default.json  # 창 권한(core/opener — 다이얼로그는 백엔드 커맨드가 띄움)
   tauri.conf.json            # 제품명/식별자/번들 타겟/창 설정
 ```
 
@@ -101,10 +103,20 @@ src-tauri/                   # 백엔드 (Rust + Tauri 2)
 
 ### 3.3 보안 경계
 
-- 토큰은 **Rust에만** 존재한다. 로그인 시 토큰을 받아 검증 후 [`secrets.rs`](../src-tauri/src/secrets.rs)가
-  AES-256-GCM(키=고정 pepper + OS 사용자명 파생)으로 암호화하여 앱 로컬데이터에 저장.
+웹뷰는 신뢰할 수 없는 원격 문서를 렌더하므로 **웹뷰가 뚫려도 피해가 커지지 않게** 백엔드가 경계를 쥔다.
+
+- **문서 HTML**: `rehype-raw` 바로 뒤 `rehype-sanitize`(GitHub 기본 스키마) — script·iframe·style·form·
+  `on*`·`javascript:` 제거. id/name은 `user-content-` 접두어(DOM clobbering 방지) → 앵커 이동은
+  [`lib/anchors.ts`](../src/lib/anchors.ts)가 접두어까지 찾는다. 그 위에 `tauri.conf.json` CSP
+  (`script-src 'self'` · `frame-src`/`object-src 'none'` 등, 동적 `<style>` 때문에 style-src만 자산 수정 제외).
+- **로컬 읽기**: [`access.rs`](../src-tauri/src/access.rs) 허용 목록 — 사용자가 **직접 연** 폴더만
+  (`pick_folder`·`pick_markdown_file`·argv·macOS `Opened`에서 grant). 웹뷰가 보낸 root는 목록 확인 후에만
+  provider로 간다. 이전 버전 등록 폴더는 `migrate_local_roots`로 **1회만**(`migrated` 표시) 들여온다.
+  `LocalProvider::resolve`는 `..`/절대경로를 거부하고, 정규화 후 root 밖(심볼릭 링크)이면 차단한다.
+- **쓰기**: `save_text_file`이 저장 다이얼로그를 백엔드에서 띄우고 고른 경로에만 쓴다(임의 경로 쓰기 커맨드 없음).
+- **토큰**: Rust에만 존재. [`secrets.rs`](../src-tauri/src/secrets.rs)가 OS 키체인(keyring)에 저장하고
+  메모리에 캐시한다. 파일에는 로그인명만(0600). 키체인이 없으면 실행 중 메모리에만 둔다.
   이후 GitHub 커맨드는 Rust 내부에서 토큰을 주입하며 **JS로 노출하지 않는다.**
-- `LocalProvider::resolve`가 `..`/절대경로 컴포넌트를 거부해 **root 밖 경로 탈출을 차단**한다.
 
 ---
 
@@ -116,20 +128,21 @@ src-tauri/                   # 백엔드 (Rust + Tauri 2)
 
 | 커맨드 | 호출처(TS) | 역할 |
 |---|---|---|
+| `migrate_local_roots` | `main.tsx`(첫 렌더 전) | 이전 버전 등록 폴더를 허용 목록으로 1회 이전 |
 | `startup_target` | `App.tsx`(부팅) | 외부 인자(argv) 해석 → `{root, file}` (Windows/터미널) |
 | `take_opened_targets` | `App.tsx`(부팅) | macOS `Opened` 콜드스타트 버퍼 비우기 → `[{root, file}]` |
-| `pick_folder` / `pick_markdown_file` | `localSource.ts` | 네이티브 선택 다이얼로그 |
+| `pick_folder` / `pick_markdown_file` | `localSource.ts` | 네이티브 선택 다이얼로그(+고른 폴더 허용) |
 | `source_list_dir` | `LocalSource/GithubSource.listDir` | 디렉터리 나열 |
 | `source_read_file` | `…readFile` | 텍스트 읽기(+version) |
 | `source_read_asset` | `…resolveAsset` | 에셋 → data URL |
 | `source_latest_version` | `…latestVersion` | 갱신 감지용 버전 |
 | `source_list_branches` | `…listBranches` | 원격 브랜치 |
-| `write_text_file` | `lib/exporters.ts` | 내보내기 저장 |
+| `save_text_file` | `lib/exporters.ts` | 저장 다이얼로그 + 고른 경로에 쓰기(내보내기) |
 | `github_login/status/logout` | `store/github.ts` | PAT 인증 |
 | `github_list_repos` / `github_default_branch` | `GithubPanel` | 저장소 목록/기본 브랜치 |
 
-모든 `source_*` 커맨드는 `commands.rs::provider_for(kind)`로 적절한 provider를 만들어 디스패치한다
-(`github`면 저장된 토큰 주입).
+모든 `source_*` 커맨드는 `commands.rs::provider_for(source)`로 적절한 provider를 만들어 디스패치한다
+(`local`이면 허용 목록 확인, `github`면 저장된 토큰 주입).
 
 ### 4.2 문서 열기 흐름 (대표 시나리오)
 
