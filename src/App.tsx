@@ -24,6 +24,13 @@ import { isMarkdownName } from "./lib/filetypes";
 import { buildRichSelectionClip, consumePlainCopyOnce } from "./lib/richCopy";
 import "./App.css";
 import { findAnchor } from "./lib/anchors";
+import { sourceKey } from "./sources/registry";
+
+/**
+ * 이 글자 수를 넘는 문서는 먼저 원문으로 보여 준다. 마크다운 렌더(파싱·하이라이트·DOM 생성)는
+ * 메인 스레드에서 문서 크기에 비례해 돌아 500KB 문서에서 약 9초 응답이 멈췄다(2026-10-09 실측).
+ */
+const LARGE_DOC_CHARS = 300_000;
 
 // 테마별 CSS 주입 객체를 미리 만들어 둔다 — 렌더마다 새 객체를 넘기면 React가 약 40KB <style>을
 // 다시 써서 전체 스타일을 재계산한다(패널 드래그 중 pointermove마다).
@@ -69,7 +76,13 @@ export default function App() {
   const [ctxMenu, setCtxMenu] = useState<{ x: number; y: number } | null>(null);
 
   // 현재 문서가 "마크다운 렌더링"으로 표시 중인지 (TX 모드/비마크다운이면 원문 보기)
-  const renderAsMarkdown = !!docPath && isMarkdownName(docPath) && viewMode === "md";
+  // 큰 문서: 사용자가 "렌더링하기"를 누른 문서(키)만 렌더한다.
+  const [largeRenderKey, setLargeRenderKey] = useState<string | null>(null);
+  const docKey = source && docPath ? `${sourceKey(source.ref)}::${docPath}` : null;
+  const wantsMarkdown = !!docPath && isMarkdownName(docPath) && viewMode === "md";
+  const largeBlocked =
+    wantsMarkdown && markdown.length > LARGE_DOC_CHARS && largeRenderKey !== docKey;
+  const renderAsMarkdown = wantsMarkdown && !largeBlocked;
 
   // 콜백 안정화 → memo된 MarkdownView가 탭 전환 등으로 재렌더되지 않게
   const handleNavigateDoc = useCallback(
@@ -330,7 +343,18 @@ export default function App() {
                     />
                   </div>
                 ) : (
-                  <PlainTextView text={markdown} />
+                  <>
+                    {largeBlocked && (
+                      <div className="large-doc-banner">
+                        <span>
+                          큰 문서({Math.round(markdown.length / 1024).toLocaleString()}K자)라 원문으로
+                          표시합니다. 마크다운으로 렌더링하면 몇 초간 응답이 멈출 수 있습니다.
+                        </span>
+                        <button onClick={() => setLargeRenderKey(docKey)}>렌더링하기</button>
+                      </div>
+                    )}
+                    <PlainTextView text={markdown} />
+                  </>
                 )
               ) : (
                 <Welcome recent={recent} onOpenRecent={(item) => void openRecent(item)} />

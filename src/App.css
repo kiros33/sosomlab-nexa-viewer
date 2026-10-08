@@ -1020,6 +1020,27 @@ body {
   padding: 40px;
   color: var(--text-dim);
 }
+.large-doc-banner {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  margin: 12px 16px 0;
+  padding: 8px 12px;
+  border: 1px solid #d4a72c66;
+  border-radius: 6px;
+  background: #fff8c533;
+  color: var(--text);
+  font-size: 13px;
+}
+.large-doc-banner button {
+  flex-shrink: 0;
+  padding: 4px 10px;
+  border: 1px solid var(--border);
+  border-radius: 6px;
+  background: var(--bg);
+  color: var(--text);
+  cursor: pointer;
+}
 .placeholder.error {
   color: #cf222e;
   white-space: pre-wrap;
