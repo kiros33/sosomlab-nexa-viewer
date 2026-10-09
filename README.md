@@ -82,14 +82,14 @@ pnpm tauri build    # 배포용 설치 파일 생성
 
 ### 패키지 매니저로 설치 (권장)
 
-최신 릴리스는 **v0.3.4**(2026-08-11)입니다.
+최신 릴리스는 **v0.4.0**(2026-10-09)입니다.
 
 | 채널 | OS | 게시 버전 | 상태 (2026-10-09 기준) |
 |------|----|-----------|------------------------|
-| Homebrew | macOS | **0.3.4** | ✅ 최신 |
-| winget | Windows | **0.3.4** | ✅ 최신 (PR #415385 머지 2026-08-11) |
-| Chocolatey | Windows | **0.3.3** | ✅ 0.3.3 승인(2026-09-01) · 0.3.4 제출 예정 |
-| APT / DNF ([pkg.sosomlab.com](https://pkg.sosomlab.com/)) | Linux | **0.3.4** | ✅ 최신 (2026-10-09 등록) |
+| Homebrew | macOS | **0.4.0** | ✅ 최신 |
+| winget | Windows | 0.3.4 | ⏳ 0.4.0 제출(PR #449305) 검증 대기 |
+| Chocolatey | Windows | 0.3.3 | ⏳ 0.4.0 제출(2026-10-09) 검수 대기 |
+| APT / DNF ([pkg.sosomlab.com](https://pkg.sosomlab.com/)) | Linux | **0.4.0** | ✅ 최신 |
 
 **🍺 macOS — Homebrew**
 
@@ -109,8 +109,8 @@ winget install SosomLab.NexaMarkdownViewer
 
 업그레이드는 `winget upgrade SosomLab.NexaMarkdownViewer`, 제거는 `winget uninstall SosomLab.NexaMarkdownViewer`.
 
-> 0.3.4는 [winget-pkgs PR #415385](https://github.com/microsoft/winget-pkgs/pull/415385)가
-> **2026-08-11 머지**되어 게시 완료입니다 — `winget install`은 최신 0.3.4를 설치합니다.
+> 0.4.0은 [winget-pkgs PR #449305](https://github.com/microsoft/winget-pkgs/pull/449305) 검증 대기 중이라
+> 머지 전까지 `winget install`은 0.3.4를 설치합니다. 지금 0.4.0이 필요하면 아래 직접 내려받기를 이용하세요.
 
 **🪟 Windows — Chocolatey**
 
@@ -122,8 +122,8 @@ choco install nexa-markdown-viewer
 
 > Chocolatey는 **0.3.3이 2026-09-01 커뮤니티 저장소 검수를 통과**해 현재 게시 버전입니다
 > (2026-07-30 제출 · 미서명 바이너리 오탐으로 사람 검수를 거쳐 약 한 달 소요).
-> 0.3.4는 0.3.3 검수 중 이중 큐를 피하려고 제출을 보류했으며, 이제 따라잡기 제출 예정입니다.
-> 지금 0.3.4가 필요하면 **winget** 또는 아래 직접 내려받기를 이용하세요.
+> 0.3.4는 건너뛰고 **0.4.0을 2026-10-09 제출**했습니다(커뮤니티 저장소 검수 대기 — 지난 0.3.3은 약 한 달 소요).
+> 지금 0.4.0이 필요하면 아래 직접 내려받기를 이용하세요.
 > (패키지 페이지: [community.chocolatey.org](https://community.chocolatey.org/packages/nexa-markdown-viewer))
 
 **🐧 Linux — APT (Debian/Ubuntu)**

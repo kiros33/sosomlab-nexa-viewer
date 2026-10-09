@@ -7,6 +7,25 @@
 
 ---
 
+## 2026-10-09 (3) — v0.4.0 릴리스 + 4개 채널 배포
+
+- **요청**: 새 버전 릴리스 → brew·pkg·winget·choco 게시 상태 확인 후 배포.
+- **사전 상태**: Homebrew 0.3.4 · winget 0.3.4(진행 중 PR 없음) · Chocolatey 0.3.3(승인, 대기 없음) · pkg 0.3.4 →
+  막힌 큐가 없어 바로 진행.
+- **버전**: 0.4.0(보안·저장 방식·권한 동작이 바뀌어 minor). `package.json`·`tauri.conf.json`·`Cargo.toml`, CHANGELOG 확정, README 요약.
+- **릴리스**: 태그 `v0.4.0` → release run 37877912958 성공(macOS·Windows·Linux 빌드 + `linux-repo` 신호 잡).
+  keyring(zbus) 의존성이 들어간 첫 Linux CI 빌드도 통과. 릴리스 본문 앞에 변경 요약 추가.
+- **설치 파일 크기**(0.3.4 → 0.4.0): dmg 11.1→6.8MB · exe 4.1→3.1MB · deb/rpm 6.6→3.9MB · AppImage 80.3→78.5MB.
+- **채널**
+  - Homebrew: 탭 cask `0.4.0`(sha256 `5c784fe8…c681a9cc`) push → ✅ 최신
+  - pkg.sosomlab.com: release.yml이 자동 신호 → linux-repo publish 성공 → APT `Version: 0.4.0`, rpm 302 확인 ✅
+  - winget: run 37878613806 → [PR #449305](https://github.com/microsoft/winget-pkgs/pull/449305) 생성, 검증 대기 ⏳
+  - Chocolatey: run 37878616875 → `nexa-markdown-viewer.0.4.0.nupkg was pushed successfully`, 0.4.0 버전 페이지 200, 검수 대기 ⏳
+    (0.3.4는 건너뜀. ps1 UTF-8 BOM 수정 83bb254 포함 패키지)
+- 문서: README·ROADMAP·위키(Installation·Building-and-Release)·packaging/winget 채널 표 갱신.
+
+---
+
 ## 2026-10-09 (2) — 전반 기능 검토 · 성능(속도·용량·UX) 검증 → 1차 반영
 
 - **요청**: 전반적인 기능 검토 및 성능(속도, 용량, UX) 검증 → "다음 진행"(제안 순서 ①~④ 반영) →
