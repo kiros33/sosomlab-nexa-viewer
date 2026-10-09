@@ -74,16 +74,16 @@ gh workflow run linux-repo.yml -f tag=v0.2.2
 
 | 채널 | 게시 버전 | 상태 |
 |------|-----------|------|
-| Homebrew | 0.3.4 | ✅ 최신 (cask `version 0.3.4`, sha256 `0088ad80…e80f80d1`) |
-| winget | **0.3.4** | ✅ 최신 (PR #415385 2026-08-11 머지, 제출 43분 만에 게시) |
-| Chocolatey | **0.3.3** | ✅ 0.3.3 승인(2026-09-01, 제출 후 33일) · 0.3.4 제출 예정 |
-| APT / DNF | **0.3.4** | ✅ 최신 (2026-10-09 pkg.sosomlab.com 등록 · deb/rpm 302 연결 확인) |
+| Homebrew | **0.4.0** | ✅ 최신 (cask `version 0.4.0`, sha256 `5c784fe8…c681a9cc`) |
+| winget | 0.3.4 | ⏳ 0.4.0 제출(PR #449305, 2026-10-09) 검증 대기 |
+| Chocolatey | 0.3.3 | ⏳ 0.4.0 제출(2026-10-09, `choco push` 성공) 검수 대기 · 0.3.4는 건너뜀 |
+| APT / DNF | **0.4.0** | ✅ 최신 (release.yml 자동 신호로 반영 · deb/rpm 302 연결 확인) |
 
-앱 릴리스 버전은 **v0.3.4**(2026-08-11)입니다.
+앱 릴리스 버전은 **v0.4.0**(2026-10-09)입니다.
 
 > Chocolatey 0.3.3은 **2026-09-01 승인**(OData `PackageStatus: Approved` ·
 > `PackageApprovedDate: 2026-09-01T11:22Z`)되어 게시 버전이 0.2.1 → 0.3.3으로 올라갔습니다.
-> 검수 중 보류했던 0.3.4는 `gh workflow run chocolatey.yml -f tag=v0.3.4`로 따라잡으면 됩니다(미실행).
+> 검수 중 보류했던 0.3.4는 건너뛰고 0.4.0을 바로 제출했습니다(2026-10-09).
 > 상태 확인 방법:
 > `curl "https://community.chocolatey.org/api/v2/Packages(Id='nexa-markdown-viewer',Version='0.3.3')"`
 
